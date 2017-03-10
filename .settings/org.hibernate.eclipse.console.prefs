@@ -1,0 +1,3 @@
+default.configuration=relevance-based-on-parse-trees
+eclipse.preferences.version=1
+hibernate3.enabled=true

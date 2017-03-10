@@ -1,9 +1,11 @@
-package opennlp.tools.parse_thicket.matching;
+package WardWork;
+
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.deeplearning4j.berkeley.Pair;
 
+import opennlp.tools.parse_thicket.matching.Matcher;
 import opennlp.tools.textsimilarity.ParseTreeChunk;
 import opennlp.tools.textsimilarity.ParseTreeChunkListScorer;
 import opennlp.tools.textsimilarity.TextProcessor;
