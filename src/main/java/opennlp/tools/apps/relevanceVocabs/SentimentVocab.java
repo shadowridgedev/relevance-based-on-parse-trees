@@ -21,83 +21,55 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-
 public class SentimentVocab {
-	private static final String[] POSITIVE_ADJECTTIVE_LIST = { "accessible",
-			"advanced", "affordable", "amazing", "awesome", "beautiful",
-			"brilliant", "capable", "classic", "clear", "comfortable",
-			"convenient", "cool", "courteous", "cute", "decent", "delight",
-			"easy", "elegant", "enjoyable", "enough", "excellent",
-			"exceptional", "fabulous", "fancy", "fantastic", "fast",
-			"favorable", "fine", "friendly", "fun", "good", "great", "handy",
-			"happy", "hefty", "helpful", "high", "immaculate", "impressive",
-			"incredible", "interesting", "jealous", "lovely", "lucky",
-			"luxurious", "marvelous", "maximum", "memorable", "neat", "nice",
-			"outstanding", "perfect", "pleasant", "positive", "pretty",
-			"powerful", "quiet", "reasonable", "remarkable", "right", "safe",
-			"silky", "sleek", "slick", "stylish", "suitable", "superb",
-			"tasteful", "terrific", "top", "unbelievable", "useful",
-			"welcoming", "wonderful", "worthwhile" };
+	private static final String[] POSITIVE_ADJECTTIVE_LIST = { "accessible", "advanced", "affordable", "amazing",
+			"awesome", "beautiful", "brilliant", "capable", "classic", "clear", "comfortable", "convenient", "cool",
+			"courteous", "cute", "decent", "delight", "easy", "elegant", "enjoyable", "enough", "excellent",
+			"exceptional", "fabulous", "fancy", "fantastic", "fast", "favorable", "fine", "friendly", "fun", "good",
+			"great", "handy", "happy", "hefty", "helpful", "high", "immaculate", "impressive", "incredible",
+			"interesting", "jealous", "lovely", "lucky", "luxurious", "marvelous", "maximum", "memorable", "neat",
+			"nice", "outstanding", "perfect", "pleasant", "positive", "pretty", "powerful", "quiet", "reasonable",
+			"remarkable", "right", "safe", "silky", "sleek", "slick", "stylish", "suitable", "superb", "tasteful",
+			"terrific", "top", "unbelievable", "useful", "welcoming", "wonderful", "worthwhile" };
 
-	private static final String[] NEGATIVE_ADJECTTIVE_LIST = { "angry",
-			"annoyed", "annoying", "anxious", "arrogant", "ashamed", "awful",
-			"bad", "bored", "boring", "broke", "broken", "clumsy",
-			"complicate", "complicated", "confused", "cranky", "crazy",
-			"cumbersome", "defective", "depressed", "dead", "depressing",
-			"difficult", "dirty", "disappointed", "disappointing", "disgusted",
-			"disgusting", "disheartened", "disheartening", "dissatisfactory",
-			"dissatisfying", "distant", "disturbed", "dizzy", "doubtful",
-			"down", "drab", "dull", "dysfunctional", "embarrassed", "evil",
-			"exhausted", "fatal", "filthy", "flawed", "fragile", "frightened",
-			"frustrating", "goofy", "grieving", "hard", "horrific",
-			"horrifying", "harsh", "horrible", "impossible", "inconvenient",
-			"insane", "lack", "lacking", "lazy", "leaking", "leaky", "lonely",
-			"low", "mediocre", "messy", "mysterious", "nasty", "naughty",
-			"negative", "noisy", "nonclean", "nutty", "outdated", "outrageous",
-			"over priced", "pathetic", "poor", "premature", "pricey", "pricy",
-			"problematic", "putrid", "puzzled", "rickety", "ridiculous",
-			"ripped off", "rugged", "slow", "stinky", "strange", "stupid",
-			"sweaty", "tedious", "terrible", "tired", "tough", "toxic",
-			"trubled", "ugly", "unbearable", "unclean", "uncomfortable",
-			"unfortunate", "unhelpful", "uninviting", "unpleasent",
-			"unsanitary", "upseting", "unusable", "weird", "worn", "worn down",
-			"wretched", "wrong" };
+	private static final String[] NEGATIVE_ADJECTTIVE_LIST = { "angry", "annoyed", "annoying", "anxious", "arrogant",
+			"ashamed", "awful", "bad", "bored", "boring", "broke", "broken", "clumsy", "complicate", "complicated",
+			"confused", "cranky", "crazy", "cumbersome", "defective", "depressed", "dead", "depressing", "difficult",
+			"dirty", "disappointed", "disappointing", "disgusted", "disgusting", "disheartened", "disheartening",
+			"dissatisfactory", "dissatisfying", "distant", "disturbed", "dizzy", "doubtful", "down", "drab", "dull",
+			"dysfunctional", "embarrassed", "evil", "exhausted", "fatal", "filthy", "flawed", "fragile", "frightened",
+			"frustrating", "goofy", "grieving", "hard", "horrific", "horrifying", "harsh", "horrible", "impossible",
+			"inconvenient", "insane", "lack", "lacking", "lazy", "leaking", "leaky", "lonely", "low", "mediocre",
+			"messy", "mysterious", "nasty", "naughty", "negative", "noisy", "nonclean", "nutty", "outdated",
+			"outrageous", "over priced", "pathetic", "poor", "premature", "pricey", "pricy", "problematic", "putrid",
+			"puzzled", "rickety", "ridiculous", "ripped off", "rugged", "slow", "stinky", "strange", "stupid", "sweaty",
+			"tedious", "terrible", "tired", "tough", "toxic", "trubled", "ugly", "unbearable", "unclean",
+			"uncomfortable", "unfortunate", "unhelpful", "uninviting", "unpleasent", "unsanitary", "upseting",
+			"unusable", "weird", "worn", "worn down", "wretched", "wrong" };
 
-	private static final String[] POSITIVE_ADVERB_LIST = { "absolutely",
-			"amazingly", "completely", "definitely", "easily", "fairly",
-			"highly", "immensely", "incredibly", "nicely", "really", "rich",
-			"simply", "surprisingly", "tastefully", "totally", "truly", "very",
-			"well" };
+	private static final String[] POSITIVE_ADVERB_LIST = { "absolutely", "amazingly", "completely", "definitely",
+			"easily", "fairly", "highly", "immensely", "incredibly", "nicely", "really", "rich", "simply",
+			"surprisingly", "tastefully", "totally", "truly", "very", "well" };
 
-	private static final String[] NEGATIVE_ADVERB_LIST = { "badly",
-			"deceptfully", "down", "horribly", "oddly", "pathetically",
-			"terribly", "too", "unfortunately" };
+	private static final String[] NEGATIVE_ADVERB_LIST = { "badly", "deceptfully", "down", "horribly", "oddly",
+			"pathetically", "terribly", "too", "unfortunately" };
 
-	private static final String[] POSITIVE_NOUN_LIST = { "ability", "benefit",
-			"character", "charm", "comfort", "discount", "dream", "elegance",
-			"favourite", "feature", "improvement", "luck", "luxury", "offer",
-			 "quality", "requirement", "usability" };
+	private static final String[] POSITIVE_NOUN_LIST = { "ability", "benefit", "character", "charm", "comfort",
+			"discount", "dream", "elegance", "favourite", "feature", "improvement", "luck", "luxury", "offer",
+			"quality", "requirement", "usability" };
 
-	private static final String[] NEGATIVE_NOUN_LIST = { "blocker",
-			"challenge", "complain", "complaint", "compromise", "con",
-			"concern", "crap", "disappointment", "disillusion", "doubt",
-			"downside", "drawback", "embarrassment", "error", "failure",
-			"fault", "garbage", "glitch", "inability", "issue", "junk",
-			"long line", "malfunction", "mess", "mistake", "nightmare",
-			"noise", "odor", "pain", "pitfall", "problem", "rip off", "roach",
-			"rude", "sacrifice", "shame", "shock", "stain", "threat",
-			"trouble", "urine", "worry" };
+	private static final String[] NEGATIVE_NOUN_LIST = { "blocker", "challenge", "complain", "complaint", "compromise",
+			"con", "concern", "crap", "disappointment", "disillusion", "doubt", "downside", "drawback", "embarrassment",
+			"error", "failure", "fault", "garbage", "glitch", "inability", "issue", "junk", "long line", "malfunction",
+			"mess", "mistake", "nightmare", "noise", "odor", "pain", "pitfall", "problem", "rip off", "roach", "rude",
+			"sacrifice", "shame", "shock", "stain", "threat", "trouble", "urine", "worry" };
 
-	private static final String[] POSITIVE_VERB_LIST = { "admire", "amaze",
-			"assist", "disgust", "enjoy", "help", "guarantee", "impress",
-			"improve", "like", "love", "patronize", "prefer", "recommend",
-			"want" };
+	private static final String[] POSITIVE_VERB_LIST = { "admire", "amaze", "assist", "disgust", "enjoy", "help",
+			"guarantee", "impress", "improve", "like", "love", "patronize", "prefer", "recommend", "want" };
 
-	private static final String[] NEGATIVE_VERB_LIST = { "annoy", "appall",
-			"break", "complain", "confuse", "depress", "disappoint",
-			"dishearten", "dislike", "dissatisfy", "embarrass", "fail", "fear",
-			"flaw", "frustrate", "hate", "ruin", "scare", "stink", "suck",
-			"think twice", "thwart", "upset", "vomit" };
+	private static final String[] NEGATIVE_VERB_LIST = { "annoy", "appall", "break", "complain", "confuse", "depress",
+			"disappoint", "dishearten", "dislike", "dissatisfy", "embarrass", "fail", "fear", "flaw", "frustrate",
+			"hate", "ruin", "scare", "stink", "suck", "think twice", "thwart", "upset", "vomit" };
 
 	public static final int SENTIMENT_POSITIVE = 1;
 	public static final int SENTIMENT_UNKNOWN = 0;
@@ -130,7 +102,7 @@ public class SentimentVocab {
 			return null;
 
 		// get the normalized form of the word
-		//word = WordDictionary.getInstance().getLemmaOrWord(word);
+		// word = WordDictionary.getInstance().getLemmaOrWord(word);
 
 		return sentimentMap.get(word);
 	}
@@ -177,26 +149,17 @@ public class SentimentVocab {
 
 	private SentimentVocab() {
 		// populate the sentiment map
-		addWordsToSentimentMap(POSITIVE_ADJECTTIVE_LIST,
-				POStags.TYPE_JJ, SENTIMENT_POSITIVE);
-		addWordsToSentimentMap(NEGATIVE_ADJECTTIVE_LIST,
-				POStags.TYPE_JJ, SENTIMENT_NEGATIVE);
-		addWordsToSentimentMap(POSITIVE_ADVERB_LIST, POStags.TYPE_RB,
-				SENTIMENT_POSITIVE);
-		addWordsToSentimentMap(NEGATIVE_ADVERB_LIST, POStags.TYPE_RB,
-				SENTIMENT_NEGATIVE);
-		addWordsToSentimentMap(POSITIVE_NOUN_LIST, POStags.TYPE_NN,
-				SENTIMENT_POSITIVE);
-		addWordsToSentimentMap(NEGATIVE_NOUN_LIST, POStags.TYPE_NN,
-				SENTIMENT_NEGATIVE);
-		addWordsToSentimentMap(POSITIVE_VERB_LIST, POStags.TYPE_VB,
-				SENTIMENT_POSITIVE);
-		addWordsToSentimentMap(NEGATIVE_VERB_LIST, POStags.TYPE_VB,
-				SENTIMENT_NEGATIVE);
+		addWordsToSentimentMap(POSITIVE_ADJECTTIVE_LIST, POStags.TYPE_JJ, SENTIMENT_POSITIVE);
+		addWordsToSentimentMap(NEGATIVE_ADJECTTIVE_LIST, POStags.TYPE_JJ, SENTIMENT_NEGATIVE);
+		addWordsToSentimentMap(POSITIVE_ADVERB_LIST, POStags.TYPE_RB, SENTIMENT_POSITIVE);
+		addWordsToSentimentMap(NEGATIVE_ADVERB_LIST, POStags.TYPE_RB, SENTIMENT_NEGATIVE);
+		addWordsToSentimentMap(POSITIVE_NOUN_LIST, POStags.TYPE_NN, SENTIMENT_POSITIVE);
+		addWordsToSentimentMap(NEGATIVE_NOUN_LIST, POStags.TYPE_NN, SENTIMENT_NEGATIVE);
+		addWordsToSentimentMap(POSITIVE_VERB_LIST, POStags.TYPE_VB, SENTIMENT_POSITIVE);
+		addWordsToSentimentMap(NEGATIVE_VERB_LIST, POStags.TYPE_VB, SENTIMENT_NEGATIVE);
 	}
 
-	private void addWordsToSentimentMap(String[] words, String posType,
-			int sentimentType) {
+	private void addWordsToSentimentMap(String[] words, String posType, int sentimentType) {
 
 		// add the word to the complete sentiment word map
 		for (String word : words) {

@@ -52,11 +52,9 @@ import org.apache.commons.lang.StringUtils;
  */
 
 public class RelatedSentenceFinder {
-	private static Logger LOG = Logger
-			.getLogger("opennlp.tools.similarity.apps.RelatedSentenceFinder");
+	private static Logger LOG = Logger.getLogger("opennlp.tools.similarity.apps.RelatedSentenceFinder");
 	PageFetcher pFetcher = new PageFetcher();
-	ParserChunker2MatcherProcessor sm = ParserChunker2MatcherProcessor
-			.getInstance();
+	ParserChunker2MatcherProcessor sm = ParserChunker2MatcherProcessor.getInstance();
 	protected ParseTreeChunkListScorer parseTreeChunkListScorer = new ParseTreeChunkListScorer();
 	protected ParseTreeChunk parseTreeChunk = new ParseTreeChunk();
 	protected static StringDistanceMeasurer stringDistanceMeasurer = new StringDistanceMeasurer();
@@ -67,40 +65,38 @@ public class RelatedSentenceFinder {
 	protected Set<String> visitedURLs = new HashSet();
 
 	// used to indicate that a sentence is an opinion, so more appropriate
-	static List<String> MENTAL_VERBS = new ArrayList<String>(
-			Arrays.asList(new String[] { "want", "know", "believe", "appeal", "ask",
-					"accept", "agree", "allow", "appeal", "ask", "assume", "believe",
-					"check", "confirm", "convince", "deny", "disagree", "explain",
-					"ignore", "inform", "remind", "request", "suggest", "suppose",
-					"think", "threaten", "try", "understand" }));
+	static List<String> MENTAL_VERBS = new ArrayList<String>(Arrays
+			.asList(new String[] { "want", "know", "believe", "appeal", "ask", "accept", "agree", "allow", "appeal",
+					"ask", "assume", "believe", "check", "confirm", "convince", "deny", "disagree", "explain", "ignore",
+					"inform", "remind", "request", "suggest", "suppose", "think", "threaten", "try", "understand" }));
 
 	private static final int MAX_FRAGMENT_SENTS = 10;
 
 	public RelatedSentenceFinder(int ms, int msr, float thresh, String key) {
 		this.MAX_STEPS = ms;
 		this.MAX_SEARCH_RESULTS = msr;
-		this.RELEVANCE_THRESHOLD=thresh;
+		this.RELEVANCE_THRESHOLD = thresh;
 		yrunner.setKey(key);
 	}
-	
+
 	int generateContentAboutIter = 0;
 
 	public RelatedSentenceFinder() {
 		// TODO Auto-generated constructor stub
 	}
+
 	public void setLang(String lang) {
 		yrunner.setLang(lang);
 
 	}
-	public List<HitBase> findRelatedOpinionsForSentenceFastAndDummy(String word,
-			List<String> sents) throws Exception {
+
+	public List<HitBase> findRelatedOpinionsForSentenceFastAndDummy(String word, List<String> sents) throws Exception {
 
 		List<HitBase> searchResult = yrunner.runSearch(word);
 		return searchResult;
 	}
 
-	public List<HitBase> findRelatedOpinionsForSentence(String sentence,
-			List<String> sents) throws Exception {
+	public List<HitBase> findRelatedOpinionsForSentence(String sentence, List<String> sents) throws Exception {
 		List<HitBase> opinionSentencesToAdd = new ArrayList<HitBase>();
 		System.out.println(" \n\n=== Sentence  = " + sentence);
 		List<String> nounPhraseQueries = buildSearchEngineQueryFromSentence(sentence);
@@ -112,13 +108,10 @@ public class RelatedSentenceFinder {
 			List<HitBase> searchResult = yrunner.runSearch(query);
 			if (searchResult != null) {
 				for (HitBase item : searchResult) { // got some text from .html
-					if (item.getAbstractText() != null
-							&& !(item.getUrl().indexOf(".pdf") > 0)) { // exclude
+					if (item.getAbstractText() != null && !(item.getUrl().indexOf(".pdf") > 0)) { // exclude
 						// pdf
-						opinionSentencesToAdd
-						.add(augmentWithMinedSentencesAndVerifyRelevance(item,
-								sentence, sents));
-						
+						opinionSentencesToAdd.add(augmentWithMinedSentencesAndVerifyRelevance(item, sentence, sents));
+
 					}
 				}
 			}
@@ -134,10 +127,10 @@ public class RelatedSentenceFinder {
 	 * mining for <br>
 	 * 
 	 * @param String
-	 *          entity name
+	 *            entity name
 	 * @return List<HitBase> of text fragment structures which contain approved
-	 *         (in terms of relevance) mined sentences, as well as original search
-	 *         results objects such as doc titles, abstracts, and urls.
+	 *         (in terms of relevance) mined sentences, as well as original
+	 *         search results objects such as doc titles, abstracts, and urls.
 	 */
 
 	public List<HitBase> generateContentAbout(String sentence) throws Exception {
@@ -146,42 +139,42 @@ public class RelatedSentenceFinder {
 		List<String> nounPhraseQueries = new ArrayList<String>();
 
 		String[] extraKeywords = new StoryDiscourseNavigator().obtainAdditionalKeywordsForAnEntity(sentence);
-		System.out.println("Found  extraKeywords "+ Arrays.asList(extraKeywords));
-		if (extraKeywords==null || extraKeywords.length<1)
+		System.out.println("Found  extraKeywords " + Arrays.asList(extraKeywords));
+		if (extraKeywords == null || extraKeywords.length < 1)
 			extraKeywords = StoryDiscourseNavigator.frequentPerformingVerbs;
 
-		int stepCount=0;
+		int stepCount = 0;
 		for (String verbAddition : extraKeywords) {
-			List<HitBase> searchResult = yrunner.runSearch(sentence + " "
-					+ verbAddition); 
-			if (MAX_SEARCH_RESULTS<searchResult.size())
+			List<HitBase> searchResult = yrunner.runSearch(sentence + " " + verbAddition);
+			if (MAX_SEARCH_RESULTS < searchResult.size())
 				searchResult = searchResult.subList(0, MAX_SEARCH_RESULTS);
-			//TODO for shorter run
+			// TODO for shorter run
 			if (searchResult != null) {
 				for (HitBase item : searchResult) { // got some text from .html
-					if (item.getAbstractText() != null
-							&& !(item.getUrl().indexOf(".pdf") > 0) && !visitedURLs.contains(item.getUrl())) { // exclude pdf
-						opinionSentencesToAdd
-						.add(//augmentWithMinedSentencesAndVerifyRelevance(item,
-							//	sentence, null));
-								buildParagraphOfGeneratedText(item,	sentence, null));
+					if (item.getAbstractText() != null && !(item.getUrl().indexOf(".pdf") > 0)
+							&& !visitedURLs.contains(item.getUrl())) { // exclude
+																		// pdf
+						opinionSentencesToAdd.add(// augmentWithMinedSentencesAndVerifyRelevance(item,
+													// sentence, null));
+								buildParagraphOfGeneratedText(item, sentence, null));
 						visitedURLs.add(item.getUrl());
 					}
 				}
 			}
 			stepCount++;
-			if (stepCount>MAX_STEPS)
+			if (stepCount > MAX_STEPS)
 				break;
 		}
-		 
+
 		// if nothing is written, then get first search result and try again
 		try {
-			if (generateContentAboutIter<4 && ContentGeneratorSupport.problematicHitList(opinionSentencesToAdd)){
+			if (generateContentAboutIter < 4 && ContentGeneratorSupport.problematicHitList(opinionSentencesToAdd)) {
 				List<HitBase> resultList = yrunner.runSearch(sentence);
 				String discoveredSimilarTopic = resultList.get(generateContentAboutIter).getTitle();
-				discoveredSimilarTopic = ContentGeneratorSupport.getPortionOfTitleWithoutDelimiters(discoveredSimilarTopic);
+				discoveredSimilarTopic = ContentGeneratorSupport
+						.getPortionOfTitleWithoutDelimiters(discoveredSimilarTopic);
 				generateContentAboutIter++;
-				opinionSentencesToAdd =  generateContentAbout(discoveredSimilarTopic);
+				opinionSentencesToAdd = generateContentAbout(discoveredSimilarTopic);
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -193,32 +186,29 @@ public class RelatedSentenceFinder {
 	}
 
 	/**
-	 * Takes a sentence and extracts noun phrases and entity names to from search
-	 * queries for finding relevant sentences on the web, which are then subject
-	 * to relevance assessment by Similarity. Search queries should not be too
-	 * general (irrelevant search results) or too specific (too few search
-	 * results)
+	 * Takes a sentence and extracts noun phrases and entity names to from
+	 * search queries for finding relevant sentences on the web, which are then
+	 * subject to relevance assessment by Similarity. Search queries should not
+	 * be too general (irrelevant search results) or too specific (too few
+	 * search results)
 	 * 
 	 * @param String
-	 *          input sentence to form queries
+	 *            input sentence to form queries
 	 * @return List<String> of search expressions
 	 */
 	public static List<String> buildSearchEngineQueryFromSentence(String sentence) {
 		ParseTreeChunk matcher = new ParseTreeChunk();
-		ParserChunker2MatcherProcessor pos = ParserChunker2MatcherProcessor
-				.getInstance();
+		ParserChunker2MatcherProcessor pos = ParserChunker2MatcherProcessor.getInstance();
 		List<List<ParseTreeChunk>> sent1GrpLst = null;
 
-		List<ParseTreeChunk> nPhrases = pos
-				.formGroupedPhrasesFromChunksForSentence(sentence).get(0);
+		List<ParseTreeChunk> nPhrases = pos.formGroupedPhrasesFromChunksForSentence(sentence).get(0);
 		List<String> queryArrayStr = new ArrayList<String>();
 		for (ParseTreeChunk ch : nPhrases) {
 			String query = "";
 			int size = ch.getLemmas().size();
 
 			for (int i = 0; i < size; i++) {
-				if (ch.getPOSs().get(i).startsWith("N")
-						|| ch.getPOSs().get(i).startsWith("J")) {
+				if (ch.getPOSs().get(i).startsWith("N") || ch.getPOSs().get(i).startsWith("J")) {
 					query += ch.getLemmas().get(i) + " ";
 				}
 			}
@@ -252,8 +242,7 @@ public class RelatedSentenceFinder {
 				int size = ch.getLemmas().size();
 
 				for (int i = 0; i < size; i++) {
-					if (ch.getPOSs().get(i).startsWith("N")
-							|| ch.getPOSs().get(i).startsWith("J")) {
+					if (ch.getPOSs().get(i).startsWith("N") || ch.getPOSs().get(i).startsWith("J")) {
 						query += ch.getLemmas().get(i) + " ";
 					}
 				}
@@ -282,8 +271,8 @@ public class RelatedSentenceFinder {
 	 * afterwards
 	 * 
 	 * @param List
-	 *          <String> of sentences (search queries, or search results
-	 *          abstracts, or titles
+	 *            <String> of sentences (search queries, or search results
+	 *            abstracts, or titles
 	 * @return List<String> of sentences where dupes are removed
 	 */
 	public static List<String> removeDuplicatesFromQueries(List<String> hits) {
@@ -311,8 +300,7 @@ public class RelatedSentenceFinder {
 					hitsDedup.add(hits.get(i));
 
 			if (hitsDedup.size() < hits.size()) {
-				LOG.info("Removed duplicates from formed query, including "
-						+ hits.get(idsToRemove.get(0)));
+				LOG.info("Removed duplicates from formed query, including " + hits.get(idsToRemove.get(0)));
 			}
 
 		} catch (Exception e) {
@@ -327,13 +315,13 @@ public class RelatedSentenceFinder {
 	 * remove dupes from search results
 	 * 
 	 * @param List
-	 *          <HitBase> of search results objects
+	 *            <HitBase> of search results objects
 	 * @return List<String> of search results objects where dupes are removed
 	 */
-	public static List<HitBase> removeDuplicatesFromResultantHits(
-			List<HitBase> hits) {
+	public static List<HitBase> removeDuplicatesFromResultantHits(List<HitBase> hits) {
 		StringDistanceMeasurer meas = new StringDistanceMeasurer();
-		double dupeThresh = // 0.8; // if more similar, then considered dupes was
+		double dupeThresh = // 0.8; // if more similar, then considered dupes
+							// was
 				0.7;
 		List<Integer> idsToRemove = new ArrayList<Integer>();
 		List<HitBase> hitsDedup = new ArrayList<HitBase>();
@@ -352,8 +340,7 @@ public class RelatedSentenceFinder {
 								continue;
 							if (meas.measureStringDistance(sf1, sf2) > dupeThresh) {
 								fragmList2Results.remove(f2);
-								LOG.info("Removed duplicates from formed fragments list: "
-										+ sf2);
+								LOG.info("Removed duplicates from formed fragments list: " + sf2);
 							}
 						}
 
@@ -367,41 +354,38 @@ public class RelatedSentenceFinder {
 	}
 
 	/**
-	 * Takes single search result for an entity which is the subject of the essay
-	 * to be written and forms essey sentences from the title, abstract, and
-	 * possibly original page
+	 * Takes single search result for an entity which is the subject of the
+	 * essay to be written and forms essey sentences from the title, abstract,
+	 * and possibly original page
 	 * 
 	 * @param HitBase
-	 *          item : search result
+	 *            item : search result
 	 * @param originalSentence
-	 *          : seed for the essay to be written
+	 *            : seed for the essay to be written
 	 * @param sentsAll
-	 *          : list<String> of other sentences in the seed if it is
-	 *          multi-sentence
+	 *            : list<String> of other sentences in the seed if it is
+	 *            multi-sentence
 	 * @return search result
 	 */
 
-	public HitBase augmentWithMinedSentencesAndVerifyRelevance(HitBase item,
-			String originalSentence, List<String> sentsAll) {
+	public HitBase augmentWithMinedSentencesAndVerifyRelevance(HitBase item, String originalSentence,
+			List<String> sentsAll) {
 		if (sentsAll == null)
 			sentsAll = new ArrayList<String>();
 		// put orig sentence in structure
 		List<String> origs = new ArrayList<String>();
 		origs.add(originalSentence);
 		item.setOriginalSentences(origs);
-		String title = item.getTitle().replace("<b>", " ").replace("</b>", " ")
-				.replace("  ", " ").replace("  ", " ");
+		String title = item.getTitle().replace("<b>", " ").replace("</b>", " ").replace("  ", " ").replace("  ", " ");
 		// generation results for this sentence
 		List<Fragment> result = new ArrayList<Fragment>();
 		// form plain text from snippet
-		String snapshot = item.getAbstractText().replace("<b>", " ")
-				.replace("</b>", " ").replace("  ", " ").replace("  ", " ");
-
+		String snapshot = item.getAbstractText().replace("<b>", " ").replace("</b>", " ").replace("  ", " ")
+				.replace("  ", " ");
 
 		// fix a template expression which can be substituted by original if
 		// relevant
-		String snapshotMarked = snapshot.replace("...",
-				" _should_find_orig_ . _should_find_orig_");
+		String snapshotMarked = snapshot.replace("...", " _should_find_orig_ . _should_find_orig_");
 		String[] fragments = sm.splitSentences(snapshotMarked);
 		List<String> allFragms = new ArrayList<String>();
 		allFragms.addAll(Arrays.asList(fragments));
@@ -414,12 +398,14 @@ public class RelatedSentenceFinder {
 				if (downloadedPage != null && downloadedPage.length() > 100) {
 					item.setPageContent(downloadedPage);
 					String pageContent = Utils.fullStripHTML(item.getPageContent());
-					pageContent = GeneratedSentenceProcessor
-							.normalizeForSentenceSplitting(pageContent);
+					pageContent = GeneratedSentenceProcessor.normalizeForSentenceSplitting(pageContent);
 					pageContent = ContentGeneratorSupport.cleanSpacesInCleanedHTMLpage(pageContent);
-					//pageContent = pageContent.trim().replaceAll("  [A-Z]", ". $0")// .replace("  ",
-					//		// ". ")
-					//		.replace("..", ".").replace(". . .", " ").trim(); // sometimes   html breaks are converted into ' ' (two spaces), so
+					// pageContent = pageContent.trim().replaceAll(" [A-Z]", ".
+					// $0")// .replace(" ",
+					// // ". ")
+					// .replace("..", ".").replace(". . .", " ").trim(); //
+					// sometimes html breaks are converted into ' ' (two
+					// spaces), so
 					// we need to put '.'
 					sents = sm.splitSentences(pageContent);
 
@@ -429,8 +415,7 @@ public class RelatedSentenceFinder {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
-			System.err
-			.println("Problem downloading  the page and splitting into sentences");
+			System.err.println("Problem downloading  the page and splitting into sentences");
 			return item;
 		}
 
@@ -440,9 +425,8 @@ public class RelatedSentenceFinder {
 				continue;
 			String pageSentence = "";
 			// try to find original sentence from webpage
-			if (fragment.indexOf("_should_find_orig_") > -1 && sents != null
-					&& sents.length > 0){
-				try { 
+			if (fragment.indexOf("_should_find_orig_") > -1 && sents != null && sents.length > 0) {
+				try {
 					// first try sorted sentences from page by length approach
 					String[] sentsSortedByLength = extractSentencesFromPage(downloadedPage);
 					String[] mainAndFollowSent = null;
@@ -454,17 +438,18 @@ public class RelatedSentenceFinder {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					// if the above gives null than try to match all sentences from snippet fragment
-					if (mainAndFollowSent==null || mainAndFollowSent[0]==null){
+					// if the above gives null than try to match all sentences
+					// from snippet fragment
+					if (mainAndFollowSent == null || mainAndFollowSent[0] == null) {
 						mainAndFollowSent = getFullOriginalSentenceFromWebpageBySnippetFragment(
 								fragment.replace("_should_find_orig_", ""), sents);
 					}
-					
-					if (mainAndFollowSent!=null || mainAndFollowSent[0]!=null){
+
+					if (mainAndFollowSent != null || mainAndFollowSent[0] != null) {
 						pageSentence = mainAndFollowSent[0];
-						for(int i = 1; i< mainAndFollowSent.length; i++)
-							if (mainAndFollowSent[i]!=null)
-								followSent+= mainAndFollowSent[i];
+						for (int i = 1; i < mainAndFollowSent.length; i++)
+							if (mainAndFollowSent[i] != null)
+								followSent += mainAndFollowSent[i];
 					}
 
 				} catch (Exception e) {
@@ -473,90 +458,79 @@ public class RelatedSentenceFinder {
 					e.printStackTrace();
 				}
 			}
-			
+
 			else
 				// or get original snippet
 				pageSentence = fragment;
 			if (pageSentence != null)
 				pageSentence.replace("_should_find_orig_", "");
 
-			// resultant sentence SHOULD NOT be longer than four times the size of
+			// resultant sentence SHOULD NOT be longer than four times the size
+			// of
 			// snippet fragment
-			if (pageSentence != null && pageSentence.length()>50 )
-			//		&& (float) pageSentence.length() / (float) fragment.length() < 4.0)
+			if (pageSentence != null && pageSentence.length() > 50)
+			// && (float) pageSentence.length() / (float) fragment.length() <
+			// 4.0)
 			{ // was 2.0,
 
 				try { // get score from syntactic match between sentence in
-					// original text and mined sentence
+						// original text and mined sentence
 					double measScore = 0.0, syntScore = 0.0, mentalScore = 0.0;
 
-					SentencePairMatchResult matchRes = sm.assessRelevance(pageSentence
-							+ " " + title, originalSentence);
+					SentencePairMatchResult matchRes = sm.assessRelevance(pageSentence + " " + title, originalSentence);
 					List<List<ParseTreeChunk>> match = matchRes.getMatchResult();
 					if (!matchRes.isVerbExists() || matchRes.isImperativeVerb()) {
-						System.out
-						.println("Rejected Sentence : No verb OR Yes imperative verb :"
-								+ pageSentence);
+						System.out.println("Rejected Sentence : No verb OR Yes imperative verb :" + pageSentence);
 						continue;
 					}
 
-					syntScore = parseTreeChunkListScorer
-							.getParseTreeChunkListScore(match);
-					System.out.println(parseTreeChunk.listToString(match) + " "
-							+ syntScore + "\n pre-processed sent = '" + pageSentence);
+					syntScore = parseTreeChunkListScorer.getParseTreeChunkListScore(match);
+					System.out.println(parseTreeChunk.listToString(match) + " " + syntScore
+							+ "\n pre-processed sent = '" + pageSentence);
 
-					if (syntScore < RELEVANCE_THRESHOLD){ // 1.5) { // trying other sents
+					if (syntScore < RELEVANCE_THRESHOLD) { // 1.5) { // trying
+															// other sents
 						for (String currSent : sentsAll) {
 							if (currSent.startsWith(originalSentence))
 								continue;
-							match = sm.assessRelevance(currSent, pageSentence)
-									.getMatchResult();
-							double syntScoreCurr = parseTreeChunkListScorer
-									.getParseTreeChunkListScore(match);
+							match = sm.assessRelevance(currSent, pageSentence).getMatchResult();
+							double syntScoreCurr = parseTreeChunkListScorer.getParseTreeChunkListScore(match);
 							if (syntScoreCurr > syntScore) {
 								syntScore = syntScoreCurr;
 							}
 						}
 						if (syntScore > RELEVANCE_THRESHOLD) {
-							System.out.println("Got match with other sent: "
-									+ parseTreeChunk.listToString(match) + " " + syntScore);
+							System.out.println("Got match with other sent: " + parseTreeChunk.listToString(match) + " "
+									+ syntScore);
 						}
 					}
 
-					measScore = stringDistanceMeasurer.measureStringDistance(
-							originalSentence, pageSentence);
+					measScore = stringDistanceMeasurer.measureStringDistance(originalSentence, pageSentence);
 
-
-					if ((syntScore > RELEVANCE_THRESHOLD || measScore > 0.5)
-							&& measScore < 0.8 && pageSentence.length() > 40) // >70
+					if ((syntScore > RELEVANCE_THRESHOLD || measScore > 0.5) && measScore < 0.8
+							&& pageSentence.length() > 40) // >70
 					{
-						String pageSentenceProc = GeneratedSentenceProcessor
-								.acceptableMinedSentence(pageSentence);
+						String pageSentenceProc = GeneratedSentenceProcessor.acceptableMinedSentence(pageSentence);
 						if (pageSentenceProc != null) {
-							pageSentenceProc = GeneratedSentenceProcessor
-									.processSentence(pageSentenceProc);
+							pageSentenceProc = GeneratedSentenceProcessor.processSentence(pageSentenceProc);
 							followSent = GeneratedSentenceProcessor.processSentence(followSent);
 							if (followSent != null) {
-								pageSentenceProc += " "+ followSent;
+								pageSentenceProc += " " + followSent;
 							}
 
 							pageSentenceProc = Utils.convertToASCII(pageSentenceProc);
-							Fragment f = new Fragment(pageSentenceProc, syntScore + measScore
-									+ mentalScore + (double) pageSentenceProc.length()
-									/ (double) 50);
+							Fragment f = new Fragment(pageSentenceProc, syntScore + measScore + mentalScore
+									+ (double) pageSentenceProc.length() / (double) 50);
 							f.setSourceURL(item.getUrl());
 							f.fragment = fragment;
 							result.add(f);
-							System.out.println("Accepted sentence: " + pageSentenceProc + " | "+followSent
+							System.out.println("Accepted sentence: " + pageSentenceProc + " | " + followSent
 									+ "| with title= " + title);
 							System.out.println("For fragment = " + fragment);
 						} else
-							System.out
-							.println("Rejected sentence due to wrong area at webpage: "
-									+ pageSentence);
+							System.out.println("Rejected sentence due to wrong area at webpage: " + pageSentence);
 					} else
-						System.out.println("Rejected sentence due to low score: "
-								+ pageSentence);
+						System.out.println("Rejected sentence due to low score: " + pageSentence);
 					// }
 				} catch (Throwable t) {
 					t.printStackTrace();
@@ -567,12 +541,9 @@ public class RelatedSentenceFinder {
 		return item;
 	}
 
-	
-
 	// given a fragment from snippet, finds an original sentence at a webpage by
 	// optimizing alignmemt score
-	public static String[] getFullOriginalSentenceFromWebpageBySnippetFragment(
-			String fragment, String[] sents) {
+	public static String[] getFullOriginalSentenceFromWebpageBySnippetFragment(String fragment, String[] sents) {
 		if (fragment.trim().length() < 15)
 			return null;
 
@@ -588,17 +559,17 @@ public class RelatedSentenceFinder {
 				result = s;
 				dist = distCurr;
 				try {
-					if (i < sents.length - 1 && sents[i + 1].length() > 60) { 
-						String f1 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i+1]);
-						if (f1!=null){
+					if (i < sents.length - 1 && sents[i + 1].length() > 60) {
+						String f1 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i + 1]);
+						if (f1 != null) {
 							followSent = f1;
 						}
 					}
 
 					if (i < sents.length - 2 && sents[i + 2].length() > 60) {
-						String f2 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i+2]);
-						if (f2!=null){
-							followSent += " "+f2;
+						String f2 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i + 2]);
+						if (f2 != null) {
+							followSent += " " + f2;
 						}
 					}
 				} catch (Exception e) {
@@ -612,8 +583,7 @@ public class RelatedSentenceFinder {
 
 	// given a fragment from snippet, finds an original sentence at a webpage by
 	// optimizing alignmemt score
-	public static String[] getBestFullOriginalSentenceFromWebpageBySnippetFragment(
-			String fragment, String[] sents) {
+	public static String[] getBestFullOriginalSentenceFromWebpageBySnippetFragment(String fragment, String[] sents) {
 		if (fragment.trim().length() < 15)
 			return null;
 		int bestSentIndex = -1;
@@ -634,8 +604,7 @@ public class RelatedSentenceFinder {
 		if (distBest > 0.4) {
 			result = sents[bestSentIndex];
 
-			if (bestSentIndex < sents.length - 1
-					&& sents[bestSentIndex + 1].length() > 60) {
+			if (bestSentIndex < sents.length - 1 && sents[bestSentIndex + 1].length() > 60) {
 				followSent = sents[bestSentIndex + 1];
 			}
 
@@ -644,41 +613,42 @@ public class RelatedSentenceFinder {
 		return new String[] { result, followSent };
 	}
 
-	public String[] extractSentencesFromPage(String downloadedPage)
-	{
+	public String[] extractSentencesFromPage(String downloadedPage) {
 
-		int maxSentsFromPage= 100;
+		int maxSentsFromPage = 100;
 		List<String[]> results = new ArrayList<String[]>();
 
-		//String pageOrigHTML = pFetcher.fetchOrigHTML(url);
+		// String pageOrigHTML = pFetcher.fetchOrigHTML(url);
 
-		downloadedPage= downloadedPage.replace("     ", "&");
+		downloadedPage = downloadedPage.replace("     ", "&");
 		downloadedPage = downloadedPage.replaceAll("(?:&)+", "#");
 		String[] sents = downloadedPage.split("#");
 		List<TextChunk> sentsList = new ArrayList<TextChunk>();
-		for(String s: sents){
+		for (String s : sents) {
 			s = ContentGeneratorSupport.cleanSpacesInCleanedHTMLpage(s);
-		/*	s = s.trim().replace("  ", ". ").replace("..", ".").replace(". . .", " ")
-					.replace(": ", ". ").replace("- ", ". ").
-					replace (". .",".").trim(); */
+			/*
+			 * s = s.trim().replace("  ", ". ").replace("..",
+			 * ".").replace(". . .", " ") .replace(": ", ". ").replace("- ",
+			 * ". "). replace (". .",".").trim();
+			 */
 			sentsList.add(new TextChunk(s, s.length()));
 		}
 
 		Collections.sort(sentsList, new TextChunkComparable());
 		String[] longestSents = new String[maxSentsFromPage];
-		int j=0;
-		int initIndex = sentsList.size()-1 -maxSentsFromPage;
-		if (initIndex<0)
+		int j = 0;
+		int initIndex = sentsList.size() - 1 - maxSentsFromPage;
+		if (initIndex < 0)
 			initIndex = 0;
-		for(int i=initIndex; i< sentsList.size() && j<maxSentsFromPage ; i++){
+		for (int i = initIndex; i < sentsList.size() && j < maxSentsFromPage; i++) {
 			longestSents[j] = sentsList.get(i).text;
 			j++;
 		}
 
 		sents = cleanSplitListOfSents(longestSents);
 
-		//sents = removeDuplicates(sents);
-		//sents = verifyEnforceStartsUpperCase(sents);
+		// sents = removeDuplicates(sents);
+		// sents = verifyEnforceStartsUpperCase(sents);
 
 		return sents;
 	}
@@ -688,56 +658,57 @@ public class RelatedSentenceFinder {
 			this.text = s;
 			this.len = length;
 		}
+
 		public String text;
 		public int len;
 	}
 
-	public class TextChunkComparable implements Comparator<TextChunk>
-	{
-		public int compare(TextChunk ch1, TextChunk ch2)
-		{
-			if (ch1.len>ch2.len)
+	public class TextChunkComparable implements Comparator<TextChunk> {
+		public int compare(TextChunk ch1, TextChunk ch2) {
+			if (ch1.len > ch2.len)
 				return 1;
-			else if (ch1.len<ch2.len)
-				return  -1;
-			else return 0;
+			else if (ch1.len < ch2.len)
+				return -1;
+			else
+				return 0;
 
 		}
 	}
 
-	protected String[] cleanSplitListOfSents(String[] longestSents){
-		float minFragmentLength = 40, minFragmentLengthSpace=4;
+	protected String[] cleanSplitListOfSents(String[] longestSents) {
+		float minFragmentLength = 40, minFragmentLengthSpace = 4;
 
 		List<String> sentsClean = new ArrayList<String>();
-		for (String sentenceOrMultSent : longestSents)
-		{
-			if (sentenceOrMultSent==null || sentenceOrMultSent.length()<20)
+		for (String sentenceOrMultSent : longestSents) {
+			if (sentenceOrMultSent == null || sentenceOrMultSent.length() < 20)
 				continue;
-			if (GeneratedSentenceProcessor.acceptableMinedSentence(sentenceOrMultSent)==null){
-				//System.out.println("Rejected sentence by GeneratedSentenceProcessor.acceptableMinedSentence = "+sentenceOrMultSent);
+			if (GeneratedSentenceProcessor.acceptableMinedSentence(sentenceOrMultSent) == null) {
+				// System.out.println("Rejected sentence by
+				// GeneratedSentenceProcessor.acceptableMinedSentence =
+				// "+sentenceOrMultSent);
 				continue;
 			}
-			// aaa. hhh hhh.  kkk . kkk ll hhh. lll kkk n.
-			int numOfDots = sentenceOrMultSent.replace('.','&').split("&").length;
-			float avgSentenceLengthInTextPortion = (float)sentenceOrMultSent.length() /(float) numOfDots;
-			if ( avgSentenceLengthInTextPortion<minFragmentLength)
+			// aaa. hhh hhh. kkk . kkk ll hhh. lll kkk n.
+			int numOfDots = sentenceOrMultSent.replace('.', '&').split("&").length;
+			float avgSentenceLengthInTextPortion = (float) sentenceOrMultSent.length() / (float) numOfDots;
+			if (avgSentenceLengthInTextPortion < minFragmentLength)
 				continue;
 			// o oo o ooo o o o ooo oo ooo o o oo
-			numOfDots = sentenceOrMultSent.replace(' ','&').split("&").length;
-			avgSentenceLengthInTextPortion = (float)sentenceOrMultSent.length() /(float) numOfDots;
-			if ( avgSentenceLengthInTextPortion<minFragmentLengthSpace)
+			numOfDots = sentenceOrMultSent.replace(' ', '&').split("&").length;
+			avgSentenceLengthInTextPortion = (float) sentenceOrMultSent.length() / (float) numOfDots;
+			if (avgSentenceLengthInTextPortion < minFragmentLengthSpace)
 				continue;
 
 			List<String> furtherSplit = TextProcessor.splitToSentences(sentenceOrMultSent);
 
 			// forced split by ',' somewhere in the middle of sentence
 			// disused - Feb 26 13
-			//furtherSplit = furtherMakeSentencesShorter(furtherSplit);
-			furtherSplit.remove(furtherSplit.size()-1);
-			for(String s : furtherSplit){
-				if (s.indexOf('|')>-1)
+			// furtherSplit = furtherMakeSentencesShorter(furtherSplit);
+			furtherSplit.remove(furtherSplit.size() - 1);
+			for (String s : furtherSplit) {
+				if (s.indexOf('|') > -1)
 					continue;
-				s = s.replace("<em>"," ").replace("</em>"," ");
+				s = s.replace("<em>", " ").replace("</em>", " ");
 				s = Utils.convertToASCII(s);
 				sentsClean.add(s);
 			}
@@ -745,26 +716,24 @@ public class RelatedSentenceFinder {
 		return (String[]) sentsClean.toArray(new String[0]);
 	}
 
-	public Triple<List<String>, String, String[]> formCandidateFragmentsForPage(HitBase item, String originalSentence, List<String> sentsAll){
+	public Triple<List<String>, String, String[]> formCandidateFragmentsForPage(HitBase item, String originalSentence,
+			List<String> sentsAll) {
 		if (sentsAll == null)
 			sentsAll = new ArrayList<String>();
 		// put orig sentence in structure
 		List<String> origs = new ArrayList<String>();
 		origs.add(originalSentence);
 		item.setOriginalSentences(origs);
-		String title = item.getTitle().replace("<b>", " ").replace("</b>", " ")
-				.replace("  ", " ").replace("  ", " ");
+		String title = item.getTitle().replace("<b>", " ").replace("</b>", " ").replace("  ", " ").replace("  ", " ");
 		// generation results for this sentence
 		List<Fragment> result = new ArrayList<Fragment>();
 		// form plain text from snippet
-		String snapshot = item.getAbstractText().replace("<b>", " ")
-				.replace("</b>", " ").replace("  ", " ").replace("  ", " ");
-
+		String snapshot = item.getAbstractText().replace("<b>", " ").replace("</b>", " ").replace("  ", " ")
+				.replace("  ", " ");
 
 		// fix a template expression which can be substituted by original if
 		// relevant
-		String snapshotMarked = snapshot.replace("...",
-				" _should_find_orig_ . _should_find_orig_");
+		String snapshotMarked = snapshot.replace("...", " _should_find_orig_ . _should_find_orig_");
 		String[] fragments = sm.splitSentences(snapshotMarked);
 		List<String> allFragms = new ArrayList<String>();
 		allFragms.addAll(Arrays.asList(fragments));
@@ -777,13 +746,14 @@ public class RelatedSentenceFinder {
 				if (downloadedPage != null && downloadedPage.length() > 100) {
 					item.setPageContent(downloadedPage);
 					String pageContent = Utils.fullStripHTML(item.getPageContent());
-					pageContent = GeneratedSentenceProcessor
-							.normalizeForSentenceSplitting(pageContent);
+					pageContent = GeneratedSentenceProcessor.normalizeForSentenceSplitting(pageContent);
 					pageContent = ContentGeneratorSupport.cleanSpacesInCleanedHTMLpage(pageContent);
-					//pageContent = pageContent.trim().replaceAll("    [A-Z]", ". $0")// .replace("  ",
-					//		// ". ")
-					//		.replace("..", ".").replace(". . .", " ").
-					//		replace(".    .",". ").trim(); // sometimes   html breaks are converted into ' ' (two spaces), so
+					// pageContent = pageContent.trim().replaceAll(" [A-Z]", ".
+					// $0")// .replace(" ",
+					// // ". ")
+					// .replace("..", ".").replace(". . .", " ").
+					// replace(". .",". ").trim(); // sometimes html breaks are
+					// converted into ' ' (two spaces), so
 					// we need to put '.'
 					sents = sm.splitSentences(pageContent);
 
@@ -793,31 +763,28 @@ public class RelatedSentenceFinder {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
-			System.err
-			.println("Problem downloading  the page and splitting into sentences");
+			System.err.println("Problem downloading  the page and splitting into sentences");
 			return new Triple(allFragms, downloadedPage, sents);
 		}
 		return new Triple(allFragms, downloadedPage, sents);
 	}
 
-	String[] formCandidateSentences(String fragment, Triple<List<String>, String, String[]> fragmentExtractionResults){
+	String[] formCandidateSentences(String fragment, Triple<List<String>, String, String[]> fragmentExtractionResults) {
 		String[] mainAndFollowSent = null;
 
-		List<String> allFragms = (List<String>)fragmentExtractionResults.getFirst();
-		String downloadedPage = (String)fragmentExtractionResults.getSecond();
-		String[] sents = (String[])fragmentExtractionResults.getThird();
+		List<String> allFragms = (List<String>) fragmentExtractionResults.getFirst();
+		String downloadedPage = (String) fragmentExtractionResults.getSecond();
+		String[] sents = (String[]) fragmentExtractionResults.getThird();
 
 		String followSent = null;
 		if (fragment.length() < 50)
 			return null;
 		String pageSentence = "";
 		// try to find original sentence from webpage
-		if (fragment.indexOf("_should_find_orig_") > -1 && sents != null
-				&& sents.length > 0){
-			try { 
+		if (fragment.indexOf("_should_find_orig_") > -1 && sents != null && sents.length > 0) {
+			try {
 				// first try sorted sentences from page by length approach
 				String[] sentsSortedByLength = extractSentencesFromPage(downloadedPage);
-
 
 				try {
 					mainAndFollowSent = getFullOriginalSentenceFromWebpageBySnippetFragment(
@@ -826,20 +793,19 @@ public class RelatedSentenceFinder {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				// if the above gives null than try to match all sentences from snippet fragment
-				if (mainAndFollowSent==null || mainAndFollowSent[0]==null){
+				// if the above gives null than try to match all sentences from
+				// snippet fragment
+				if (mainAndFollowSent == null || mainAndFollowSent[0] == null) {
 					mainAndFollowSent = getFullOriginalSentenceFromWebpageBySnippetFragment(
 							fragment.replace("_should_find_orig_", ""), sents);
 				}
-
 
 			} catch (Exception e) {
 
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
-		else
+		} else
 			// or get original snippet
 			pageSentence = fragment;
 		if (pageSentence != null)
@@ -847,173 +813,160 @@ public class RelatedSentenceFinder {
 
 		return mainAndFollowSent;
 
-	}	
+	}
 
-	private Fragment verifyCandidateSentencesAndFormParagraph(
-			String[] candidateSentences, HitBase item, String fragment, String originalSentence, List<String> sentsAll) {
-		Fragment result = null;	
+	private Fragment verifyCandidateSentencesAndFormParagraph(String[] candidateSentences, HitBase item,
+			String fragment, String originalSentence, List<String> sentsAll) {
+		Fragment result = null;
 
 		String pageSentence = candidateSentences[0];
 		String followSent = "";
-		for(int i = 1; i< candidateSentences.length; i++)
-			followSent+= candidateSentences[i];
+		for (int i = 1; i < candidateSentences.length; i++)
+			followSent += candidateSentences[i];
 		String title = item.getTitle();
 
 		// resultant sentence SHOULD NOT be longer than for times the size of
 		// snippet fragment
-		if (!(pageSentence != null && pageSentence.length()>50) ){
-			System.out.println("Cannot accept the sentence = "+ pageSentence +
-					"!(pageSentence != null && pageSentence.length()>50 && (float) pageSentence.length() / (float) fragment.length() < 4.0) )");
-			
+		if (!(pageSentence != null && pageSentence.length() > 50)) {
+			System.out.println("Cannot accept the sentence = " + pageSentence
+					+ "!(pageSentence != null && pageSentence.length()>50 && (float) pageSentence.length() / (float) fragment.length() < 4.0) )");
+
 			return null;
 		}
 
-
 		try { // get score from syntactic match between sentence in
-			// original text and mined sentence
+				// original text and mined sentence
 			double measScore = 0.0, syntScore = 0.0, mentalScore = 0.0;
 
-			SentencePairMatchResult matchRes = sm.assessRelevance(pageSentence
-					+ " " + title, originalSentence);
+			SentencePairMatchResult matchRes = sm.assessRelevance(pageSentence + " " + title, originalSentence);
 			List<List<ParseTreeChunk>> match = matchRes.getMatchResult();
-			if (match==null || match.size()<1){
-				System.out
-				.println("Rejected Sentence : empty match "+ pageSentence);
-				return null;
-			}
-			
-			if (!matchRes.isVerbExists() || matchRes.isImperativeVerb()) {
-				System.out
-				.println("Rejected Sentence : No verb OR Yes imperative verb :"
-						+ pageSentence);
+			if (match == null || match.size() < 1) {
+				System.out.println("Rejected Sentence : empty match " + pageSentence);
 				return null;
 			}
 
-			syntScore = parseTreeChunkListScorer
-					.getParseTreeChunkListScore(match);
-			System.out.println(parseTreeChunk.listToString(match) + " "
-					+ syntScore + "\n pre-processed sent = '" + pageSentence);
+			if (!matchRes.isVerbExists() || matchRes.isImperativeVerb()) {
+				System.out.println("Rejected Sentence : No verb OR Yes imperative verb :" + pageSentence);
+				return null;
+			}
+
+			syntScore = parseTreeChunkListScorer.getParseTreeChunkListScore(match);
+			System.out.println(
+					parseTreeChunk.listToString(match) + " " + syntScore + "\n pre-processed sent = '" + pageSentence);
 
 			try {
-				if (sentsAll!=null && syntScore < RELEVANCE_THRESHOLD){ // 1.5) { // trying other sents
+				if (sentsAll != null && syntScore < RELEVANCE_THRESHOLD) { // 1.5)
+																			// {
+																			// //
+																			// trying
+																			// other
+																			// sents
 					for (String currSent : sentsAll) {
 						if (currSent.startsWith(originalSentence))
 							continue;
-						match = sm.assessRelevance(currSent, pageSentence)
-								.getMatchResult();
-						double syntScoreCurr = parseTreeChunkListScorer
-								.getParseTreeChunkListScore(match);
+						match = sm.assessRelevance(currSent, pageSentence).getMatchResult();
+						double syntScoreCurr = parseTreeChunkListScorer.getParseTreeChunkListScore(match);
 						if (syntScoreCurr > syntScore) {
 							syntScore = syntScoreCurr;
 						}
 					}
 					if (syntScore > RELEVANCE_THRESHOLD) {
-						System.out.println("Got match with other sent: "
-								+ parseTreeChunk.listToString(match) + " " + syntScore);
+						System.out.println(
+								"Got match with other sent: " + parseTreeChunk.listToString(match) + " " + syntScore);
 					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
-			measScore = stringDistanceMeasurer.measureStringDistance(
-					originalSentence, pageSentence);
+			measScore = stringDistanceMeasurer.measureStringDistance(originalSentence, pageSentence);
 
-
-			if ((syntScore > RELEVANCE_THRESHOLD || measScore > 0.5)
-					&& measScore < 0.8 && pageSentence.length() > 40) // >70
+			if ((syntScore > RELEVANCE_THRESHOLD || measScore > 0.5) && measScore < 0.8 && pageSentence.length() > 40) // >70
 			{
-				String pageSentenceProc = GeneratedSentenceProcessor
-						.acceptableMinedSentence(pageSentence);
+				String pageSentenceProc = GeneratedSentenceProcessor.acceptableMinedSentence(pageSentence);
 				if (pageSentenceProc != null) {
-					pageSentenceProc = GeneratedSentenceProcessor
-							.processSentence(pageSentenceProc);
+					pageSentenceProc = GeneratedSentenceProcessor.processSentence(pageSentenceProc);
 					followSent = GeneratedSentenceProcessor.processSentence(followSent);
 					if (followSent != null) {
-						pageSentenceProc += " "+ followSent;
+						pageSentenceProc += " " + followSent;
 					}
 
 					pageSentenceProc = Utils.convertToASCII(pageSentenceProc);
-					result = new Fragment(pageSentenceProc, syntScore + measScore
-							+ mentalScore + (double) pageSentenceProc.length()
-							/ (double) 50);
+					result = new Fragment(pageSentenceProc,
+							syntScore + measScore + mentalScore + (double) pageSentenceProc.length() / (double) 50);
 					result.setSourceURL(item.getUrl());
 					result.fragment = fragment;
 
-					System.out.println("Accepted sentence: " + pageSentenceProc
-							+ "| with title= " + title);
+					System.out.println("Accepted sentence: " + pageSentenceProc + "| with title= " + title);
 					System.out.println("For fragment = " + fragment);
 				} else
-					System.out
-					.println("Rejected sentence due to wrong area at webpage: "
-							+ pageSentence);
+					System.out.println("Rejected sentence due to wrong area at webpage: " + pageSentence);
 			} else
-				System.out.println("Rejected sentence due to low score: "
-						+ pageSentence);
+				System.out.println("Rejected sentence due to low score: " + pageSentence);
 			// }
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 
-	return result;
-}
-
-public HitBase buildParagraphOfGeneratedText(HitBase item,
-		String originalSentence, List<String> sentsAll) {
-	List<Fragment> results = new ArrayList<Fragment>() ;
-	
-	Triple<List<String>, String, String[]> fragmentExtractionResults = formCandidateFragmentsForPage(item, originalSentence, sentsAll);
-
-	List<String> allFragms = (List<String>)fragmentExtractionResults.getFirst();
-	String downloadedPage = (String)fragmentExtractionResults.getSecond();
-	String[] sents = (String[])fragmentExtractionResults.getThird();
-
-	for (String fragment : allFragms) {
-		String[] candidateSentences = formCandidateSentences(fragment, fragmentExtractionResults);
-		if (candidateSentences == null)
-			continue;
-		Fragment res = verifyCandidateSentencesAndFormParagraph(candidateSentences, item, fragment, originalSentence, sentsAll);
-		if (res!=null)
-			results.add(res);
-
-	}
-	
-	item.setFragments(results );
-	return item;
-}
-
-
-
-
-public static void main(String[] args) {
-	RelatedSentenceFinder f = new RelatedSentenceFinder();
-
-	List<HitBase> hits = null;
-	try {
-		// uncomment the sentence you would like to serve as a seed sentence for
-		// content generation for an event description
-
-		// uncomment the sentence you would like to serve as a seed sentence for
-		// content generation for an event description
-		hits = f.generateContentAbout("Albert Einstein"
-				// "Britney Spears - The Femme Fatale Tour"
-				// "Rush Time Machine",
-				// "Blue Man Group" ,
-				// "Belly Dance With Zaharah",
-				// "Hollander Musicology Lecture: Danielle Fosler-Lussier, Guest Lecturer",
-				// "Jazz Master and arguably the most famous jazz musician alive, trumpeter Wynton Marsalis",
-				);
-		System.out.println(HitBase.toString(hits));
-		System.out.println(HitBase.toResultantString(hits));
-		// WordFileGenerator.createWordDoc("Essey about Albert Einstein",
-		// hits.get(0).getTitle(), hits);
-
-	} catch (Exception e) {
-		e.printStackTrace();
+		return result;
 	}
 
-}
+	public HitBase buildParagraphOfGeneratedText(HitBase item, String originalSentence, List<String> sentsAll) {
+		List<Fragment> results = new ArrayList<Fragment>();
 
+		Triple<List<String>, String, String[]> fragmentExtractionResults = formCandidateFragmentsForPage(item,
+				originalSentence, sentsAll);
 
+		List<String> allFragms = (List<String>) fragmentExtractionResults.getFirst();
+		String downloadedPage = (String) fragmentExtractionResults.getSecond();
+		String[] sents = (String[]) fragmentExtractionResults.getThird();
+
+		for (String fragment : allFragms) {
+			String[] candidateSentences = formCandidateSentences(fragment, fragmentExtractionResults);
+			if (candidateSentences == null)
+				continue;
+			Fragment res = verifyCandidateSentencesAndFormParagraph(candidateSentences, item, fragment,
+					originalSentence, sentsAll);
+			if (res != null)
+				results.add(res);
+
+		}
+
+		item.setFragments(results);
+		return item;
+	}
+
+	public static void main(String[] args) {
+		RelatedSentenceFinder f = new RelatedSentenceFinder();
+
+		List<HitBase> hits = null;
+		try {
+			// uncomment the sentence you would like to serve as a seed sentence
+			// for
+			// content generation for an event description
+
+			// uncomment the sentence you would like to serve as a seed sentence
+			// for
+			// content generation for an event description
+			hits = f.generateContentAbout("Albert Einstein"
+			// "Britney Spears - The Femme Fatale Tour"
+			// "Rush Time Machine",
+			// "Blue Man Group" ,
+			// "Belly Dance With Zaharah",
+			// "Hollander Musicology Lecture: Danielle Fosler-Lussier, Guest
+			// Lecturer",
+			// "Jazz Master and arguably the most famous jazz musician alive,
+			// trumpeter Wynton Marsalis",
+			);
+			System.out.println(HitBase.toString(hits));
+			System.out.println(HitBase.toResultantString(hits));
+			// WordFileGenerator.createWordDoc("Essey about Albert Einstein",
+			// hits.get(0).getTitle(), hits);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
 
 }

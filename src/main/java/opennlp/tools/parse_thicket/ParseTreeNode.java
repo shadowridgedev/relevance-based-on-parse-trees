@@ -4,25 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ParseTreeNode implements IGeneralizer<ParseTreeNode>{
+public class ParseTreeNode implements IGeneralizer<ParseTreeNode> {
 	String word; // word in normal form, lemma
 	// this is the POS tag of the token
-	String pos; 
+	String pos;
 	// this is the NER label of the token
-	String ne; 
+	String ne;
 	Integer id;
-	//PhraseType 
+	// PhraseType
 	String phraseType;
 	Map<String, Object> attributes;
 	String normalizedWord;
 	String syntacticDependence;
-	String originalWord; //what actually occurs in a sentence
+	String originalWord; // what actually occurs in a sentence
 
 	String head;
 	String label;
 	String modifier;
-
-
 
 	public String getOriginalWord() {
 		return originalWord;
@@ -80,11 +78,13 @@ public class ParseTreeNode implements IGeneralizer<ParseTreeNode>{
 		this.attributes = attributes;
 	}
 
-	public enum PhraseType {NP("NP"), VP("VP"), PRP("PRP");
-	private PhraseType(final String text) {
-		this.text = text;
-	}
-	private final String text;
+	public enum PhraseType {
+		NP("NP"), VP("VP"), PRP("PRP");
+		private PhraseType(final String text) {
+			this.text = text;
+		}
+
+		private final String text;
 
 	}
 
@@ -106,60 +106,71 @@ public class ParseTreeNode implements IGeneralizer<ParseTreeNode>{
 	public String getPhraseType() {
 		return phraseType;
 	}
+
 	public void setPhraseType(String pt) {
-		this.phraseType=pt;
+		this.phraseType = pt;
 	}
+
 	public String getWord() {
 		return word;
 	}
+
 	public void setWord(String word) {
 		this.word = word;
 	}
+
 	public String getPos() {
 		return pos;
 	}
+
 	public void setPos(String pos) {
 		this.pos = pos;
 	}
+
 	public String getNe() {
 		return ne;
 	}
+
 	public void setNe(String ne) {
 		this.ne = ne;
 	}
+
 	public Integer getId() {
 		return id;
 	}
+
 	public void setId(Integer id) {
 		this.id = id;
-	} 
+	}
 
-	public String toString(){
+	public String toString() {
 		StringBuffer buf = new StringBuffer();
-		if (id!=null)
-			buf.append("<"+id+">");
-		if(phraseType!=null)
+		if (id != null)
+			buf.append("<" + id + ">");
+		if (phraseType != null)
 			buf.append(phraseType);
-		if(word!=null)
-			buf.append("'"+word+"'");
-		if (pos!=null)
-			buf.append(":"+pos);
+		if (word != null)
+			buf.append("'" + word + "'");
+		if (pos != null)
+			buf.append(":" + pos);
 		return buf.toString();
 	}
 
-	public static String toTreeRepresentationString(List<ParseTreeNode> chList){
+	public static String toTreeRepresentationString(List<ParseTreeNode> chList) {
 		StringBuffer buf = new StringBuffer();
-		for(ParseTreeNode ch: chList){
-			if (ch.getPos().startsWith(".") || ch.getPos().startsWith(",") || ch.getPos().startsWith(";") || ch.getPos().startsWith("!"))
+		for (ParseTreeNode ch : chList) {
+			if (ch.getPos().startsWith(".") || ch.getPos().startsWith(",") || ch.getPos().startsWith(";")
+					|| ch.getPos().startsWith("!"))
 				continue;
-			buf.append( "("+ch.getWord()+ " " + ch.getPos() + ")" );
+			buf.append("(" + ch.getWord() + " " + ch.getPos() + ")");
 		}
 		return buf.toString().trim();
 	}
-	public static String toWordString(List<ParseTreeNode> chList){
+
+	public static String toWordString(List<ParseTreeNode> chList) {
 		String buf = "";
-		for(ParseTreeNode ch: chList){
-			buf+=ch.getWord()+ " ";
+		for (ParseTreeNode ch : chList) {
+			buf += ch.getWord() + " ";
 		}
 		return buf.trim();
 	}
@@ -170,43 +181,38 @@ public class ParseTreeNode implements IGeneralizer<ParseTreeNode>{
 
 		ParseTreeNode w1 = (ParseTreeNode) o1;
 		ParseTreeNode w2 = (ParseTreeNode) o2;
-		String posGen =  generalizePOS(w1.pos, w2.pos);
-		if (posGen ==null)
+		String posGen = generalizePOS(w1.pos, w2.pos);
+		if (posGen == null)
 			return result;
-		ParseTreeNode newNode = new ParseTreeNode(generalizeWord(w1.word, w2.word),
-				posGen, "O", -1);
+		ParseTreeNode newNode = new ParseTreeNode(generalizeWord(w1.word, w2.word), posGen, "O", -1);
 		result.add(newNode);
 		return result;
 	}
 
-	public String generalizeWord(String lemma1, String lemma2){
+	public String generalizeWord(String lemma1, String lemma2) {
 		if (lemma1.equals(lemma2))
 			return lemma1;
 		if (lemma1.equals("*"))
 			return "*";
 		if (lemma2.equals("*"))
 			return "*";
-		//TODO
+		// TODO
 		return "*";
 
 	}
 
 	public String generalizePOS(String pos1, String pos2) {
-		if ((pos1.startsWith("NN") && pos2.equals("NP") || pos2.startsWith("NN")
-				&& pos1.equals("NP"))) {
+		if ((pos1.startsWith("NN") && pos2.equals("NP") || pos2.startsWith("NN") && pos1.equals("NP"))) {
 			return "NN";
 		}
-		if ((pos1.startsWith("NN") && pos2.equals("VBG") || pos2.startsWith("VBG")
-				&& pos1.equals("NN"))) {
+		if ((pos1.startsWith("NN") && pos2.equals("VBG") || pos2.startsWith("VBG") && pos1.equals("NN"))) {
 			return "NN";
 		}
 
-		if ((pos1.startsWith("NN") && pos2.equals("ADJP") || pos2.startsWith("NN")
-				&& pos1.equals("ADJP"))) {
+		if ((pos1.startsWith("NN") && pos2.equals("ADJP") || pos2.startsWith("NN") && pos1.equals("ADJP"))) {
 			return "NN";
 		}
-		if ((pos1.equals("IN") && pos2.equals("TO") || pos1.equals("TO")
-				&& pos2.equals("IN"))) {
+		if ((pos1.equals("IN") && pos2.equals("TO") || pos1.equals("TO") && pos2.equals("IN"))) {
 			return "IN";
 		}
 		// VBx vs VBx = VB (does not matter which form for verb)
@@ -231,6 +237,4 @@ public class ParseTreeNode implements IGeneralizer<ParseTreeNode>{
 		return null;
 	}
 
-
 };
-

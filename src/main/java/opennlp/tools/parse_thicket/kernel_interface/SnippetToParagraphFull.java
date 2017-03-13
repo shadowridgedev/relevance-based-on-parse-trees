@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 
-
 import opennlp.tools.parse_thicket.apps.MinedSentenceProcessor;
 import opennlp.tools.parse_thicket.apps.SnippetToParagraph;
 import opennlp.tools.similarity.apps.Fragment;
@@ -38,29 +37,26 @@ import opennlp.tools.similarity.apps.utils.StringDistanceMeasurer;
 import opennlp.tools.similarity.apps.utils.Utils;
 import opennlp.tools.textsimilarity.TextProcessor;
 
-
 public class SnippetToParagraphFull extends SnippetToParagraph {
 	private PageFetcher pFetcher = new PageFetcher();
-	private static Logger LOG = Logger
-			.getLogger("com.become.parse_thicket.apps.SnippetToParagraphFull");
-
-	
+	private static Logger LOG = Logger.getLogger("com.become.parse_thicket.apps.SnippetToParagraphFull");
 
 	public HitBase formTextFromOriginalPageGivenSnippet(HitBase item) {
 
 		String[] sents = extractSentencesFromPage(item.getUrl());
 
-		//String title = item.getTitle().replace("<b>", " ").replace("</b>", " ")
-		//		.replace("  ", " ").replace("  ", " ");
+		// String title = item.getTitle().replace("<b>", " ").replace("</b>", "
+		// ")
+		// .replace(" ", " ").replace(" ", " ");
 		// generation results for this sentence
 		List<String> result = new ArrayList<String>();
 		// form plain text from snippet
-		String snapshot = item.getAbstractText().replace("<b>", " ")
-				.replace("</b>", " ").replace("  ", " ").replace("  ", " ").replace("\"", "");
+		String snapshot = item.getAbstractText().replace("<b>", " ").replace("</b>", " ").replace("  ", " ")
+				.replace("  ", " ").replace("\"", "");
 
 		String snapshotMarked = snapshot.replace(" ...", ".");
 		List<String> fragments = TextProcessor.splitToSentences(snapshotMarked);
-		if (fragments.size()<3 && StringUtils.countMatches(snapshotMarked, ".")>1){
+		if (fragments.size() < 3 && StringUtils.countMatches(snapshotMarked, ".") > 1) {
 			snapshotMarked = snapshotMarked.replace("..", "&").replace(".", "&");
 			String[] fragmSents = snapshotMarked.split("&");
 			fragments = Arrays.asList(fragmSents);
@@ -74,18 +70,16 @@ public class SnippetToParagraphFull extends SnippetToParagraph {
 			// try to find original sentence from webpage
 
 			try {
-				String[] mainAndFollowSent = getFullOriginalSentenceFromWebpageBySnippetFragment(
-						f, sents);
+				String[] mainAndFollowSent = getFullOriginalSentenceFromWebpageBySnippetFragment(f, sents);
 				pageSentence = mainAndFollowSent[0];
 				followSent = mainAndFollowSent[1];
-				if (pageSentence!=null && followSent!=null)
+				if (pageSentence != null && followSent != null)
 					result.add(pageSentence + "\n" + followSent);
-				else if (pageSentence!=null){
+				else if (pageSentence != null) {
 					result.add(pageSentence);
-				}
-				else {
+				} else {
 					result.add(f);
-					LOG.info("Could not find the original sentence \n"+f +"\n in the page " );
+					LOG.info("Could not find the original sentence \n" + f + "\n in the page ");
 				}
 
 			} catch (Exception e) {
@@ -97,6 +91,4 @@ public class SnippetToParagraphFull extends SnippetToParagraph {
 		return item;
 	}
 
-	
 }
-

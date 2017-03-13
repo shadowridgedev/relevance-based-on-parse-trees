@@ -22,35 +22,32 @@ import java.util.List;
 
 import opennlp.tools.parse_thicket.IGeneralizer;
 
-public class PartOfSpeechGeneralizer implements IGeneralizer<String>{
+public class PartOfSpeechGeneralizer implements IGeneralizer<String> {
 
 	@Override
-	public List<String> generalize(Object o1, Object o2){
-		String pos1 = (String)o1, pos2 =  (String) o2;
-		List<String>  results = new ArrayList<String>();
+	public List<String> generalize(Object o1, Object o2) {
+		String pos1 = (String) o1, pos2 = (String) o2;
+		List<String> results = new ArrayList<String>();
 		String res = computeSimilarity(pos1, pos2);
-		if (res!=null)
+		if (res != null)
 			results.add(res);
 		return results;
 
 	}
-	private String computeSimilarity(String pos1, String pos2){
 
-		if ((pos1.startsWith("NN") && pos2.equals("NP") || pos2.startsWith("NN")
-				&& pos1.equals("NP"))) {
+	private String computeSimilarity(String pos1, String pos2) {
+
+		if ((pos1.startsWith("NN") && pos2.equals("NP") || pos2.startsWith("NN") && pos1.equals("NP"))) {
 			return "NN";
 		}
-		if ((pos1.startsWith("NN") && pos2.equals("VBG") || pos2.startsWith("VBG")
-				&& pos1.equals("NN"))) {
+		if ((pos1.startsWith("NN") && pos2.equals("VBG") || pos2.startsWith("VBG") && pos1.equals("NN"))) {
 			return "NN";
 		}
 
-		if ((pos1.startsWith("NN") && pos2.equals("ADJP") || pos2.startsWith("NN")
-				&& pos1.equals("ADJP"))) {
+		if ((pos1.startsWith("NN") && pos2.equals("ADJP") || pos2.startsWith("NN") && pos1.equals("ADJP"))) {
 			return "NN";
 		}
-		if ((pos1.equals("IN") && pos2.equals("TO") || pos1.equals("TO")
-				&& pos2.equals("IN"))) {
+		if ((pos1.equals("IN") && pos2.equals("TO") || pos1.equals("TO") && pos2.equals("IN"))) {
 			return "IN";
 		}
 		// VBx vs VBx = VB (does not matter which form for verb)

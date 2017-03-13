@@ -26,7 +26,8 @@ import opennlp.tools.similarity.apps.utils.PageFetcher;
 
 public class YouTubeMiner {
 	private PageFetcher fetcher = new PageFetcher();
-	public YouTubeMinerResult getData(String url){
+
+	public YouTubeMinerResult getData(String url) {
 		YouTubeMinerResult result = new YouTubeMinerResult();
 		String content = fetcher.fetchOrigHTML(url);
 		try {
@@ -35,13 +36,13 @@ public class YouTubeMiner {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		if (url.indexOf("channel")>-1){
-			try { //subscriber-count" title="30" 
-				String subscribersStr = StringUtils.substringBetween(content,"subscriber-count", "tabindex");
+		if (url.indexOf("channel") > -1) {
+			try { // subscriber-count" title="30"
+				String subscribersStr = StringUtils.substringBetween(content, "subscriber-count", "tabindex");
 				String dirtyNumber = StringUtils.substringBetween(subscribersStr, "title=\"", "\"");
 				String cleanNumber = dirtyNumber.replaceAll("[^\\x00-\\x7F]", "");
-				if (cleanNumber!=null){
-					int subscribers = Integer.parseInt(cleanNumber );
+				if (cleanNumber != null) {
+					int subscribers = Integer.parseInt(cleanNumber);
 					result.subscribers = subscribers;
 				} else {
 					System.err.println("Not found data for 'subscriber-count', 'tabindex'");
@@ -53,22 +54,22 @@ public class YouTubeMiner {
 		} else {
 			try {
 
-				String subscribersStr = StringUtils.substringBetween(content,"subscriber-count", "tabindex");
+				String subscribersStr = StringUtils.substringBetween(content, "subscriber-count", "tabindex");
 				String dirtyNumber = StringUtils.substringBetween(subscribersStr, "title=\"", "\"").replace(" ", "");
-				if (dirtyNumber!=null){
-					int subscribers = Integer.parseInt(dirtyNumber );
+				if (dirtyNumber != null) {
+					int subscribers = Integer.parseInt(dirtyNumber);
 					result.subscribers = subscribers;
 				} else {
 					System.err.println("Not found data for 'subscriber-count', 'tabindex'");
 				}
 
 				String viewsStrDirty = StringUtils.substringBetween(content,
-						//"div class=\"watch-view-count\">"," views</div>");
-						//view-count">12 просмотров</div>
-						"view-count","<div>");
-				String viewsStr = StringUtils.substringBetween(viewsStrDirty,">", " ");
-				if (viewsStr!=null){
-					int views = Integer.parseInt(viewsStr );
+						// "div class=\"watch-view-count\">"," views</div>");
+						// view-count">12 просмотров</div>
+						"view-count", "<div>");
+				String viewsStr = StringUtils.substringBetween(viewsStrDirty, ">", " ");
+				if (viewsStr != null) {
+					int views = Integer.parseInt(viewsStr);
 					result.views = views;
 				} else {
 					System.err.println("Not found data for 'view-count','<div>'");
@@ -82,16 +83,11 @@ public class YouTubeMiner {
 		return result;
 	}
 
-
-
-
-	public static void main(String[] args){
-		YouTubeMiner  miner = new YouTubeMiner();
+	public static void main(String[] args) {
+		YouTubeMiner miner = new YouTubeMiner();
 		System.out.println(miner.getData("https://www.youtube.com/channel/UC-maQbG5eUS5c1wmaTnLwTA"));
 		System.out.println(miner.getData("https://www.youtube.com/watch?v=U6X4VT9dVr8"));
 		System.out.println(miner.getData("https://www.youtube.com/watch?v=kH-AQnta714"));
 		System.out.println(miner.getData("https://www.youtube.com/watch?v=pWb50Kn1ShQ"));
 	}
 }
-
-

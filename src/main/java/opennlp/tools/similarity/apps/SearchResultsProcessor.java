@@ -27,83 +27,77 @@ import opennlp.tools.textsimilarity.SentencePairMatchResult;
 import opennlp.tools.textsimilarity.chunker2matcher.ParserChunker2MatcherProcessor;
 
 public class SearchResultsProcessor extends BingQueryRunner {
-  private static Logger LOG = Logger
-      .getLogger("opennlp.tools.similarity.apps.SearchResultsProcessor");
-  private ParseTreeChunkListScorer parseTreeChunkListScorer = new ParseTreeChunkListScorer();
-  ParserChunker2MatcherProcessor sm;
-  WebSearchEngineResultsScraper scraper = new WebSearchEngineResultsScraper();
+	private static Logger LOG = Logger.getLogger("opennlp.tools.similarity.apps.SearchResultsProcessor");
+	private ParseTreeChunkListScorer parseTreeChunkListScorer = new ParseTreeChunkListScorer();
+	ParserChunker2MatcherProcessor sm;
+	WebSearchEngineResultsScraper scraper = new WebSearchEngineResultsScraper();
 
-  /*
-   * Takes a search engine API (or scraped) search results and calculates the parse tree similarity
-   * between the question and each snippet. Ranks those snippets with higher
-   * similarity score up
-   */
-  
-  
-  private List<HitBase> calculateMatchScoreResortHits(List<HitBase> hits,
-      String searchQuery) {
+	/*
+	 * Takes a search engine API (or scraped) search results and calculates the
+	 * parse tree similarity between the question and each snippet. Ranks those
+	 * snippets with higher similarity score up
+	 */
 
-    List<HitBase> newHitList = new ArrayList<HitBase>();
-    sm = ParserChunker2MatcherProcessor.getInstance();
+	private List<HitBase> calculateMatchScoreResortHits(List<HitBase> hits, String searchQuery) {
 
-    for (HitBase hit : hits) {
-      String snapshot = hit.getAbstractText().replace("<b>...</b>", ". ").replace("<span class='best-phrase'>", " ").replace("<span>", " ").replace("<span>", " ")
-          .replace("<b>", "").replace("</b>", "");
-      snapshot = snapshot.replace("</B>", "").replace("<B>", "")
-          .replace("<br>", "").replace("</br>", "").replace("...", ". ")
-          .replace("|", " ").replace(">", " ");
-      snapshot += " . " + hit.getTitle();
-      Double score = 0.0;
-      try {
-        SentencePairMatchResult matchRes = sm.assessRelevance(snapshot,
-            searchQuery);
-        List<List<ParseTreeChunk>> match = matchRes.getMatchResult();
-        score = parseTreeChunkListScorer.getParseTreeChunkListScore(match);
-        LOG.finest(score + " | " + snapshot);
-      } catch (Exception e) {
-        LOG.severe("Problem processing snapshot " + snapshot);
-        e.printStackTrace();
-      }
-      hit.setGenerWithQueryScore(score);
-      newHitList.add(hit);
-    }
-    Collections.sort(newHitList, new HitBaseComparable());
-   
-    LOG.info("\n\n ============= NEW ORDER ================= ");
-    for (HitBase hit : newHitList) {
-      LOG.info(hit.toString());
-    }
+		List<HitBase> newHitList = new ArrayList<HitBase>();
+		sm = ParserChunker2MatcherProcessor.getInstance();
 
-    return newHitList;
-  }
+		for (HitBase hit : hits) {
+			String snapshot = hit.getAbstractText().replace("<b>...</b>", ". ")
+					.replace("<span class='best-phrase'>", " ").replace("<span>", " ").replace("<span>", " ")
+					.replace("<b>", "").replace("</b>", "");
+			snapshot = snapshot.replace("</B>", "").replace("<B>", "").replace("<br>", "").replace("</br>", "")
+					.replace("...", ". ").replace("|", " ").replace(">", " ");
+			snapshot += " . " + hit.getTitle();
+			Double score = 0.0;
+			try {
+				SentencePairMatchResult matchRes = sm.assessRelevance(snapshot, searchQuery);
+				List<List<ParseTreeChunk>> match = matchRes.getMatchResult();
+				score = parseTreeChunkListScorer.getParseTreeChunkListScore(match);
+				LOG.finest(score + " | " + snapshot);
+			} catch (Exception e) {
+				LOG.severe("Problem processing snapshot " + snapshot);
+				e.printStackTrace();
+			}
+			hit.setGenerWithQueryScore(score);
+			newHitList.add(hit);
+		}
+		Collections.sort(newHitList, new HitBaseComparable());
 
-  public void close() {
-    sm.close();
-  }
+		LOG.info("\n\n ============= NEW ORDER ================= ");
+		for (HitBase hit : newHitList) {
+			LOG.info(hit.toString());
+		}
 
-  public List<HitBase> runSearch(String query) {
-    
-    
-    List<HitBase> hits = scraper.runSearch(query);
-    hits = calculateMatchScoreResortHits(hits, query);
-    return hits;
-  }
-  
-  public List<HitBase> runSearchViaAPI(String query) {
-	List<HitBase> hits = null;
-    try {
-      List<HitBase> resultList = runSearch(query);
-      // now we apply our own relevance filter
-      hits = calculateMatchScoreResortHits(resultList, query);
+		return newHitList;
+	}
 
-    } catch (Exception e) {
-      // e.printStackTrace();
-      LOG.info("No search results for query '" + query);
-      return null;
-    }
+	public void close() {
+		sm.close();
+	}
 
+	public List<HitBase> runSearch(String query) {
 
-    return hits;
-  }
+		List<HitBase> hits = scraper.runSearch(query);
+		hits = calculateMatchScoreResortHits(hits, query);
+		return hits;
+	}
+
+	public List<HitBase> runSearchViaAPI(String query) {
+		List<HitBase> hits = null;
+		try {
+			List<HitBase> resultList = runSearch(query);
+			// now we apply our own relevance filter
+			hits = calculateMatchScoreResortHits(resultList, query);
+
+		} catch (Exception e) {
+			// e.printStackTrace();
+			LOG.info("No search results for query '" + query);
+			return null;
+		}
+
+		return hits;
+	}
 
 }

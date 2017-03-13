@@ -72,16 +72,13 @@ import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 
-
-
 public class ContentGeneratorRequestHandler extends SearchHandler {
 	private static Logger LOG = Logger
 			.getLogger("com.become.search.requestHandlers.SearchResultsReRankerRequestHandler");
 	private ParserChunker2MatcherProcessor sm = null;
-	WordDocBuilderEndNotes docBuilder = new WordDocBuilderEndNotes ();
+	WordDocBuilderEndNotes docBuilder = new WordDocBuilderEndNotes();
 
-
-	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp){
+	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) {
 
 		String query = req.getParams().get("q");
 		LOG.info(query);
@@ -91,7 +88,7 @@ public class ContentGeneratorRequestHandler extends SearchHandler {
 		runCommand[1] = "-Xmx1g";
 		runCommand[2] = "-jar";
 		runCommand[3] = "pt.jar";
-		runCommand[4] = "\""+query+"\"";
+		runCommand[4] = "\"" + query + "\"";
 		runCommand[5] = req.getParams().get("email");
 		runCommand[6] = req.getParams().get("resourceDir");
 		runCommand[7] = req.getParams().get("stepsNum");
@@ -100,44 +97,39 @@ public class ContentGeneratorRequestHandler extends SearchHandler {
 		runCommand[10] = req.getParams().get("lang");
 		runCommand[11] = req.getParams().get("bingKey");
 
-		for(int i= 0; i<8; i++){
-			runInternal[i] = runCommand[i+4];
+		for (int i = 0; i < 8; i++) {
+			runInternal[i] = runCommand[i + 4];
 		}
 		String resultText = null;
 		try {
 			resultText = cgRunner(runInternal);
 		} catch (Exception e1) {
-			
-/*
-		Runtime r = Runtime.getRuntime();
-		Process mStartProcess = null;
-		String workDir = req.getParams().get("workDir"); 
-		if (workDir == null)
-			System.err.println("workDir = null");
 
-		try {
-			mStartProcess = r.exec(runCommand, null, new File(workDir));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			/*
+			 * Runtime r = Runtime.getRuntime(); Process mStartProcess = null;
+			 * String workDir = req.getParams().get("workDir"); if (workDir ==
+			 * null) System.err.println("workDir = null");
+			 * 
+			 * try { mStartProcess = r.exec(runCommand, null, new
+			 * File(workDir)); } catch (IOException e) { // TODO Auto-generated
+			 * catch block e.printStackTrace(); }
+			 * 
+			 * StreamLogger outputGobbler = new
+			 * StreamLogger(mStartProcess.getInputStream());
+			 * outputGobbler.start(); }
+			 */
 		}
 
-		StreamLogger outputGobbler = new StreamLogger(mStartProcess.getInputStream());
-		outputGobbler.start();
-		}
-*/
-		}
-		
 		NamedList<Object> values = rsp.getValues();
 		values.remove("response");
-		values.add("response", "We completed your request to write an essay on '"+query+"' and sent you an email at "+ runCommand[5]);
+		values.add("response", "We completed your request to write an essay on '" + query
+				+ "' and sent you an email at " + runCommand[5]);
 		values.add("text", resultText);
 		rsp.setAllValues(values);
 
 	}
 
-
-	class StreamLogger extends Thread{
+	class StreamLogger extends Thread {
 
 		private InputStream mInputStream;
 
@@ -160,16 +152,15 @@ public class ContentGeneratorRequestHandler extends SearchHandler {
 	}
 
 	public String cgRunner(String[] args) {
-		int count=0; 
-		for(String a: args){
-			System.out.print(count+">>" + a + " | ");
+		int count = 0;
+		for (String a : args) {
+			System.out.print(count + ">>" + a + " | ");
 			count++;
 		}
-		
 
 		try {
 			String resourceDir = args[2];
-			if (resourceDir!=null)
+			if (resourceDir != null)
 				sm = ParserChunker2MatcherProcessor.getInstance(resourceDir);
 			else
 				sm = ParserChunker2MatcherProcessor.getInstance();
@@ -180,49 +171,54 @@ public class ContentGeneratorRequestHandler extends SearchHandler {
 		}
 
 		String bingKey = args[7];
-		if (bingKey == null){
+		if (bingKey == null) {
 			bingKey = "e8ADxIjn9YyHx36EihdjH/tMqJJItUrrbPTUpKahiU0=";
-					//"xdnRVcVf9m4vDvW1SkTAz5kS5DFYa19CrPYGelGJxnc";
+			// "xdnRVcVf9m4vDvW1SkTAz5kS5DFYa19CrPYGelGJxnc";
 		}
 
 		RelatedSentenceFinder f = null;
 		String lang = args[6];
-		if (lang.startsWith("es") || lang.startsWith("ru") || lang.startsWith("de")){
-			f = new RelatedSentenceFinderML(Integer.parseInt(args[3]), Integer.parseInt(args[4]), Float.parseFloat(args[5]), bingKey);
+		if (lang.startsWith("es") || lang.startsWith("ru") || lang.startsWith("de")) {
+			f = new RelatedSentenceFinderML(Integer.parseInt(args[3]), Integer.parseInt(args[4]),
+					Float.parseFloat(args[5]), bingKey);
 			f.setLang(lang);
-		} else	    
+		} else
 
-			if (args.length>4 && args[4]!=null)
-				f = new RelatedSentenceFinder(Integer.parseInt(args[3]), Integer.parseInt(args[4]), Float.parseFloat(args[5]), bingKey);
-			else
-				f = new RelatedSentenceFinder();
+		if (args.length > 4 && args[4] != null)
+			f = new RelatedSentenceFinder(Integer.parseInt(args[3]), Integer.parseInt(args[4]),
+					Float.parseFloat(args[5]), bingKey);
+		else
+			f = new RelatedSentenceFinder();
 		String generatedContent = null;
 		List<HitBase> hits = null;
 		try {
 
 			hits = f.generateContentAbout(args[0].replace('+', ' ').replace('"', ' ').trim());
-			
+
 			System.out.println(HitBase.toString(hits));
-			generatedContent = HitBase.toResultantString(hits) + "\n REFERENCES \n" + HitBase.produceReferenceSection(hits) ;
+			generatedContent = HitBase.toResultantString(hits) + "\n REFERENCES \n"
+					+ HitBase.produceReferenceSection(hits);
 
 			try {
 				writeResultInAFile(args[0].replace('+', ' '), generatedContent);
 			} catch (Exception e2) {
 				e2.printStackTrace();
 			}
-			
+
 			String attachmentFileName = null;
 			try {
 				attachmentFileName = docBuilder.buildWordDoc(hits, args[0].replace('+', ' ').replace('"', ' '));
 			} catch (Exception e2) {
 				e2.printStackTrace();
 			}
-			
+
 			opennlp.tools.apps.utils.email.EmailSender s = new opennlp.tools.apps.utils.email.EmailSender();
 
 			try {
-				s.sendMail("smtp.rambler.ru", "bg7550@rambler.ru", "pill0693", new InternetAddress("bg7550@rambler.ru"), new InternetAddress[]{new InternetAddress(args[1])}, new InternetAddress[]{}, new InternetAddress[]{}, 
-						"Generated content for you on '"+args[0].replace('+', ' ')+"'", generatedContent, attachmentFileName);
+				s.sendMail("smtp.rambler.ru", "bg7550@rambler.ru", "pill0693", new InternetAddress("bg7550@rambler.ru"),
+						new InternetAddress[] { new InternetAddress(args[1]) }, new InternetAddress[] {},
+						new InternetAddress[] {}, "Generated content for you on '" + args[0].replace('+', ' ') + "'",
+						generatedContent, attachmentFileName);
 			} catch (AddressException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -230,14 +226,17 @@ public class ContentGeneratorRequestHandler extends SearchHandler {
 
 				e.printStackTrace();
 				try {
-					s.sendMail("smtp.rambler.ru", "bg7550@rambler.ru", "pill0693", new InternetAddress("bg7550@rambler.ru"), new InternetAddress[]{new InternetAddress(args[1])}, new InternetAddress[]{}, new InternetAddress[]{}, 
-							"Generated content for you on '"+args[0].replace('+', ' ')+"'", generatedContent, attachmentFileName);
+					s.sendMail("smtp.rambler.ru", "bg7550@rambler.ru", "pill0693",
+							new InternetAddress("bg7550@rambler.ru"),
+							new InternetAddress[] { new InternetAddress(args[1]) }, new InternetAddress[] {},
+							new InternetAddress[] {},
+							"Generated content for you on '" + args[0].replace('+', ' ') + "'", generatedContent,
+							attachmentFileName);
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
-
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -245,28 +244,28 @@ public class ContentGeneratorRequestHandler extends SearchHandler {
 		return generatedContent;
 	}
 
-	private void writeResultInAFile(String title, String content){
+	private void writeResultInAFile(String title, String content) {
 		FileOutputStream fop = null;
 		File file;
 		String absPath = new File(".").getAbsolutePath();
-		absPath = absPath.substring(0, absPath.length()-1);
- 
+		absPath = absPath.substring(0, absPath.length() - 1);
+
 		try {
- 
-			file = new File(absPath+"/written/"+ title.replace(' ','_').replace('\"', ' ').trim()+ ".txt");
+
+			file = new File(absPath + "/written/" + title.replace(' ', '_').replace('\"', ' ').trim() + ".txt");
 			// if file doesnt exists, then create it
 			if (!file.exists()) {
 				file.createNewFile();
 			}
 			fop = new FileOutputStream(file);
-  
+
 			// get the content in bytes
 			byte[] contentInBytes = content.getBytes();
- 
+
 			fop.write(contentInBytes);
 			fop.flush();
-			fop.close(); 
-			 
+			fop.close();
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -279,10 +278,13 @@ public class ContentGeneratorRequestHandler extends SearchHandler {
 			}
 		}
 	}
-	
+
 }
 
 /*
-http://173.255.254.250:8983/solr/contentgen/?q=human+body+anatomy&email=bgalitsky@hotmail.com&resourceDir=/home/solr/solr-4.4.0/example/src/test/resources&workDir=/home/solr/solr-4.4.0/example/solr-webapp/webapp/WEB-INF/lib&stepsNum=20&searchResultsNum=10&relevanceThreshold=1.5
-
+ * http://173.255.254.250:8983/solr/contentgen/?q=human+body+anatomy&email=
+ * bgalitsky@hotmail.com&resourceDir=/home/solr/solr-4.4.0/example/src/test/
+ * resources&workDir=/home/solr/solr-4.4.0/example/solr-webapp/webapp/WEB-INF/
+ * lib&stepsNum=20&searchResultsNum=10&relevanceThreshold=1.5
+ * 
  */

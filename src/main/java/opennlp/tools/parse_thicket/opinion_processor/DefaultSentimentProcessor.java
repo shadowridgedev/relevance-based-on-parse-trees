@@ -77,9 +77,9 @@ public class DefaultSentimentProcessor {
 	}
 
 	/**
-	 * Sets the labels on the tree (except the leaves) to be the integer
-	 * value of the sentiment prediction.  Makes it easy to print out
-	 * with Tree.toString()
+	 * Sets the labels on the tree (except the leaves) to be the integer value
+	 * of the sentiment prediction. Makes it easy to print out with
+	 * Tree.toString()
 	 */
 	static void setSentimentLabels(Tree tree) {
 		if (tree.isLeaf()) {
@@ -99,8 +99,8 @@ public class DefaultSentimentProcessor {
 	}
 
 	/**
-	 * Sets the labels on the tree to be the indices of the nodes.
-	 * Starts counting at the root and does a postorder traversal.
+	 * Sets the labels on the tree to be the indices of the nodes. Starts
+	 * counting at the root and does a postorder traversal.
 	 */
 	static int setIndexLabels(Tree tree, int index) {
 		if (tree.isLeaf()) {
@@ -116,8 +116,8 @@ public class DefaultSentimentProcessor {
 	}
 
 	/**
-	 * Outputs the vectors from the tree.  Counts the tree nodes the
-	 * same as setIndexLabels.
+	 * Outputs the vectors from the tree. Counts the tree nodes the same as
+	 * setIndexLabels.
 	 */
 	static int outputTreeVectors(PrintStream out, Tree tree, int index) {
 		if (tree.isLeaf()) {
@@ -138,8 +138,8 @@ public class DefaultSentimentProcessor {
 	}
 
 	/**
-	 * Outputs the scores from the tree.  Counts the tree nodes the
-	 * same as setIndexLabels.
+	 * Outputs the scores from the tree. Counts the tree nodes the same as
+	 * setIndexLabels.
 	 */
 	static int outputTreeScores(PrintStream out, Tree tree, int index) {
 		if (tree.isLeaf()) {
@@ -163,8 +163,7 @@ public class DefaultSentimentProcessor {
 		return wordToString(o, justValue, null);
 	}
 
-	public static <T> String wordToString(T o, final boolean justValue,
-			final String separator) {
+	public static <T> String wordToString(T o, final boolean justValue, final String separator) {
 		if (justValue && o instanceof Label) {
 			if (o instanceof CoreLabel) {
 				CoreLabel l = (CoreLabel) o;
@@ -203,38 +202,39 @@ public class DefaultSentimentProcessor {
 		}
 	}
 
-
 	/**
-	 * Returns the sentence as a string with a space between words.
-	 * It prints out the {@code value()} of each item -
-	 * this will give the expected answer for a short form representation
-	 * of the "sentence" over a range of cases.  It is equivalent to
-	 * calling {@code toString(true)}.
+	 * Returns the sentence as a string with a space between words. It prints
+	 * out the {@code value()} of each item - this will give the expected answer
+	 * for a short form representation of the "sentence" over a range of cases.
+	 * It is equivalent to calling {@code toString(true)}.
 	 *
-	 * TODO: Sentence used to be a subclass of ArrayList, with this
-	 * method as the toString.  Therefore, there may be instances of
-	 * ArrayList being printed that expect this method to be used.
+	 * TODO: Sentence used to be a subclass of ArrayList, with this method as
+	 * the toString. Therefore, there may be instances of ArrayList being
+	 * printed that expect this method to be used.
 	 *
-	 * @param list The tokenized sentence to print out
+	 * @param list
+	 *            The tokenized sentence to print out
 	 * @return The tokenized sentence as a String
 	 */
 	public static <T> String listToString(List<T> list) {
 		return listToString(list, true);
 	}
+
 	/**
-	 * Returns the sentence as a string with a space between words.
-	 * Designed to work robustly, even if the elements stored in the
-	 * 'Sentence' are not of type Label.
+	 * Returns the sentence as a string with a space between words. Designed to
+	 * work robustly, even if the elements stored in the 'Sentence' are not of
+	 * type Label.
 	 *
 	 * This one uses the default separators for any word type that uses
 	 * separators, such as TaggedWord.
 	 *
-	 * @param list The tokenized sentence to print out
-	 * @param justValue If {@code true} and the elements are of type
-	 *                  {@code Label}, return just the
-	 *                  {@code value()} of the {@code Label} of each word;
-	 *                  otherwise,
-	 *                  call the {@code toString()} method on each item.
+	 * @param list
+	 *            The tokenized sentence to print out
+	 * @param justValue
+	 *            If {@code true} and the elements are of type {@code Label},
+	 *            return just the {@code value()} of the {@code Label} of each
+	 *            word; otherwise, call the {@code toString()} method on each
+	 *            item.
 	 * @return The sentence in String form
 	 */
 	public static <T> String listToString(List<T> list, final boolean justValue) {
@@ -242,14 +242,13 @@ public class DefaultSentimentProcessor {
 	}
 
 	/**
-	 * As already described, but if separator is not null, then objects
-	 * such as TaggedWord
+	 * As already described, but if separator is not null, then objects such as
+	 * TaggedWord
 	 *
-	 * @param separator The string used to separate Word and Tag
-	 *                  in TaggedWord, etc
+	 * @param separator
+	 *            The string used to separate Word and Tag in TaggedWord, etc
 	 */
-	public static <T> String listToString(List<T> list, final boolean justValue,
-			final String separator) {
+	public static <T> String listToString(List<T> list, final boolean justValue, final String separator) {
 		StringBuilder s = new StringBuilder();
 		for (Iterator<T> wordIterator = list.iterator(); wordIterator.hasNext();) {
 			T o = wordIterator.next();
@@ -301,7 +300,8 @@ public class DefaultSentimentProcessor {
 	/**
 	 * Reads an annotation from the given filename using the requested input.
 	 */
-	public static List<Annotation> getAnnotations(StanfordCoreNLP tokenizer, Input inputFormat, String filename, boolean filterUnknown) {
+	public static List<Annotation> getAnnotations(StanfordCoreNLP tokenizer, Input inputFormat, String filename,
+			boolean filterUnknown) {
 		switch (inputFormat) {
 		case TEXT: {
 			String text = IOUtils.slurpFileNoExceptions(filename);
@@ -361,7 +361,7 @@ public class DefaultSentimentProcessor {
 
 		String tlppClass = "DEFAULT_TLPP_CLASS";
 
-		for (int argIndex = 0; argIndex < args.length; ) {
+		for (int argIndex = 0; argIndex < args.length;) {
 			if (args[argIndex].equalsIgnoreCase("-sentimentModel")) {
 				sentimentModel = args[argIndex + 1];
 				argIndex += 2;
@@ -401,8 +401,8 @@ public class DefaultSentimentProcessor {
 			}
 		}
 
-		// We construct two pipelines.  One handles tokenization, if
-		// necessary.  The other takes tokenized sentences and converts
+		// We construct two pipelines. One handles tokenization, if
+		// necessary. The other takes tokenized sentences and converts
 		// them to sentiment trees.
 		Properties pipelineProps = new Properties();
 		Properties tokenizerProps = null;
@@ -429,9 +429,12 @@ public class DefaultSentimentProcessor {
 		}
 
 		int count = 0;
-		if (filename != null) count++;
-		if (fileList != null) count++;
-		if (stdin) count++;
+		if (filename != null)
+			count++;
+		if (fileList != null)
+			count++;
+		if (stdin)
+			count++;
 		if (count > 1) {
 			throw new IllegalArgumentException("Please only specify one of -file, -fileList or -stdin");
 		}
@@ -443,7 +446,7 @@ public class DefaultSentimentProcessor {
 		StanfordCoreNLP pipeline = new StanfordCoreNLP(pipelineProps);
 
 		if (filename != null) {
-			// Process a file.  The pipeline will do tokenization, which
+			// Process a file. The pipeline will do tokenization, which
 			// means it will split it into sentences as best as possible
 			// with the tokenizer.
 			List<Annotation> annotations = getAnnotations(tokenizer, inputFormat, filename, filterUnknown);
@@ -456,9 +459,9 @@ public class DefaultSentimentProcessor {
 				}
 			}
 		} else if (fileList != null) {
-			// Process multiple files.  The pipeline will do tokenization,
+			// Process multiple files. The pipeline will do tokenization,
 			// which means it will split it into sentences as best as
-			// possible with the tokenizer.  Output will go to filename.out
+			// possible with the tokenizer. Output will go to filename.out
 			// for each file.
 			for (String file : fileList.split(",")) {
 				List<Annotation> annotations = getAnnotations(tokenizer, inputFormat, file, filterUnknown);
@@ -476,15 +479,15 @@ public class DefaultSentimentProcessor {
 				fout.close();
 			}
 		} else {
-			// Process stdin.  Each line will be treated as a single sentence.
+			// Process stdin. Each line will be treated as a single sentence.
 			log.info("Reading in text from stdin.");
 			log.info("Please enter one sentence per line.");
 			log.info("Processing will end when EOF is reached.");
 			BufferedReader reader = IOUtils.readerFromStdin("utf-8");
 
-			for (String line; (line = reader.readLine()) != null; ) {
+			for (String line; (line = reader.readLine()) != null;) {
 				line = line.trim();
-				if ( ! line.isEmpty()) {
+				if (!line.isEmpty()) {
 					Annotation annotation = tokenizer.process(line);
 					pipeline.annotate(annotation);
 					for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {

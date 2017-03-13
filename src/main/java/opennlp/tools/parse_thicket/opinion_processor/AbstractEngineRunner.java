@@ -33,62 +33,62 @@ public class AbstractEngineRunner {
 	private List<File> queue;
 	private final static String reviewSource = "/Users/bgalitsky/Documents/relevance-based-on-parse-trees/src/test/resources/opinions/macbook_pro.txt";
 	NamedEntityExtractor neExtractor = new NamedEntityExtractor();
-	
-	public void processJSONfileWithReviews(){
-		List<String[]> report = new ArrayList<String[]>();
-		report.add(new String[] { "text", "phrases of potential interest list" , });
 
-		
-		String content=null;
+	public void processJSONfileWithReviews() {
+		List<String[]> report = new ArrayList<String[]>();
+		report.add(new String[] { "text", "phrases of potential interest list", });
+
+		String content = null;
 		try {
 			content = FileUtils.readFileToString(new File(reviewSource));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		String[] texts = StringUtils.substringsBetween(content, "reviewText\": \"", "\", \"overall");
-		for(String text: texts){
+		for (String text : texts) {
 			EntityExtractionResult result = neExtractor.extractEntities(text);
-			report.add(new String[]{text});
-			//report.add((String[])result.extractedNERWords.toArray(new String[0]));
-			//report.add((String[])result.extractedSentimentPhrases.toArray(new String[0]));
-			List<String> stringPhrases = new ArrayList<String>(),
-					nodePhrases = new ArrayList<String>();
-			for(List<ParseTreeNode> chList: result.extractedSentimentPhrases){
-				String buf = "", nodeBuf="";
-				for(ParseTreeNode ch: chList){
-					buf+=ch.getWord()+ " ";
-					nodeBuf+=ch.toString()+ " ";
+			report.add(new String[] { text });
+			// report.add((String[])result.extractedNERWords.toArray(new
+			// String[0]));
+			// report.add((String[])result.extractedSentimentPhrases.toArray(new
+			// String[0]));
+			List<String> stringPhrases = new ArrayList<String>(), nodePhrases = new ArrayList<String>();
+			for (List<ParseTreeNode> chList : result.extractedSentimentPhrases) {
+				String buf = "", nodeBuf = "";
+				for (ParseTreeNode ch : chList) {
+					buf += ch.getWord() + " ";
+					nodeBuf += ch.toString() + " ";
 				}
 				stringPhrases.add(buf.trim());
 				nodePhrases.add(nodeBuf.trim());
 			}
-			report.add((String[])stringPhrases.toArray(new String[0]));
-			report.add((String[])nodePhrases.toArray(new String[0]));
-			report.add(new String[]{"-----------------------------"});
+			report.add((String[]) stringPhrases.toArray(new String[0]));
+			report.add((String[]) nodePhrases.toArray(new String[0]));
+			report.add(new String[] { "-----------------------------" });
 			ProfileReaderWriter.writeReport(report, "nameEntitiesTopicsOfInterestExtracted.csv");
 		}
 	}
 
-	// this func collects files 
-		private void addFiles(File file) {
+	// this func collects files
+	private void addFiles(File file) {
 
-			if (!file.exists()) {
-				System.out.println(file + " does not exist.");
-			}
-			if (file.isDirectory()) {
-				for (File f : file.listFiles()) {
-					if (f.getName().startsWith("."))
-						continue;
-					addFiles(f);
-					System.out.println(f.getName());
-				}
-			} else {
-				queue.add(file);
-
-			}
+		if (!file.exists()) {
+			System.out.println(file + " does not exist.");
 		}
-	
-	public static void main(String[] args){
+		if (file.isDirectory()) {
+			for (File f : file.listFiles()) {
+				if (f.getName().startsWith("."))
+					continue;
+				addFiles(f);
+				System.out.println(f.getName());
+			}
+		} else {
+			queue.add(file);
+
+		}
+	}
+
+	public static void main(String[] args) {
 		AbstractEngineRunner runner = new AbstractEngineRunner();
 		runner.processJSONfileWithReviews();
 
@@ -96,25 +96,25 @@ public class AbstractEngineRunner {
 }
 
 /*
-	public void processDirectory(String path){
-		List<String[]> report = new ArrayList<String[]>();
-		report.add(new String[] { "filename", "named entity list", "phrases of potential interest list" });
-
-		List<String> allNamedEntities = new ArrayList<String>();
-
-		addFiles(new File(path));
-		for(File f: queue){
-			List<String> entities = (List<String>) extractEntities(f.getAbsolutePath()).getFirst();
-			List<String> opinions = (List<String>) extractEntities(f.getAbsolutePath()).getSecond();
-			report.add(new String[]{ f.getName(), entities.toString(),  opinions.toString()});	
-			ProfileReaderWriter.writeReport(report, "nameEntitiesExtracted.csv");
-
-			allNamedEntities.addAll(entities);
-
-			allNamedEntities = new ArrayList<String>(new HashSet<String> (allNamedEntities ));
-
-
-		}
-		ProfileReaderWriter.writeReport(report, "nameEntitiesTopicsOfInterestExtracted.csv");
-	} 
-} */
+ * public void processDirectory(String path){ List<String[]> report = new
+ * ArrayList<String[]>(); report.add(new String[] { "filename",
+ * "named entity list", "phrases of potential interest list" });
+ * 
+ * List<String> allNamedEntities = new ArrayList<String>();
+ * 
+ * addFiles(new File(path)); for(File f: queue){ List<String> entities =
+ * (List<String>) extractEntities(f.getAbsolutePath()).getFirst(); List<String>
+ * opinions = (List<String>) extractEntities(f.getAbsolutePath()).getSecond();
+ * report.add(new String[]{ f.getName(), entities.toString(),
+ * opinions.toString()}); ProfileReaderWriter.writeReport(report,
+ * "nameEntitiesExtracted.csv");
+ * 
+ * allNamedEntities.addAll(entities);
+ * 
+ * allNamedEntities = new ArrayList<String>(new HashSet<String>
+ * (allNamedEntities ));
+ * 
+ * 
+ * } ProfileReaderWriter.writeReport(report,
+ * "nameEntitiesTopicsOfInterestExtracted.csv"); } }
+ */

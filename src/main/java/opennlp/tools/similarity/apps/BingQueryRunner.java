@@ -25,11 +25,12 @@ public class BingQueryRunner {
 	private String accountKey = "623bf56c8cc9403290abb2aa1b5b8ced";
 
 	// request string
-	final String bingUrlPattern ="https://api.cognitive.microsoft.com/bing/v5.0/search?q=", 
-			bingImageUrlPattern ="https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=";
+	final String bingUrlPattern = "https://api.cognitive.microsoft.com/bing/v5.0/search?q=",
+			bingImageUrlPattern = "https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=";
 
-	// Main entry point. The same function from ver 3 but now new authentication and new reqiest string
-	public List<HitBase> runSearch(String queryOrig){
+	// Main entry point. The same function from ver 3 but now new authentication
+	// and new reqiest string
+	public List<HitBase> runSearch(String queryOrig) {
 		List<HitBase> sresults = new ArrayList<HitBase>();
 		String query = "";
 		try {
@@ -42,7 +43,7 @@ public class BingQueryRunner {
 		URL url;
 		URLConnection connection = null;
 		try {
-			url = new URL(bingUrl+query);
+			url = new URL(bingUrl + query);
 			connection = url.openConnection();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -57,7 +58,7 @@ public class BingQueryRunner {
 			try {
 				JSONObject json = new JSONObject(response.toString());
 				JSONObject d = null;
-				if (json.has("webPages")){
+				if (json.has("webPages")) {
 					d = json.getJSONObject("webPages");
 					JSONArray results = d.getJSONArray("value");
 					int resultsLength = results.length();
@@ -74,8 +75,7 @@ public class BingQueryRunner {
 						sr.setTitle(aResult.getString("name"));
 						sresults.add(sr);
 					}
-				}
-				else  if (json.has("relatedSearches")){
+				} else if (json.has("relatedSearches")) {
 					d = json.getJSONObject("relatedSearches");
 					JSONArray results = d.getJSONArray("value");
 					int resultsLength = results.length();
@@ -102,7 +102,7 @@ public class BingQueryRunner {
 		return sresults;
 	}
 
-	public List<HitBase> runSearch(String queryOrig, int count){
+	public List<HitBase> runSearch(String queryOrig, int count) {
 		List<HitBase> sresults = new ArrayList<HitBase>();
 		String query = "";
 		try {
@@ -115,7 +115,7 @@ public class BingQueryRunner {
 		URL url;
 		URLConnection connection = null;
 		try {
-			url = new URL(bingUrl+query);
+			url = new URL(bingUrl + query);
 			connection = url.openConnection();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -130,7 +130,7 @@ public class BingQueryRunner {
 			try {
 				JSONObject json = new JSONObject(response.toString());
 				JSONObject d = null;
-				if (json.has("webPages")){
+				if (json.has("webPages")) {
 					d = json.getJSONObject("webPages");
 					JSONArray results = d.getJSONArray("value");
 					int resultsLength = results.length();
@@ -147,8 +147,7 @@ public class BingQueryRunner {
 						sr.setTitle(aResult.getString("name"));
 						sresults.add(sr);
 					}
-				}
-				else  if (json.has("relatedSearches")){
+				} else if (json.has("relatedSearches")) {
 					d = json.getJSONObject("relatedSearches");
 					JSONArray results = d.getJSONArray("value");
 					int resultsLength = results.length();
@@ -176,12 +175,15 @@ public class BingQueryRunner {
 	}
 
 	/*
-	 * "url": "https:\/\/www.bing.com\/cr?IG=68108732D8B34F73BA8717948A600CA8&CID=30FA793A2D26674C1E5F70C52C1766BD&rd=1&h=hC5Q6GkMgH2EyLdypYCuB1wVKEFjpSZF8haOW1hhq_U&v=1&
-	 * r=https%3a%2f%2fwww.quora.com%2fHow-do-I-pay-my-credit-card-bill-with-another-credit-card
-	 * &p=DevEx,5146.1"
+	 * "url":
+	 * "https:\/\/www.bing.com\/cr?IG=68108732D8B34F73BA8717948A600CA8&CID=
+	 * 30FA793A2D26674C1E5F70C52C1766BD&rd=1&h=
+	 * hC5Q6GkMgH2EyLdypYCuB1wVKEFjpSZF8haOW1hhq_U&v=1&
+	 * r=https%3a%2f%2fwww.quora.com%2fHow-do-I-pay-my-credit-card-bill-with-
+	 * another-credit-card &p=DevEx,5146.1"
 	 */
 
-	public List<HitBase> runImageSearch(String queryOrig){
+	public List<HitBase> runImageSearch(String queryOrig) {
 		List<HitBase> sresults = new ArrayList<HitBase>();
 		String query = "";
 		try {
@@ -194,7 +196,7 @@ public class BingQueryRunner {
 		URL url;
 		URLConnection connection = null;
 		try {
-			url = new URL(bingUrl+query);
+			url = new URL(bingUrl + query);
 			connection = url.openConnection();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -208,7 +210,7 @@ public class BingQueryRunner {
 			}
 			try {
 				JSONObject json = new JSONObject(response.toString());
-				//JSONObject d = json.getJSONObject("instrumentation");
+				// JSONObject d = json.getJSONObject("instrumentation");
 				JSONArray results = json.getJSONArray("value");
 				int resultsLength = results.length();
 				for (int i = 0; i < resultsLength; i++) {
@@ -228,18 +230,18 @@ public class BingQueryRunner {
 		return sresults;
 	}
 
-	public void setKey(String key){
-		accountKey=key;
-	}
-	public void setLang(String lang) {
-		// TODO Auto-generated method stub   
+	public void setKey(String key) {
+		accountKey = key;
 	}
 
-	public static void main(String[] args){
-		// run search and print all results in a  line
+	public void setLang(String lang) {
+		// TODO Auto-generated method stub
+	}
+
+	public static void main(String[] args) {
+		// run search and print all results in a line
 		System.out.println(new BingQueryRunner().runSearch("can I pay with one credit card for another"));
 		System.out.println(new BingQueryRunner().runImageSearch("latest iphone"));
 	}
-
 
 }

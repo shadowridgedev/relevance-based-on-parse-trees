@@ -35,139 +35,128 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
 
-
 public class PageFetcher {
-  private static final Logger log = Logger
-      .getLogger("opennlp.tools.similarity.apps.utils.PageFetcher");
-  Tika tika = new Tika();
+	private static final Logger log = Logger.getLogger("opennlp.tools.similarity.apps.utils.PageFetcher");
+	Tika tika = new Tika();
 
-  private static int DEFAULT_TIMEOUT = 3500; //1500
-  private void setTimeout(int to){
-	  DEFAULT_TIMEOUT = to;
-  }
+	private static int DEFAULT_TIMEOUT = 3500; // 1500
 
-  public String fetchPage(final String url) {
-    return fetchPage(url, DEFAULT_TIMEOUT);
-  }
-  
-  public String fetchPageAutoDetectParser(final String url ){
-	  String fetchURL = addHttp(url);
-	  String pageContent = null;
-	    URLConnection connection;
-	    try {
-	      log.info("fetch url  auto detect parser " + url);
-	      connection = new URL(fetchURL).openConnection();
-	      connection.setReadTimeout(DEFAULT_TIMEOUT);
-	      
-	    //parse method parameters
-	      Parser parser = new AutoDetectParser();
-	      BodyContentHandler handler = new BodyContentHandler();
-	      Metadata metadata = new Metadata();
-	      ParseContext context = new ParseContext();
-	      
-	      //parsing the file
-	      parser.parse(connection.getInputStream(), handler, metadata, context);
-	      
-	      pageContent = handler.toString();
-	    } catch (Exception e) {
-	      log.info(e.getMessage() + "\n" + e);
-	    }
-	    return  pageContent;
-  }
-  
+	private void setTimeout(int to) {
+		DEFAULT_TIMEOUT = to;
+	}
 
-  public String fetchPage(final String url, final int timeout) {
-    String fetchURL = addHttp(url);
+	public String fetchPage(final String url) {
+		return fetchPage(url, DEFAULT_TIMEOUT);
+	}
 
-    log.info("fetch url " + fetchURL);
+	public String fetchPageAutoDetectParser(final String url) {
+		String fetchURL = addHttp(url);
+		String pageContent = null;
+		URLConnection connection;
+		try {
+			log.info("fetch url  auto detect parser " + url);
+			connection = new URL(fetchURL).openConnection();
+			connection.setReadTimeout(DEFAULT_TIMEOUT);
 
-    String pageContent = null;
-    HttpURLConnection connection;
-    try {
-      connection = (HttpURLConnection)new URL(fetchURL).openConnection();
-      connection
-      .setRequestProperty(
-          "User-Agent",
-          "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
-      connection
-      	.setRequestProperty("Cookie", "foo=bar"); 
-      connection.setReadTimeout(DEFAULT_TIMEOUT);
-      
-      pageContent = tika.parseToString(connection.getInputStream())
-          .replace('\n', ' ').replace('\t', ' ');
-    } catch (MalformedURLException e) {
-      log.severe(e.getMessage() + "\n" + e);
-    } catch (IOException e) {
-      log.severe(e.getMessage() + "\n" + e);
-    } catch (TikaException e) {
-      log.severe(e.getMessage() + "\n" + e);
-    }
-    return pageContent;
-  }
+			// parse method parameters
+			Parser parser = new AutoDetectParser();
+			BodyContentHandler handler = new BodyContentHandler();
+			Metadata metadata = new Metadata();
+			ParseContext context = new ParseContext();
 
-  private String addHttp(final String url) {
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-      return "http://" + url;
-    }
-    return url;
-  }
-  
-  public String fetchOrigHTML(String url, int timeout) {
-	  setTimeout(timeout);
-	  return fetchOrigHTML(url);
-  }
+			// parsing the file
+			parser.parse(connection.getInputStream(), handler, metadata, context);
 
-  public String fetchOrigHTML(String url) {
-    log.info("fetch url " + url);
-    StringBuffer buf = new StringBuffer();
-    try {
-      URLConnection connection = new URL(url).openConnection();
-      connection.setReadTimeout(DEFAULT_TIMEOUT);
-      connection
-          .setRequestProperty(
-              "User-Agent",
-              "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
-      String line;
-      BufferedReader reader = null;
-      try {
-        reader = new BufferedReader(new InputStreamReader(
-            connection.getInputStream()));
-      } catch (Exception e) {
-        // we dont always need to log trial web pages if access fails
-        log.severe(e.toString());
-      }
+			pageContent = handler.toString();
+		} catch (Exception e) {
+			log.info(e.getMessage() + "\n" + e);
+		}
+		return pageContent;
+	}
 
-      while ((line = reader.readLine()) != null) {
-        buf.append(line);
-      }
+	public String fetchPage(final String url, final int timeout) {
+		String fetchURL = addHttp(url);
 
-    }
-    // normal case when a hypothetical page does not exist
-    catch (Exception e) {
+		log.info("fetch url " + fetchURL);
 
-      // LOG.error(e.getMessage(), e);
-      // System.err.println("error fetching url " + url);
-    }
-/*    try {
-      Thread.sleep(50); // do nothing 4 sec
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    } */
-    return buf.toString();
-  }
-  
-  public static void main(String[] args){
-	  PageFetcher fetcher = new PageFetcher();
-	  String content = fetcher.fetchPageAutoDetectParser("http://www.elastica.net/");
-	  System.out.println(content);
-	  content = fetcher.
-			  fetchPageAutoDetectParser("http://www.cnn.com");
-	  System.out.println(content);
-	  content = new PageFetcher().fetchPage("https://github.com");
-	  System.out.println(content);
-	  content = new PageFetcher().fetchOrigHTML("http://www.cnn.com");
-	  System.out.println(content);
-	  
-  }
+		String pageContent = null;
+		HttpURLConnection connection;
+		try {
+			connection = (HttpURLConnection) new URL(fetchURL).openConnection();
+			connection.setRequestProperty("User-Agent",
+					"Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
+			connection.setRequestProperty("Cookie", "foo=bar");
+			connection.setReadTimeout(DEFAULT_TIMEOUT);
+
+			pageContent = tika.parseToString(connection.getInputStream()).replace('\n', ' ').replace('\t', ' ');
+		} catch (MalformedURLException e) {
+			log.severe(e.getMessage() + "\n" + e);
+		} catch (IOException e) {
+			log.severe(e.getMessage() + "\n" + e);
+		} catch (TikaException e) {
+			log.severe(e.getMessage() + "\n" + e);
+		}
+		return pageContent;
+	}
+
+	private String addHttp(final String url) {
+		if (!url.startsWith("http://") && !url.startsWith("https://")) {
+			return "http://" + url;
+		}
+		return url;
+	}
+
+	public String fetchOrigHTML(String url, int timeout) {
+		setTimeout(timeout);
+		return fetchOrigHTML(url);
+	}
+
+	public String fetchOrigHTML(String url) {
+		log.info("fetch url " + url);
+		StringBuffer buf = new StringBuffer();
+		try {
+			URLConnection connection = new URL(url).openConnection();
+			connection.setReadTimeout(DEFAULT_TIMEOUT);
+			connection.setRequestProperty("User-Agent",
+					"Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3");
+			String line;
+			BufferedReader reader = null;
+			try {
+				reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			} catch (Exception e) {
+				// we dont always need to log trial web pages if access fails
+				log.severe(e.toString());
+			}
+
+			while ((line = reader.readLine()) != null) {
+				buf.append(line);
+			}
+
+		}
+		// normal case when a hypothetical page does not exist
+		catch (Exception e) {
+
+			// LOG.error(e.getMessage(), e);
+			// System.err.println("error fetching url " + url);
+		}
+		/*
+		 * try { Thread.sleep(50); // do nothing 4 sec } catch
+		 * (InterruptedException e) { e.printStackTrace(); }
+		 */
+		return buf.toString();
+	}
+
+	public static void main(String[] args) {
+		PageFetcher fetcher = new PageFetcher();
+		String content = fetcher.fetchPageAutoDetectParser("http://www.elastica.net/");
+		System.out.println(content);
+		content = fetcher.fetchPageAutoDetectParser("http://www.cnn.com");
+		System.out.println(content);
+		content = new PageFetcher().fetchPage("https://github.com");
+		System.out.println(content);
+		content = new PageFetcher().fetchOrigHTML("http://www.cnn.com");
+		System.out.println(content);
+
+	}
 
 }

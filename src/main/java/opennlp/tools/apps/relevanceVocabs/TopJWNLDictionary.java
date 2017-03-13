@@ -53,8 +53,7 @@ public class TopJWNLDictionary implements Dictionary {
 	private MorphologicalProcessor morphy;
 	private static String[] empty = new String[0];
 
-	public TopJWNLDictionary(String propertiesFile) throws IOException,
-			JWNLException {
+	public TopJWNLDictionary(String propertiesFile) throws IOException, JWNLException {
 		JWNL.initialize(this.getClass().getResourceAsStream(propertiesFile));
 		dict = net.didion.jwnl.dictionary.Dictionary.getInstance();
 		morphy = dict.getMorphologicalProcessor();
@@ -109,8 +108,7 @@ public class TopJWNLDictionary implements Dictionary {
 		}
 	}
 
-	private void getParents(Synset synset, List<String> parents)
-			throws JWNLException {
+	private void getParents(Synset synset, List<String> parents) throws JWNLException {
 		Pointer[] pointers = synset.getPointers();
 		for (int pi = 0, pn = pointers.length; pi < pn; pi++) {
 			if (pointers[pi].getType() == PointerType.HYPERNYM) {
@@ -122,7 +120,8 @@ public class TopJWNLDictionary implements Dictionary {
 	}
 
 	public String[] getParentSenseKeys(String lemma, String pos, int sense) {
-		// System.err.println("JWNLDictionary.getParentSenseKeys: lemma="+lemma);
+		// System.err.println("JWNLDictionary.getParentSenseKeys:
+		// lemma="+lemma);
 		try {
 			IndexWord iw = dict.getIndexWord(POS.NOUN, lemma);
 			if (iw != null) {
@@ -144,19 +143,14 @@ public class TopJWNLDictionary implements Dictionary {
 		System.err.println("searchDir=" + searchDir);
 		searchDir = "models/WordNet_2.1";
 		if (searchDir != null) {
-			Dictionary dict = new TopJWNLDictionary(
-					System.getProperty("WNSEARCHDIR"));
+			Dictionary dict = new TopJWNLDictionary(System.getProperty("WNSEARCHDIR"));
 			// Dictionary dict = new TopJWNLDictionary();
 			// String word = args[0];
 			String[] lemmas = dict.getLemmas("test", "NN");
 			for (int li = 0, ln = lemmas.length; li < ln; li++) {
 				for (int si = 0, sn = dict.getNumSenses(lemmas[li], "NN"); si < sn; si++) {
-					System.out.println(lemmas[li]
-							+ " ("
-							+ si
-							+ ")\t"
-							+ java.util.Arrays.asList(dict.getParentSenseKeys(
-									lemmas[li], "NN", si)));
+					System.out.println(lemmas[li] + " (" + si + ")\t"
+							+ java.util.Arrays.asList(dict.getParentSenseKeys(lemmas[li], "NN", si)));
 				}
 			}
 		}

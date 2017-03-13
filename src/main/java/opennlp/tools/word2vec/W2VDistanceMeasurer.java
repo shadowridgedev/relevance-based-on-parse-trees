@@ -30,16 +30,16 @@ public class W2VDistanceMeasurer {
 		return instance;
 	}
 
-	public W2VDistanceMeasurer(){
-		if (resourceDir ==null)
+	public W2VDistanceMeasurer() {
+		if (resourceDir == null)
 			try {
-				resourceDir = new File( "." ).getCanonicalPath()+"/src/test/resources";
+				resourceDir = new File(".").getCanonicalPath() + "/src/test/resources";
 			} catch (IOException e) {
 				e.printStackTrace();
 				vec = null;
 				return;
 			}
-	
+
 		String pathToW2V = resourceDir + "/w2v/GoogleNews-vectors-negative300.bin.gz";
 		File gModel = new File(pathToW2V);
 		try {
@@ -48,11 +48,11 @@ public class W2VDistanceMeasurer {
 			System.out.println("Word2vec model is not loaded");
 			vec = null;
 			return;
-		} 
-		
-	} 
+		}
 
-	public static void main(String[] args){
+	}
+
+	public static void main(String[] args) {
 
 		W2VDistanceMeasurer vw2v = W2VDistanceMeasurer.getInstance();
 
@@ -60,10 +60,9 @@ public class W2VDistanceMeasurer {
 		System.out.println(value);
 	}
 
-
 	public static void runCycle() {
 
-		String filePath=null;
+		String filePath = null;
 		try {
 			filePath = new ClassPathResource("raw_sentences.txt").getFile().getAbsolutePath();
 		} catch (IOException e1) {
@@ -73,7 +72,7 @@ public class W2VDistanceMeasurer {
 
 		System.out.println("Load & Vectorize Sentences....");
 		// Strip white space before and after for each line
-		SentenceIterator iter=null;
+		SentenceIterator iter = null;
 		try {
 			iter = UimaSentenceIterator.createWithPath(filePath);
 		} catch (Exception e1) {
@@ -85,19 +84,13 @@ public class W2VDistanceMeasurer {
 		t.setTokenPreProcessor(new CommonPreprocessor());
 
 		InMemoryLookupCache cache = new InMemoryLookupCache();
-		WeightLookupTable table = new InMemoryLookupTable.Builder()
-		.vectorLength(100)
-		.useAdaGrad(false)
-		.cache(cache)
-		.lr(0.025f).build();
+		WeightLookupTable table = new InMemoryLookupTable.Builder().vectorLength(100).useAdaGrad(false).cache(cache)
+				.lr(0.025f).build();
 
 		System.out.println("Building model....");
-		Word2Vec vec = new Word2Vec.Builder()
-		.minWordFrequency(5).iterations(1)
-		.layerSize(100).lookupTable(table)
-		.stopWords(new ArrayList<String>())
-		.vocabCache(cache).seed(42)
-		.windowSize(5).iterate(iter).tokenizerFactory(t).build();
+		Word2Vec vec = new Word2Vec.Builder().minWordFrequency(5).iterations(1).layerSize(100).lookupTable(table)
+				.stopWords(new ArrayList<String>()).vocabCache(cache).seed(42).windowSize(5).iterate(iter)
+				.tokenizerFactory(t).build();
 
 		System.out.println("Fitting Word2Vec model....");
 		try {
@@ -121,4 +114,3 @@ public class W2VDistanceMeasurer {
 		System.out.println(lst);
 	}
 }
-

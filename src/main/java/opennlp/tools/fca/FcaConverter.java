@@ -21,49 +21,49 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public class FcaConverter {
-	
-	public FcaConverter (){
-		
+
+	public FcaConverter() {
+
 	}
-	
-	public int [][] latticeToContext(ConceptLattice cl){
-		
+
+	public int[][] latticeToContext(ConceptLattice cl) {
+
 		int newAttrCount = cl.conceptList.size();
-		int [][] binaryContext = null;
+		int[][] binaryContext = null;
 		ArrayList<FormalConcept> cList = new ArrayList<FormalConcept>();
 		cList.addAll(cl.conceptList);
 		boolean run = true;
-		int k=0;
-		while (run && k<cl.conceptList.size()){
-			if (cl.conceptList.get(k).intent.size() == cl.attributeCount){
-					for (Integer i:cl.conceptList.get(k).parents){
-						//cList.remove(cl.conceptList.get(i));
-					}
-				//cList.remove(cl.conceptList.get(k));
-				run=false;
-			}
-			else{
-				//cList.add(arg0, arg1);
-				
-			}
-			
-		}
-		//System.out.println("cList.size() " + cList.size());
-		run = true;
-		k=0;
-		while (run && k<=newAttrCount){
-			if (cList.get(k).extent.size()==0)
-				k++;
+		int k = 0;
+		while (run && k < cl.conceptList.size()) {
+			if (cl.conceptList.get(k).intent.size() == cl.attributeCount) {
+				for (Integer i : cl.conceptList.get(k).parents) {
+					// cList.remove(cl.conceptList.get(i));
+				}
+				// cList.remove(cl.conceptList.get(k));
 				run = false;
+			} else {
+				// cList.add(arg0, arg1);
+
+			}
+
+		}
+		// System.out.println("cList.size() " + cList.size());
+		run = true;
+		k = 0;
+		while (run && k <= newAttrCount) {
+			if (cList.get(k).extent.size() == 0)
+				k++;
+			run = false;
 		}
 		newAttrCount = cList.size();
 		Set<Integer> nodeExtend;
 		binaryContext = new int[cl.objectCount][newAttrCount];
-		for (int j = 0; j<newAttrCount; j++){
+		for (int j = 0; j < newAttrCount; j++) {
 			nodeExtend = cList.get(j).extent;
-			//System.out.println(cList.get(j).position+" nodeExtend " + nodeExtend);
-			for (Integer i: nodeExtend){
-				binaryContext[i][j]=1;
+			// System.out.println(cList.get(j).position+" nodeExtend " +
+			// nodeExtend);
+			for (Integer i : nodeExtend) {
+				binaryContext[i][j] = 1;
 			}
 		}
 		return binaryContext;

@@ -16,7 +16,6 @@
  */
 package opennlp.tools.similarity.apps.solr;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -55,22 +54,20 @@ import opennlp.tools.similarity.apps.BingQueryRunner;
 import opennlp.tools.similarity.apps.Fragment;
 import opennlp.tools.similarity.apps.HitBase;
 
-public class WordDocBuilderEndNotes extends WordDocBuilderSingleImageSearchCall{
-	
-	public String buildWordDoc(List<HitBase> content, String title){
-		
-		String outputDocFinename =  absPath+"written/"+ title.replace(' ','_').replace('\"', ' ').trim()+ ".docx";
-		
-		WordprocessingMLPackage wordMLPackage=null;
-		
-       
+public class WordDocBuilderEndNotes extends WordDocBuilderSingleImageSearchCall {
+
+	public String buildWordDoc(List<HitBase> content, String title) {
+
+		String outputDocFinename = absPath + "written/" + title.replace(' ', '_').replace('\"', ' ').trim() + ".docx";
+
+		WordprocessingMLPackage wordMLPackage = null;
+
 		List<String> imageURLs = getAllImageSearchResults(title);
-		int count=0;
+		int count = 0;
 		BigInteger refId = BigInteger.ONE;
 		try {
 			wordMLPackage = WordprocessingMLPackage.createPackage();
-			
-			
+
 			CTEndnotes endnotes = null;
 			try {
 				EndnotesPart ep = new EndnotesPart();
@@ -81,55 +78,60 @@ public class WordDocBuilderEndNotes extends WordDocBuilderSingleImageSearchCall{
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			
-			
-			
-			
+
 			wordMLPackage.getMainDocumentPart().addStyledParagraphOfText("Title", title.toUpperCase());
-			for(HitBase para: content){
-				if (para.getFragments()==null || para.getFragments().size()<1) // no found content in this hit
-						continue;
+			for (HitBase para : content) {
+				if (para.getFragments() == null || para.getFragments().size() < 1) // no
+																					// found
+																					// content
+																					// in
+																					// this
+																					// hit
+					continue;
 				try {
 					String processedParaTitle = processParagraphTitle(para.getTitle());
-					
-					if (processedParaTitle!=null && 
-							!processedParaTitle.endsWith("..") || StringUtils.isAlphanumeric(processedParaTitle)){
-						wordMLPackage.getMainDocumentPart().addStyledParagraphOfText("Subtitle",processedParaTitle);
+
+					if (processedParaTitle != null && !processedParaTitle.endsWith("..")
+							|| StringUtils.isAlphanumeric(processedParaTitle)) {
+						wordMLPackage.getMainDocumentPart().addStyledParagraphOfText("Subtitle", processedParaTitle);
 					}
 					String paraText = processParagraphText(para.getFragments().toString());
 					wordMLPackage.getMainDocumentPart().addParagraphOfText(paraText);
-					
-					 CTFtnEdn endnote = Context.getWmlObjectFactory().createCTFtnEdn();
-			         endnotes.getEndnote().add(endnote);
-			        
-			         endnote.setId(refId);
-			         refId.add(BigInteger.ONE);
-			         String url = para.getUrl();
-			         String endnoteBody = "<w:p xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" ><w:pPr><w:pStyle w:val=\"EndnoteText\"/></w:pPr><w:r><w:rPr>" +
-			         		"<w:rStyle w:val=\"EndnoteReference\"/></w:rPr><w:endnoteRef/></w:r><w:r><w:t xml:space=\"preserve\"> "+ url + "</w:t></w:r></w:p>";
-			         try {
-						endnote.getEGBlockLevelElts().add( XmlUtils.unmarshalString(endnoteBody));
+
+					CTFtnEdn endnote = Context.getWmlObjectFactory().createCTFtnEdn();
+					endnotes.getEndnote().add(endnote);
+
+					endnote.setId(refId);
+					refId.add(BigInteger.ONE);
+					String url = para.getUrl();
+					String endnoteBody = "<w:p xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" ><w:pPr><w:pStyle w:val=\"EndnoteText\"/></w:pPr><w:r><w:rPr>"
+							+ "<w:rStyle w:val=\"EndnoteReference\"/></w:rPr><w:endnoteRef/></w:r><w:r><w:t xml:space=\"preserve\"> "
+							+ url + "</w:t></w:r></w:p>";
+					try {
+						endnote.getEGBlockLevelElts().add(XmlUtils.unmarshalString(endnoteBody));
 					} catch (JAXBException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-			         
-			         // Add the body text referencing it
-			         String docBody = "<w:p xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" ><w:r><w:t>"//+ paraText
-			         /*+ refId.toString()*/ +"</w:t></w:r><w:r><w:rPr><w:rStyle w:val=\"EndnoteReference\"/></w:rPr><w:endnoteReference w:id=\""+refId.toString()+"\"/></w:r></w:p>";
-			         
-			         try {
-			        	 wordMLPackage.getMainDocumentPart().addParagraph(docBody);
+
+					// Add the body text referencing it
+					String docBody = "<w:p xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" ><w:r><w:t>"// +
+																																// paraText
+							/* + refId.toString() */ + "</w:t></w:r><w:r><w:rPr><w:rStyle w:val=\"EndnoteReference\"/></w:rPr><w:endnoteReference w:id=\""
+							+ refId.toString() + "\"/></w:r></w:p>";
+
+					try {
+						wordMLPackage.getMainDocumentPart().addParagraph(docBody);
 					} catch (JAXBException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					
+
 					try {
 						addImageByImageURLToPackage(count, wordMLPackage, imageURLs);
 					} catch (Exception e) {
 						// no need to report issues
-						//e.printStackTrace();
+						// e.printStackTrace();
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -139,85 +141,87 @@ public class WordDocBuilderEndNotes extends WordDocBuilderSingleImageSearchCall{
 			}
 			// now add URLs
 			wordMLPackage.getMainDocumentPart().addStyledParagraphOfText("Subtitle", "REFERENCES");
-			for(HitBase para: content){
-				if (para.getFragments()==null || para.getFragments().size()<1) // no found content in this hit
-						continue;
+			for (HitBase para : content) {
+				if (para.getFragments() == null || para.getFragments().size() < 1) // no
+																					// found
+																					// content
+																					// in
+																					// this
+																					// hit
+					continue;
 				try {
-					wordMLPackage.getMainDocumentPart().addStyledParagraphOfText("Subtitle",
-							para.getTitle());
+					wordMLPackage.getMainDocumentPart().addStyledParagraphOfText("Subtitle", para.getTitle());
 					String paraText = para.getUrl();
 					wordMLPackage.getMainDocumentPart().addParagraphOfText(paraText);
-					
-					
+
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-	
-	        
+
 			try {
 				wordMLPackage.save(new File(outputDocFinename));
-				System.out.println("Finished creating docx ="+outputDocFinename);
+				System.out.println("Finished creating docx =" + outputDocFinename);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 			try {
-				String fileNameToDownload = "/var/www/wrt_latest/"+title.replace(' ','_').replace('\"', ' ').trim()+ ".docx";
+				String fileNameToDownload = "/var/www/wrt_latest/" + title.replace(' ', '_').replace('\"', ' ').trim()
+						+ ".docx";
 				wordMLPackage.save(new File(fileNameToDownload));
-				System.out.println("Wrote a doc for download :"+fileNameToDownload);
+				System.out.println("Wrote a doc for download :" + fileNameToDownload);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return outputDocFinename;
 	}
-	
-	public static String processParagraphText(String title){
-		
-		return title.replace("[", "").replace("]", "").replace(" | ", "")
-		.replace(".,", ".").replace(".\"", "\"").replace(". .", ".")
-		.replace(",.", ".");
+
+	public static String processParagraphText(String title) {
+
+		return title.replace("[", "").replace("]", "").replace(" | ", "").replace(".,", ".").replace(".\"", "\"")
+				.replace(". .", ".").replace(",.", ".");
 	}
-	
-	public static String processParagraphTitle(String title){
+
+	public static String processParagraphTitle(String title) {
 		String titleDelim = title.replace('-', '&').replace('|', '&');
 		String[] titleParts = titleDelim.split("&");
-		
-		int lenCurr = -1; 
+
+		int lenCurr = -1;
 		String bestPart = null;
-		for(String candidatePart: titleParts ){ // if this part longer and does not have periods
-			if (lenCurr< candidatePart.length() && candidatePart.indexOf('.')<0){
+		for (String candidatePart : titleParts) { // if this part longer and
+													// does not have periods
+			if (lenCurr < candidatePart.length() && candidatePart.indexOf('.') < 0) {
 				lenCurr = candidatePart.length();
 				bestPart = candidatePart;
 			}
 		}
-		
+
 		return bestPart;
 	}
 
-    
-    public static void main(String[] args){
-    	WordDocBuilderEndNotes b = new WordDocBuilderEndNotes();
-    	List<HitBase> content = new ArrayList<HitBase>();
-    	for(int i = 0; i<10; i++){
-    		HitBase h = new HitBase();
-    		h.setTitle("albert einstein "+i);
-    		List<Fragment> frs = new ArrayList<Fragment>();
-    		frs.add(new Fragment(" content "+i, 0));
-    		h.setFragments(frs);
-    		h.setUrl("http://www."+i+".com");
-    		content.add(h);
-    	}
-    	
-    	b.buildWordDoc(content, "albert einstein");
-    }
+	public static void main(String[] args) {
+		WordDocBuilderEndNotes b = new WordDocBuilderEndNotes();
+		List<HitBase> content = new ArrayList<HitBase>();
+		for (int i = 0; i < 10; i++) {
+			HitBase h = new HitBase();
+			h.setTitle("albert einstein " + i);
+			List<Fragment> frs = new ArrayList<Fragment>();
+			frs.add(new Fragment(" content " + i, 0));
+			h.setFragments(frs);
+			h.setUrl("http://www." + i + ".com");
+			content.add(h);
+		}
+
+		b.buildWordDoc(content, "albert einstein");
+	}
 }

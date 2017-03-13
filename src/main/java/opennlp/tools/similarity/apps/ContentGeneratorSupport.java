@@ -45,36 +45,32 @@ import org.apache.commons.lang.StringUtils;
  */
 
 public class ContentGeneratorSupport {
-	private static Logger LOG = Logger
-			.getLogger("opennlp.tools.similarity.apps.ContentGeneratorSupport");
+	private static Logger LOG = Logger.getLogger("opennlp.tools.similarity.apps.ContentGeneratorSupport");
 
 	/**
-	 * Takes a sentence and extracts noun phrases and entity names to from search
-	 * queries for finding relevant sentences on the web, which are then subject
-	 * to relevance assessment by Similarity. Search queries should not be too
-	 * general (irrelevant search results) or too specific (too few search
-	 * results)
+	 * Takes a sentence and extracts noun phrases and entity names to from
+	 * search queries for finding relevant sentences on the web, which are then
+	 * subject to relevance assessment by Similarity. Search queries should not
+	 * be too general (irrelevant search results) or too specific (too few
+	 * search results)
 	 * 
 	 * @param String
-	 *          input sentence to form queries
+	 *            input sentence to form queries
 	 * @return List<String> of search expressions
 	 */
 	public static List<String> buildSearchEngineQueryFromSentence(String sentence) {
 		ParseTreeChunk matcher = new ParseTreeChunk();
-		ParserChunker2MatcherProcessor pos = ParserChunker2MatcherProcessor
-				.getInstance();
+		ParserChunker2MatcherProcessor pos = ParserChunker2MatcherProcessor.getInstance();
 		List<List<ParseTreeChunk>> sent1GrpLst = null;
 
-		List<ParseTreeChunk> nPhrases = pos
-				.formGroupedPhrasesFromChunksForSentence(sentence).get(0);
+		List<ParseTreeChunk> nPhrases = pos.formGroupedPhrasesFromChunksForSentence(sentence).get(0);
 		List<String> queryArrayStr = new ArrayList<String>();
 		for (ParseTreeChunk ch : nPhrases) {
 			String query = "";
 			int size = ch.getLemmas().size();
 
 			for (int i = 0; i < size; i++) {
-				if (ch.getPOSs().get(i).startsWith("N")
-						|| ch.getPOSs().get(i).startsWith("J")) {
+				if (ch.getPOSs().get(i).startsWith("N") || ch.getPOSs().get(i).startsWith("J")) {
 					query += ch.getLemmas().get(i) + " ";
 				}
 			}
@@ -108,8 +104,7 @@ public class ContentGeneratorSupport {
 				int size = ch.getLemmas().size();
 
 				for (int i = 0; i < size; i++) {
-					if (ch.getPOSs().get(i).startsWith("N")
-							|| ch.getPOSs().get(i).startsWith("J")) {
+					if (ch.getPOSs().get(i).startsWith("N") || ch.getPOSs().get(i).startsWith("J")) {
 						query += ch.getLemmas().get(i) + " ";
 					}
 				}
@@ -143,12 +138,22 @@ public class ContentGeneratorSupport {
 		return (String[]) sentsClean.toArray(new String[0]);
 	}
 
-	public static String cleanSpacesInCleanedHTMLpage(String pageContent){ //was 4 spaces 
-		//was 3 spaces => now back to 2
-		//TODO - verify regexp!!
-		pageContent = pageContent.trim().replaceAll("([a-z])(\\s{2,3})([A-Z])", "$1. $3")
-				.replace("..", ".").replace(". . .", " ").
-				replace(".    .",". ").trim(); // sometimes   html breaks are converted into ' ' (two spaces), so
+	public static String cleanSpacesInCleanedHTMLpage(String pageContent) { // was
+																			// 4
+																			// spaces
+		// was 3 spaces => now back to 2
+		// TODO - verify regexp!!
+		pageContent = pageContent.trim().replaceAll("([a-z])(\\s{2,3})([A-Z])", "$1. $3").replace("..", ".")
+				.replace(". . .", " ").replace(".    .", ". ").trim(); // sometimes
+																		// html
+																		// breaks
+																		// are
+																		// converted
+																		// into
+																		// ' '
+																		// (two
+																		// spaces),
+																		// so
 		// we need to put '.'
 		return pageContent;
 	}
@@ -158,8 +163,8 @@ public class ContentGeneratorSupport {
 	 * afterwards
 	 * 
 	 * @param List
-	 *          <String> of sentences (search queries, or search results
-	 *          abstracts, or titles
+	 *            <String> of sentences (search queries, or search results
+	 *            abstracts, or titles
 	 * @return List<String> of sentences where dupes are removed
 	 */
 	public static List<String> removeDuplicatesFromQueries(List<String> hits) {
@@ -187,8 +192,7 @@ public class ContentGeneratorSupport {
 					hitsDedup.add(hits.get(i));
 
 			if (hitsDedup.size() < hits.size()) {
-				LOG.info("Removed duplicates from formed query, including "
-						+ hits.get(idsToRemove.get(0)));
+				LOG.info("Removed duplicates from formed query, including " + hits.get(idsToRemove.get(0)));
 			}
 
 		} catch (Exception e) {
@@ -203,13 +207,13 @@ public class ContentGeneratorSupport {
 	 * remove dupes from search results
 	 * 
 	 * @param List
-	 *          <HitBase> of search results objects
+	 *            <HitBase> of search results objects
 	 * @return List<String> of search results objects where dupes are removed
 	 */
-	public static List<HitBase> removeDuplicatesFromResultantHits(
-			List<HitBase> hits) {
+	public static List<HitBase> removeDuplicatesFromResultantHits(List<HitBase> hits) {
 		StringDistanceMeasurer meas = new StringDistanceMeasurer();
-		double dupeThresh = // 0.8; // if more similar, then considered dupes was
+		double dupeThresh = // 0.8; // if more similar, then considered dupes
+							// was
 				0.7;
 		List<Integer> idsToRemove = new ArrayList<Integer>();
 		List<HitBase> hitsDedup = new ArrayList<HitBase>();
@@ -228,8 +232,7 @@ public class ContentGeneratorSupport {
 								continue;
 							if (meas.measureStringDistance(sf1, sf2) > dupeThresh) {
 								fragmList2Results.remove(f2);
-								LOG.info("Removed duplicates from formed fragments list: "
-										+ sf2);
+								LOG.info("Removed duplicates from formed fragments list: " + sf2);
 							}
 						}
 
@@ -242,12 +245,9 @@ public class ContentGeneratorSupport {
 		return hits;
 	}
 
-
-
 	// given a fragment from snippet, finds an original sentence at a webpage by
 	// optimizing alignmemt score
-	public static String[] getFullOriginalSentenceFromWebpageBySnippetFragment(
-			String fragment, String[] sents) {
+	public static String[] getFullOriginalSentenceFromWebpageBySnippetFragment(String fragment, String[] sents) {
 		if (fragment.trim().length() < 15)
 			return null;
 
@@ -263,33 +263,33 @@ public class ContentGeneratorSupport {
 				result = s;
 				dist = distCurr;
 				try {
-					if (i < sents.length - 1 && sents[i + 1].length() > 60) { 
-						String f1 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i+1]);
-						if (f1!=null){
+					if (i < sents.length - 1 && sents[i + 1].length() > 60) {
+						String f1 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i + 1]);
+						if (f1 != null) {
 							followSent = f1;
 						}
 					}
 
 					if (i < sents.length - 2 && sents[i + 2].length() > 60) {
-						String f2 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i+2]);
-						if (f2!=null){
-							followSent += " "+f2;
+						String f2 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i + 2]);
+						if (f2 != null) {
+							followSent += " " + f2;
 						}
-						
+
 					}
 					if (i < sents.length - 3 && sents[i + 3].length() > 60) {
-						String f3 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i+3]);
-						if (f3!=null){
-							followSent += " "+f3;
+						String f3 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i + 3]);
+						if (f3 != null) {
+							followSent += " " + f3;
 						}
 					}
 					if (i < sents.length - 4 && sents[i + 4].length() > 60) {
-						String f4 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i+4]);
-						if (f4!=null){
-							followSent += " "+f4;
+						String f4 = GeneratedSentenceProcessor.acceptableMinedSentence(sents[i + 4]);
+						if (f4 != null) {
+							followSent += " " + f4;
 						}
 					}
-					
+
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -301,8 +301,7 @@ public class ContentGeneratorSupport {
 
 	// given a fragment from snippet, finds an original sentence at a webpage by
 	// optimizing alignmemt score
-	public static String[] getBestFullOriginalSentenceFromWebpageBySnippetFragment(
-			String fragment, String[] sents) {
+	public static String[] getBestFullOriginalSentenceFromWebpageBySnippetFragment(String fragment, String[] sents) {
 		if (fragment.trim().length() < 15)
 			return null;
 		int bestSentIndex = -1;
@@ -323,8 +322,7 @@ public class ContentGeneratorSupport {
 		if (distBest > 0.4) {
 			result = sents[bestSentIndex];
 
-			if (bestSentIndex < sents.length - 1
-					&& sents[bestSentIndex + 1].length() > 60) {
+			if (bestSentIndex < sents.length - 1 && sents[bestSentIndex + 1].length() > 60) {
 				followSent = sents[bestSentIndex + 1];
 			}
 
@@ -333,38 +331,37 @@ public class ContentGeneratorSupport {
 		return new String[] { result, followSent };
 	}
 
-	public String[] extractSentencesFromPage(String downloadedPage)
-	{
+	public String[] extractSentencesFromPage(String downloadedPage) {
 
-		int maxSentsFromPage= 100;
+		int maxSentsFromPage = 100;
 		List<String[]> results = new ArrayList<String[]>();
 
-		//String pageOrigHTML = pFetcher.fetchOrigHTML(url);
+		// String pageOrigHTML = pFetcher.fetchOrigHTML(url);
 
-		downloadedPage= downloadedPage.replace("     ", "&");
+		downloadedPage = downloadedPage.replace("     ", "&");
 		downloadedPage = downloadedPage.replaceAll("(?:&)+", "#");
 		String[] sents = downloadedPage.split("#");
 		List<TextChunk> sentsList = new ArrayList<TextChunk>();
-		for(String s: sents){
+		for (String s : sents) {
 			s = ContentGeneratorSupport.cleanSpacesInCleanedHTMLpage(s);
 			sentsList.add(new TextChunk(s, s.length()));
 		}
 
 		Collections.sort(sentsList, new TextChunkComparable());
 		String[] longestSents = new String[maxSentsFromPage];
-		int j=0;
-		int initIndex = sentsList.size()-1 -maxSentsFromPage;
-		if (initIndex<0)
+		int j = 0;
+		int initIndex = sentsList.size() - 1 - maxSentsFromPage;
+		if (initIndex < 0)
 			initIndex = 0;
-		for(int i=initIndex; i< sentsList.size() && j<maxSentsFromPage ; i++){
+		for (int i = initIndex; i < sentsList.size() && j < maxSentsFromPage; i++) {
 			longestSents[j] = sentsList.get(i).text;
 			j++;
 		}
 
 		sents = cleanSplitListOfSents(longestSents);
 
-		//sents = removeDuplicates(sents);
-		//sents = verifyEnforceStartsUpperCase(sents);
+		// sents = removeDuplicates(sents);
+		// sents = verifyEnforceStartsUpperCase(sents);
 
 		return sents;
 	}
@@ -374,98 +371,97 @@ public class ContentGeneratorSupport {
 			this.text = s;
 			this.len = length;
 		}
+
 		public String text;
 		public int len;
 	}
 
-	public class TextChunkComparable implements Comparator<TextChunk>
-	{
-		public int compare(TextChunk ch1, TextChunk ch2)
-		{
-			if (ch1.len>ch2.len)
+	public class TextChunkComparable implements Comparator<TextChunk> {
+		public int compare(TextChunk ch1, TextChunk ch2) {
+			if (ch1.len > ch2.len)
 				return 1;
-			else if (ch1.len<ch2.len)
-				return  -1;
-			else return 0;
+			else if (ch1.len < ch2.len)
+				return -1;
+			else
+				return 0;
 
 		}
 	}
 
-	protected String[] cleanSplitListOfSents(String[] longestSents){
-		float minFragmentLength = 40, minFragmentLengthSpace=4;
+	protected String[] cleanSplitListOfSents(String[] longestSents) {
+		float minFragmentLength = 40, minFragmentLengthSpace = 4;
 
 		List<String> sentsClean = new ArrayList<String>();
-		for (String sentenceOrMultSent : longestSents)
-		{
-			if (sentenceOrMultSent==null || sentenceOrMultSent.length()<20)
+		for (String sentenceOrMultSent : longestSents) {
+			if (sentenceOrMultSent == null || sentenceOrMultSent.length() < 20)
 				continue;
-			if (GeneratedSentenceProcessor.acceptableMinedSentence(sentenceOrMultSent)==null){
-				System.out.println("Rejected sentence by GeneratedSentenceProcessor.acceptableMinedSentence = "+sentenceOrMultSent);
+			if (GeneratedSentenceProcessor.acceptableMinedSentence(sentenceOrMultSent) == null) {
+				System.out.println("Rejected sentence by GeneratedSentenceProcessor.acceptableMinedSentence = "
+						+ sentenceOrMultSent);
 				continue;
 			}
-			// aaa. hhh hhh.  kkk . kkk ll hhh. lll kkk n.
-			int numOfDots = sentenceOrMultSent.replace('.','&').split("&").length;
-			float avgSentenceLengthInTextPortion = (float)sentenceOrMultSent.length() /(float) numOfDots;
-			if ( avgSentenceLengthInTextPortion<minFragmentLength)
+			// aaa. hhh hhh. kkk . kkk ll hhh. lll kkk n.
+			int numOfDots = sentenceOrMultSent.replace('.', '&').split("&").length;
+			float avgSentenceLengthInTextPortion = (float) sentenceOrMultSent.length() / (float) numOfDots;
+			if (avgSentenceLengthInTextPortion < minFragmentLength)
 				continue;
 			// o oo o ooo o o o ooo oo ooo o o oo
-			numOfDots = sentenceOrMultSent.replace(' ','&').split("&").length;
-			avgSentenceLengthInTextPortion = (float)sentenceOrMultSent.length() /(float) numOfDots;
-			if ( avgSentenceLengthInTextPortion<minFragmentLengthSpace)
+			numOfDots = sentenceOrMultSent.replace(' ', '&').split("&").length;
+			avgSentenceLengthInTextPortion = (float) sentenceOrMultSent.length() / (float) numOfDots;
+			if (avgSentenceLengthInTextPortion < minFragmentLengthSpace)
 				continue;
 
 			List<String> furtherSplit = TextProcessor.splitToSentences(sentenceOrMultSent);
 
 			// forced split by ',' somewhere in the middle of sentence
 			// disused - Feb 26 13
-			//furtherSplit = furtherMakeSentencesShorter(furtherSplit);
-			furtherSplit.remove(furtherSplit.size()-1);
-			for(String s : furtherSplit){
-				if (s.indexOf('|')>-1)
+			// furtherSplit = furtherMakeSentencesShorter(furtherSplit);
+			furtherSplit.remove(furtherSplit.size() - 1);
+			for (String s : furtherSplit) {
+				if (s.indexOf('|') > -1)
 					continue;
-				s = s.replace("<em>"," ").replace("</em>"," ");
+				s = s.replace("<em>", " ").replace("</em>", " ");
 				s = Utils.convertToASCII(s);
 				sentsClean.add(s);
 			}
 		}
 		return (String[]) sentsClean.toArray(new String[0]);
-	}	
+	}
 
-	protected String[] cleanSplitListOfSentsFirstSplit(String[] longestSents){
-		float minFragmentLength = 40, minFragmentLengthSpace=4;
+	protected String[] cleanSplitListOfSentsFirstSplit(String[] longestSents) {
+		float minFragmentLength = 40, minFragmentLengthSpace = 4;
 
 		List<String> sentsClean = new ArrayList<String>();
-		for (String sentenceOrMultSent : longestSents)
-		{
-			if (sentenceOrMultSent==null || sentenceOrMultSent.length()<minFragmentLength)
+		for (String sentenceOrMultSent : longestSents) {
+			if (sentenceOrMultSent == null || sentenceOrMultSent.length() < minFragmentLength)
 				continue;
 			List<String> furtherSplit = TextProcessor.splitToSentences(sentenceOrMultSent);
-			for(String sentence: furtherSplit ){
-				if (sentence==null || sentence.length()<20)
+			for (String sentence : furtherSplit) {
+				if (sentence == null || sentence.length() < 20)
 					continue;
-				if (GeneratedSentenceProcessor.acceptableMinedSentence(sentence)==null){
-					//System.out.println("Rejected sentence by GeneratedSentenceProcessor.acceptableMinedSentence = "+sentenceOrMultSent);
+				if (GeneratedSentenceProcessor.acceptableMinedSentence(sentence) == null) {
+					// System.out.println("Rejected sentence by
+					// GeneratedSentenceProcessor.acceptableMinedSentence =
+					// "+sentenceOrMultSent);
 					continue;
 				}
-				// aaa. hhh hhh.  kkk . kkk ll hhh. lll kkk n.
-				int numOfDots = sentence.replace('.','&').split("&").length;
-				float avgSentenceLengthInTextPortion = (float)sentenceOrMultSent.length() /(float) numOfDots;
-				if ( avgSentenceLengthInTextPortion<minFragmentLength)
+				// aaa. hhh hhh. kkk . kkk ll hhh. lll kkk n.
+				int numOfDots = sentence.replace('.', '&').split("&").length;
+				float avgSentenceLengthInTextPortion = (float) sentenceOrMultSent.length() / (float) numOfDots;
+				if (avgSentenceLengthInTextPortion < minFragmentLength)
 					continue;
 				// o oo o ooo o o o ooo oo ooo o o oo
-				numOfDots = sentence.replace(' ','&').split("&").length;
-				avgSentenceLengthInTextPortion = (float)sentence.length() /(float) numOfDots;
-				if ( avgSentenceLengthInTextPortion<minFragmentLengthSpace)
+				numOfDots = sentence.replace(' ', '&').split("&").length;
+				avgSentenceLengthInTextPortion = (float) sentence.length() / (float) numOfDots;
+				if (avgSentenceLengthInTextPortion < minFragmentLengthSpace)
 					continue;
-
-
 
 				// forced split by ',' somewhere in the middle of sentence
 				// disused - Feb 26 13
-				//furtherSplit = furtherMakeSentencesShorter(furtherSplit);
-				//furtherSplit.remove(furtherSplit.size()-1);
+				// furtherSplit = furtherMakeSentencesShorter(furtherSplit);
+				// furtherSplit.remove(furtherSplit.size()-1);
 
-				if (sentence.indexOf('|')>-1)
+				if (sentence.indexOf('|') > -1)
 					continue;
 				sentence = Utils.convertToASCII(sentence);
 				sentsClean.add(sentence);
@@ -474,13 +470,13 @@ public class ContentGeneratorSupport {
 		return (String[]) sentsClean.toArray(new String[0]);
 	}
 
-	public static String getPortionOfTitleWithoutDelimiters(String title){
-		String[] delimiters = new String[]{"\\+","-", "=", "_", "\\)", "\\|"};
-		for(String delim: delimiters ){
+	public static String getPortionOfTitleWithoutDelimiters(String title) {
+		String[] delimiters = new String[] { "\\+", "-", "=", "_", "\\)", "\\|" };
+		for (String delim : delimiters) {
 			String[] split = title.split(delim);
-			if (split.length>1){
-				for(String s: split){
-					if (s.indexOf(".")<0)
+			if (split.length > 1) {
+				for (String s : split) {
+					if (s.indexOf(".") < 0)
 						return s;
 				}
 			}
@@ -489,26 +485,24 @@ public class ContentGeneratorSupport {
 		return title;
 	}
 
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		String s = "You can grouP   parts  Of your regular expression  In your pattern   You grouP  elements";
-		//with round brackets, e.g., ()." +
-		//		" This allows you to assign a repetition operator to a complete group.";
+		// with round brackets, e.g., ()." +
+		// " This allows you to assign a repetition operator to a complete
+		// group.";
 		String sr = s.replaceAll("([a-z])(\\s{2,3})([A-Z])", "$1. $3");
 		String sr1 = s.replaceAll("  [A-Z]", ". $0");
 		sr = s.replaceAll("[a-z]  [A-Z]", ". $1");
 		sr1 = s.replaceAll("  [A-Z]", ". $1");
 	}
 
-	public static boolean problematicHitList(List<HitBase> hits){
-		if (hits.size()<1)
+	public static boolean problematicHitList(List<HitBase> hits) {
+		if (hits.size() < 1)
 			return true;
-		for(HitBase hit: hits){
+		for (HitBase hit : hits) {
 			if (!hit.getFragments().isEmpty())
 				return false;
 		}
-		return true;		
+		return true;
 	}
 }
-
-
-

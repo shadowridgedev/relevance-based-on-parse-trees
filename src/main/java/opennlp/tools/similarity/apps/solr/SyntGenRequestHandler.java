@@ -79,39 +79,38 @@ public class SyntGenRequestHandler extends SearchHandler {
 
 	private ParseTreeChunkListScorer parseTreeChunkListScorer = new ParseTreeChunkListScorer();
 
-	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp){
+	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) {
 		try {
 			super.handleRequestBody(req, rsp);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		SolrParams reqValues = req.getOriginalParams();
 		Iterator<String> iter = reqValues.getParameterNamesIterator();
-		while(iter.hasNext()){
+		while (iter.hasNext()) {
 			System.out.println(iter.next());
 		}
-		
+
 		String param = req.getParamString();
-		//modify rsp
+		// modify rsp
 		NamedList values = rsp.getValues();
 		ResultContext c = (ResultContext) values.get("response");
-		if (c==null)
+		if (c == null)
 			return;
-		
-		String val1 = (String)values.get("t1");
+
+		String val1 = (String) values.get("t1");
 		String k1 = values.getName(0);
 		k1 = values.getName(1);
 		k1 = values.getName(2);
 		k1 = values.getName(3);
 		k1 = values.getName(4);
-		
+
 		DocList dList = c.docs;
-		DocList dListResult=null;
+		DocList dListResult = null;
 		try {
-			dListResult = filterResultsBySyntMatchReduceDocSet(dList,
-					req,  req.getParams());
+			dListResult = filterResultsBySyntMatchReduceDocSet(dList, req, req.getParams());
 		} catch (Exception e) {
 			dListResult = dList;
 			// TODO Auto-generated catch block
@@ -119,127 +118,127 @@ public class SyntGenRequestHandler extends SearchHandler {
 		}
 		c.docs = dListResult;
 		values.remove("response");
-		
+
 		rsp.setAllValues(values);
 	}
 
-
-	public DocList filterResultsBySyntMatchReduceDocSet(DocList docList,
-			SolrQueryRequest req,  SolrParams params) {		
-		//if (!docList.hasScores()) 
-		//	return docList;
+	public DocList filterResultsBySyntMatchReduceDocSet(DocList docList, SolrQueryRequest req, SolrParams params) {
+		// if (!docList.hasScores())
+		// return docList;
 
 		int len = docList.size();
 		if (len < 1) // do nothing
 			return docList;
-		ParserChunker2MatcherProcessor pos = ParserChunker2MatcherProcessor .getInstance();
+		ParserChunker2MatcherProcessor pos = ParserChunker2MatcherProcessor.getInstance();
 
 		DocIterator iter = docList.iterator();
 		float[] syntMatchScoreArr = new float[len];
 		String requestExpression = req.getParamString();
 		String[] exprParts = requestExpression.split("&");
-		for(String part: exprParts){
+		for (String part : exprParts) {
 			if (part.startsWith("q="))
-				requestExpression = part;			
+				requestExpression = part;
 		}
 		String fieldNameQuery = StringUtils.substringBetween(requestExpression, "=", ":");
 		// extract phrase query (in double-quotes)
 		String[] queryParts = requestExpression.split("\"");
-		if  (queryParts.length>=2 && queryParts[1].length()>5)
-			requestExpression = queryParts[1].replace('+', ' ');	
-		else if (requestExpression.indexOf(":") > -1 ) {// still field-based expression
-			requestExpression = requestExpression.replaceAll(fieldNameQuery+":", "").replace('+',' ').replaceAll("  ", " ").replace("q=", "");
+		if (queryParts.length >= 2 && queryParts[1].length() > 5)
+			requestExpression = queryParts[1].replace('+', ' ');
+		else if (requestExpression.indexOf(":") > -1) {// still field-based
+														// expression
+			requestExpression = requestExpression.replaceAll(fieldNameQuery + ":", "").replace('+', ' ')
+					.replaceAll("  ", " ").replace("q=", "");
 		}
-		
-		if (fieldNameQuery ==null)
+
+		if (fieldNameQuery == null)
 			return docList;
-		if (requestExpression==null || requestExpression.length()<5  || requestExpression.split(" ").length<3)
+		if (requestExpression == null || requestExpression.length() < 5 || requestExpression.split(" ").length < 3)
 			return docList;
-		int[] docIDsHits = new int[len]; 
+		int[] docIDsHits = new int[len];
 
 		IndexReader indexReader = req.getSearcher().getIndexReader();
-		List<Integer> bestMatchesDocIds = new ArrayList<Integer>(); List<Float> bestMatchesScore = new ArrayList<Float>();
-		List<Pair<Integer, Float>> docIdsScores = new ArrayList<Pair<Integer, Float>> ();
+		List<Integer> bestMatchesDocIds = new ArrayList<Integer>();
+		List<Float> bestMatchesScore = new ArrayList<Float>();
+		List<Pair<Integer, Float>> docIdsScores = new ArrayList<Pair<Integer, Float>>();
 		try {
-			for (int i=0; i<docList.size(); ++i) {
+			for (int i = 0; i < docList.size(); ++i) {
 				int docId = iter.nextDoc();
 				docIDsHits[i] = docId;
 				Document doc = indexReader.document(docId);
 
 				// get text for event
 				String answerText = doc.get(fieldNameQuery);
-				if (answerText==null)
+				if (answerText == null)
 					continue;
-				SentencePairMatchResult matchResult = pos.assessRelevance( requestExpression , answerText);
-				float syntMatchScore =  new Double(parseTreeChunkListScorer.getParseTreeChunkListScore(matchResult.getMatchResult())).floatValue();
+				SentencePairMatchResult matchResult = pos.assessRelevance(requestExpression, answerText);
+				float syntMatchScore = new Double(
+						parseTreeChunkListScorer.getParseTreeChunkListScore(matchResult.getMatchResult())).floatValue();
 				bestMatchesDocIds.add(docId);
 				bestMatchesScore.add(syntMatchScore);
-				syntMatchScoreArr[i] = (float)syntMatchScore; //*iter.score();
-				System.out.println(" Matched query = '"+requestExpression + "' with answer = '"+answerText +"' | doc_id = '"+docId);
-				System.out.println(" Match result = '"+matchResult.getMatchResult() + "' with score = '"+syntMatchScore +"';" );
+				syntMatchScoreArr[i] = (float) syntMatchScore; // *iter.score();
+				System.out.println(" Matched query = '" + requestExpression + "' with answer = '" + answerText
+						+ "' | doc_id = '" + docId);
+				System.out.println(" Match result = '" + matchResult.getMatchResult() + "' with score = '"
+						+ syntMatchScore + "';");
 				docIdsScores.add(new Pair(docId, syntMatchScore));
 			}
 
 		} catch (CorruptIndexException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-			//log.severe("Corrupt index"+e1);
+			// log.severe("Corrupt index"+e1);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-			//log.severe("File read IO / index"+e1);
+			// log.severe("File read IO / index"+e1);
 		}
-		
-		
+
 		Collections.sort(docIdsScores, new PairComparable());
-		for(int i = 0; i<docIdsScores.size(); i++){
+		for (int i = 0; i < docIdsScores.size(); i++) {
 			bestMatchesDocIds.set(i, docIdsScores.get(i).getFirst());
 			bestMatchesScore.set(i, docIdsScores.get(i).getSecond());
 		}
 		System.out.println(bestMatchesScore);
 		float maxScore = docList.maxScore(); // do not change
 		int limit = docIdsScores.size();
-		int start = 0; 
+		int start = 0;
 		DocSlice ds = null;
 
-		ds = new DocSlice(start, limit, 
-				ArrayUtils.toPrimitive(bestMatchesDocIds.toArray(new Integer[0])), 
-				ArrayUtils.toPrimitive(bestMatchesScore.toArray(new Float[0])), 
-				bestMatchesDocIds.size(), maxScore);
-
-
+		ds = new DocSlice(start, limit, ArrayUtils.toPrimitive(bestMatchesDocIds.toArray(new Integer[0])),
+				ArrayUtils.toPrimitive(bestMatchesScore.toArray(new Float[0])), bestMatchesDocIds.size(), maxScore);
 
 		return ds;
 	}
 
-
-	public void handleRequestBody1(SolrQueryRequest req, SolrQueryResponse rsp)
-	throws Exception {
+	public void handleRequestBody1(SolrQueryRequest req, SolrQueryResponse rsp) throws Exception {
 
 		// extract params from request
 		SolrParams params = req.getParams();
 		String q = params.get(CommonParams.Q);
 		String[] fqs = params.getParams(CommonParams.FQ);
 		int start = 0;
-		try { start = Integer.parseInt(params.get(CommonParams.START)); } 
-		catch (Exception e) { /* default */ }
+		try {
+			start = Integer.parseInt(params.get(CommonParams.START));
+		} catch (Exception e) {
+			/* default */ }
 		int rows = 0;
-		try { rows = Integer.parseInt(params.get(CommonParams.ROWS)); } 
-		catch (Exception e) { /* default */ }
-		//SolrPluginUtils.setReturnFields(req, rsp);
+		try {
+			rows = Integer.parseInt(params.get(CommonParams.ROWS));
+		} catch (Exception e) {
+			/* default */ }
+		// SolrPluginUtils.setReturnFields(req, rsp);
 
 		// build initial data structures
 
 		SolrDocumentList results = new SolrDocumentList();
 		SolrIndexSearcher searcher = req.getSearcher();
-		Map<String,SchemaField> fields = req.getSchema().getFields();
+		Map<String, SchemaField> fields = req.getSchema().getFields();
 		int ndocs = start + rows;
 		Filter filter = buildFilter(fqs, req);
 		Set<Integer> alreadyFound = new HashSet<Integer>();
 
 		// invoke the various sub-handlers in turn and return results
-		doSearch1(results, searcher, q, filter, ndocs, req, 
-				fields, alreadyFound);
+		doSearch1(results, searcher, q, filter, ndocs, req, fields, alreadyFound);
 
 		// ... more sub-handler calls here ...
 
@@ -247,7 +246,7 @@ public class SyntGenRequestHandler extends SearchHandler {
 		float maxScore = 0.0F;
 		int numFound = 0;
 		List<SolrDocument> slice = new ArrayList<SolrDocument>();
-		for (Iterator<SolrDocument> it = results.iterator(); it.hasNext(); ) {
+		for (Iterator<SolrDocument> it = results.iterator(); it.hasNext();) {
 			SolrDocument sdoc = it.next();
 			Float score = (Float) sdoc.getFieldValue("score");
 			if (maxScore < score) {
@@ -267,9 +266,7 @@ public class SyntGenRequestHandler extends SearchHandler {
 
 	}
 
-
-	private Filter buildFilter(String[] fqs, SolrQueryRequest req) 
-	throws IOException, ParseException {
+	private Filter buildFilter(String[] fqs, SolrQueryRequest req) throws IOException, ParseException {
 		if (fqs != null && fqs.length > 0) {
 			BooleanQuery fquery = new BooleanQuery();
 			for (int i = 0; i < fqs.length; i++) {
@@ -292,33 +289,26 @@ public class SyntGenRequestHandler extends SearchHandler {
 		return null;
 	}
 
-	private void doSearch1(SolrDocumentList results,
-			SolrIndexSearcher searcher, String q, Filter filter, 
-			int ndocs, SolrQueryRequest req,
-			Map<String,SchemaField> fields, Set<Integer> alreadyFound) 
-	throws IOException {
+	private void doSearch1(SolrDocumentList results, SolrIndexSearcher searcher, String q, Filter filter, int ndocs,
+			SolrQueryRequest req, Map<String, SchemaField> fields, Set<Integer> alreadyFound) throws IOException {
 
 		// build custom query and extra fields
-		Query query = null; //buildCustomQuery1(q);
-		Map<String,Object> extraFields = new HashMap<String,Object>();
+		Query query = null; // buildCustomQuery1(q);
+		Map<String, Object> extraFields = new HashMap<String, Object>();
 		extraFields.put("search_type", "search1");
-		boolean includeScore = 
-			req.getParams().get(CommonParams.FL).contains("score");
+		boolean includeScore = req.getParams().get(CommonParams.FL).contains("score");
 
-		int  maxDocsPerSearcherType = 0;
+		int maxDocsPerSearcherType = 0;
 		float maprelScoreCutoff = 2.0f;
-		append(results, searcher.search(
-				query, filter, maxDocsPerSearcherType).scoreDocs,
-				alreadyFound, fields, extraFields, maprelScoreCutoff , 
-				searcher.getIndexReader(), includeScore);
+		append(results, searcher.search(query, filter, maxDocsPerSearcherType).scoreDocs, alreadyFound, fields,
+				extraFields, maprelScoreCutoff, searcher.getIndexReader(), includeScore);
 	}
 
 	// ... more doSearchXXX() calls here ...
 
-	private void append(SolrDocumentList results, ScoreDoc[] more, 
-			Set<Integer> alreadyFound, Map<String,SchemaField> fields,
-			Map<String,Object> extraFields, float scoreCutoff, 
-			IndexReader reader, boolean includeScore) throws IOException {
+	private void append(SolrDocumentList results, ScoreDoc[] more, Set<Integer> alreadyFound,
+			Map<String, SchemaField> fields, Map<String, Object> extraFields, float scoreCutoff, IndexReader reader,
+			boolean includeScore) throws IOException {
 		for (ScoreDoc hit : more) {
 			if (alreadyFound.contains(hit.doc)) {
 				continue;
@@ -341,14 +331,15 @@ public class SyntGenRequestHandler extends SearchHandler {
 			alreadyFound.add(hit.doc);
 		}
 	}
+
 	public class PairComparable implements Comparator<Pair> {
 		// @Override
 		public int compare(Pair o1, Pair o2) {
 			int b = -2;
-			if ( o1.getSecond() instanceof Float && o2.getSecond() instanceof Float){
+			if (o1.getSecond() instanceof Float && o2.getSecond() instanceof Float) {
 
-				b =  (((Float)o1.getSecond()> (Float)o2.getSecond()) ? -1
-						: (((Float)o1.getSecond() == (Float)o2.getSecond()) ? 0 : 1));
+				b = (((Float) o1.getSecond() > (Float) o2.getSecond()) ? -1
+						: (((Float) o1.getSecond() == (Float) o2.getSecond()) ? 0 : 1));
 			}
 			return b;
 		}
@@ -359,5 +350,10 @@ public class SyntGenRequestHandler extends SearchHandler {
 /*
  * 
  * 
- * http://localhost:8080/solr/syntgen/?q=add-style-to-your-every-day-fresh-design-iphone-cases&t1=Personalized+iPhone+Cases&d1=Add+style+to+your+every+day+with+a+custom+iPhone+case&t2=Personalized+iPhone+Cases&d2=Add+style+to+your+every+day+with+a+custom+iPhone+case&t3=Personalized+iPhone+Cases&d3=Add+style+to+your+every+day+with+a+custom+iPhone+case&t4=Personalized+iPhone+Cases&d4=add+style+to+your+every+day+with+a+custom+iPhone+case
- * */
+ * http://localhost:8080/solr/syntgen/?q=add-style-to-your-every-day-fresh-
+ * design-iphone-cases&t1=Personalized+iPhone+Cases&d1=Add+style+to+your+every+
+ * day+with+a+custom+iPhone+case&t2=Personalized+iPhone+Cases&d2=Add+style+to+
+ * your+every+day+with+a+custom+iPhone+case&t3=Personalized+iPhone+Cases&d3=Add+
+ * style+to+your+every+day+with+a+custom+iPhone+case&t4=Personalized+iPhone+
+ * Cases&d4=add+style+to+your+every+day+with+a+custom+iPhone+case
+ */

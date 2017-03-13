@@ -37,19 +37,18 @@ public class DocClassifierTrainingSetVerifier {
 	public static String resourceDir = new File(".").getAbsolutePath().replace("/.", "") + "/src/main/resources";
 	DocClassifier classifier = null;
 	private String sourceDir = null, destinationDir = null;
-	
 
 	protected ArrayList<File> queue = new ArrayList<File>();
 
 	protected Tika tika = new Tika();
+
 	public DocClassifierTrainingSetVerifier(String resource) {
 
-		
 		classifier = new DocClassifier("", new JSONObject());
 
 	}
-	private int FRAGMENT_LENGTH = 500;
 
+	private int FRAGMENT_LENGTH = 500;
 
 	protected void addFiles(File file) {
 
@@ -74,90 +73,83 @@ public class DocClassifierTrainingSetVerifier {
 
 	public void processDirectory(String fileName) throws IOException {
 		List<String[]> report = new ArrayList<String[]>();
-		report.add(new String[] { "filename", "category",
-				"confirmed?" ,
-		});
-		
+		report.add(new String[] { "filename", "category", "confirmed?", });
+
 		addFiles(new File(fileName));
-		//FileUtils.deleteDirectory(new File(destinationDir));
-		//FileUtils.forceMkdir(new File(destinationDir));
-		
+		// FileUtils.deleteDirectory(new File(destinationDir));
+		// FileUtils.forceMkdir(new File(destinationDir));
 
 		for (File f : queue) {
 			String content = null;
 			try {
-				System.out.println("processing "+f.getName());
-				
-				//if (f.getName().indexOf(".html")<0)
-					//continue;
-				classifier = new DocClassifier("", new JSONObject());
+				System.out.println("processing " + f.getName());
 
+				// if (f.getName().indexOf(".html")<0)
+				// continue;
+				classifier = new DocClassifier("", new JSONObject());
 
 				content = tika.parseToString(f);
 
-				//classifier.runExpressionsOnContent(content);
+				// classifier.runExpressionsOnContent(content);
 				List<String> resultsClassif = classifier.getEntityOrClassFromText(content);
 				Boolean bRejected = true;
-				if (resultsClassif.size()==1 
-						&& resultsClassif.get(0).equals(
-								ClassifierTrainingSetIndexer.getCategoryFromFilePath(f.getAbsolutePath()))){
+				if (resultsClassif.size() == 1 && resultsClassif.get(0)
+						.equals(ClassifierTrainingSetIndexer.getCategoryFromFilePath(f.getAbsolutePath()))) {
 					String destFileName = f.getAbsolutePath().replace(sourceDir, destinationDir);
 					FileUtils.copyFile(f, new File(destFileName));
 					bRejected = false;
 				} else {
-					System.out.println("File "+ f.getAbsolutePath() + "\n classified as "+
-							resultsClassif.toString() + " but should be " + ClassifierTrainingSetIndexer.getCategoryFromFilePath(f.getAbsolutePath()) );
+					System.out.println("File " + f.getAbsolutePath() + "\n classified as " + resultsClassif.toString()
+							+ " but should be "
+							+ ClassifierTrainingSetIndexer.getCategoryFromFilePath(f.getAbsolutePath()));
 				}
 				bRejected = !bRejected;
 				String fragment = content;
 				if (content.length() > FRAGMENT_LENGTH)
 					fragment = content.substring(0, FRAGMENT_LENGTH);
 				fragment = fragment.replaceAll("\n", " ").trim();
-				report.add(new String[] { f.getName(),  resultsClassif.toString(), ClassifierTrainingSetIndexer.getCategoryFromFilePath(f.getAbsolutePath()),
-						(bRejected).toString(),   
-						fragment});
-				ProfileReaderWriter.writeReport(report,  "DocClassifierMultiLingRpt.csv");
+				report.add(new String[] { f.getName(), resultsClassif.toString(),
+						ClassifierTrainingSetIndexer.getCategoryFromFilePath(f.getAbsolutePath()),
+						(bRejected).toString(), fragment });
+				ProfileReaderWriter.writeReport(report, "DocClassifierMultiLingRpt.csv");
 
 			} catch (TikaException e) {
-				System.out.println("Tika problem with file"
-						+ f.getAbsolutePath());
+				System.out.println("Tika problem with file" + f.getAbsolutePath());
 			} catch (Exception ee) {
 				ee.printStackTrace();
 			}
 		}
-
 
 		queue.clear();
 	}
 
 	public static void main(String[] args) {
 		if (args.length < 2) {
-			System.err
-			.println("Verifier accepts two arguments: [0] - input 'training_corpus' folder, "
+			System.err.println("Verifier accepts two arguments: [0] - input 'training_corpus' folder, "
 					+ "[1] - output 'training_corpus' folder . "
-					+ "All paths should include category name as a part of full path string, such as '/computing/' " );
+					+ "All paths should include category name as a part of full path string, such as '/computing/' ");
 			System.exit(0);
 		}
 
 		DocClassifierTrainingSetVerifier runner = new DocClassifierTrainingSetVerifier(null);
-		runner.sourceDir = args[0]; runner.destinationDir = args[1];
+		runner.sourceDir = args[0];
+		runner.destinationDir = args[1];
 		runner.sourceDir =
-			//	"/Users/borisgalitsky/Documents/svm_tk_july2015/milkyway/eval_corpus_multiling";
+				// "/Users/borisgalitsky/Documents/svm_tk_july2015/milkyway/eval_corpus_multiling";
 				"/Users/borisgalitsky/Documents/merged_svm_tk/milkyway/training_corpus_new_multilingual";
-		runner.destinationDir =
-				"/Users/borisgalitsky/Documents/svm_tk_july2015/milkyway/training_corpus_multilingual_verif";
-		//	"/Users/borisgalitsky/Documents/svm_tk_july2015/milkyway/eval_corpus_multiling_bogus";
+		runner.destinationDir = "/Users/borisgalitsky/Documents/svm_tk_july2015/milkyway/training_corpus_multilingual_verif";
+		// "/Users/borisgalitsky/Documents/svm_tk_july2015/milkyway/eval_corpus_multiling_bogus";
 
 		try {
-			runner.processDirectory( runner.sourceDir);
+			runner.processDirectory(runner.sourceDir);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 
 	}
 }
 
 /*
-/Users/borisgalitsky/Documents/workspace/deepContentInspection/src/main/resources/docs/netflix
+ * /Users/borisgalitsky/Documents/workspace/deepContentInspection/src/main/
+ * resources/docs/netflix
  */

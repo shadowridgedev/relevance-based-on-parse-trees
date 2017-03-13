@@ -16,7 +16,6 @@
  */
 package opennlp.tools.similarity.apps.solr;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -49,66 +48,62 @@ import opennlp.tools.similarity.apps.BingQueryRunner;
 import opennlp.tools.similarity.apps.Fragment;
 import opennlp.tools.similarity.apps.HitBase;
 
-public class WordDocBuilder{
+public class WordDocBuilder {
 	protected static final String IMG_REL_PATH = "images/";
 	protected BingQueryRunner imageSearcher = new BingQueryRunner();
 	protected String absPath = null;
-	
-	public WordDocBuilder(){
-	absPath = new File(".").getAbsolutePath();
-	absPath = absPath.substring(0, absPath.length()-1);
+
+	public WordDocBuilder() {
+		absPath = new File(".").getAbsolutePath();
+		absPath = absPath.substring(0, absPath.length() - 1);
 	}
-	
-	public String buildWordDoc(List<HitBase> content, String title){
-		
-		String outputDocFinename =  absPath+"/written/"+ title.replace(' ','_').replace('\"', ' ').trim()+ ".docx";
-		
+
+	public String buildWordDoc(List<HitBase> content, String title) {
+
+		String outputDocFinename = absPath + "/written/" + title.replace(' ', '_').replace('\"', ' ').trim() + ".docx";
+
 		WordprocessingMLPackage wordMLPackage;
 		try {
 			wordMLPackage = WordprocessingMLPackage.createPackage();
 			wordMLPackage.getMainDocumentPart().addStyledParagraphOfText("Title", title);
-			for(HitBase para: content){
-				
-				wordMLPackage.getMainDocumentPart().addStyledParagraphOfText("Subtitle",
-						para.getTitle());
+			for (HitBase para : content) {
+
+				wordMLPackage.getMainDocumentPart().addStyledParagraphOfText("Subtitle", para.getTitle());
 				String paraText = para.getFragments().toString().replace("[", "").replace("]", "").replace(" | ", "")
-						.replace(".,", ".").replace(".\"", "\"").replace(". .", ".")
-						.replace(",.", ".");
+						.replace(".,", ".").replace(".\"", "\"").replace(". .", ".").replace(",.", ".");
 				wordMLPackage.getMainDocumentPart().addParagraphOfText(paraText);
-				
+
 				addImageByImageTitleToPackage(wordMLPackage, para.getTitle());
 			}
-			
-			//File file = new File("C:/ma/personal/argCamp.png");
-	        //byte[] bytes = convertImageToByteArray(file);
-	        //addImageToPackage(wordMLPackage, bytes);
-	        
+
+			// File file = new File("C:/ma/personal/argCamp.png");
+			// byte[] bytes = convertImageToByteArray(file);
+			// addImageToPackage(wordMLPackage, bytes);
+
 			wordMLPackage.save(new File(outputDocFinename));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return outputDocFinename;
 	}
-	
-	private void addImageByImageTitleToPackage(
-			WordprocessingMLPackage wordMLPackage, String title) {
+
+	private void addImageByImageTitleToPackage(WordprocessingMLPackage wordMLPackage, String title) {
 		List<HitBase> res = imageSearcher.runImageSearch(title);
-		for (HitBase anr : res){
+		for (HitBase anr : res) {
 			String url = anr.getUrl();
-			addImageByURLToPackage( wordMLPackage, url);
+			addImageByURLToPackage(wordMLPackage, url);
 			return;
 		}
-		
+
 	}
 
-	private void addImageByURLToPackage(WordprocessingMLPackage wordMLPackage,
-            String url){
+	private void addImageByURLToPackage(WordprocessingMLPackage wordMLPackage, String url) {
 		String destinationFile = url.replace("http://", "").replace("/", "_");
-		saveImageFromTheWeb(url, absPath+IMG_REL_PATH+destinationFile);
-		File file = new File(absPath+destinationFile);
-        try {
+		saveImageFromTheWeb(url, absPath + IMG_REL_PATH + destinationFile);
+		File file = new File(absPath + destinationFile);
+		try {
 			byte[] bytes = convertImageToByteArray(file);
 			addImageToPackage(wordMLPackage, bytes);
 		} catch (FileNotFoundException e) {
@@ -122,115 +117,112 @@ public class WordDocBuilder{
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
-     *  Docx4j contains a utility method to create an image part from an array of
-     *  bytes and then adds it to the given package. In order to be able to add this
-     *  image to a paragraph, we have to convert it into an inline object. For this
-     *  there is also a method, which takes a filename hint, an alt-text, two ids
-     *  and an indication on whether it should be embedded or linked to.
-     *  One id is for the drawing object non-visual properties of the document, and
-     *  the second id is for the non visual drawing properties of the picture itself.
-     *  Finally we add this inline object to the paragraph and the paragraph to the
-     *  main document of the package.
-     *
-     *  @param wordMLPackage The package we want to add the image to
-     *  @param bytes         The bytes of the image
-     *  @throws Exception    Sadly the createImageInline method throws an Exception
-     *                       (and not a more specific exception type)
-     *                       
-     *                       
-     */
-    protected static void addImageToPackage(WordprocessingMLPackage wordMLPackage,
-                            byte[] bytes) throws Exception {
-        BinaryPartAbstractImage imagePart =
-            BinaryPartAbstractImage.createImagePart(wordMLPackage, bytes);
- 
-        int docPrId = 1;
-        int cNvPrId = 2;
-            Inline inline = imagePart.createImageInline("Filename hint",
-                "Alternative text", docPrId, cNvPrId, false);
- 
-        P paragraph = addInlineImageToParagraph(inline);
- 
-        wordMLPackage.getMainDocumentPart().addObject(paragraph);
-    }
- 
-    /**
-     *  We create an object factory and use it to create a paragraph and a run.
-     *  Then we add the run to the paragraph. Next we create a drawing and
-     *  add it to the run. Finally we add the inline object to the drawing and
-     *  return the paragraph.
-     *
-     * @param   inline The inline object containing the image.
-     * @return  the paragraph containing the image
-     */
-    private static P addInlineImageToParagraph(Inline inline) {
-        // Now add the in-line image to a paragraph
-    	org.docx4j.wml.ObjectFactory factory = new org.docx4j.wml.ObjectFactory();
-        P paragraph = factory.createP();
-        R run = factory.createR();
-        paragraph.getContent().add(run);
-        Drawing drawing = factory.createDrawing();
-        run.getContent().add(drawing);
-        drawing.getAnchorOrInline().add(inline);
-        return paragraph;
-    }
-    
-    private static CTFootnotes createFootnote(P paragraph){
-    	org.docx4j.wml.ObjectFactory factory = new org.docx4j.wml.ObjectFactory();
-    	CTFootnotes fn = factory.createCTFootnotes();
-    	fn.setParent(paragraph);
-    	
-    	//STFtnEdn sTFtnEdn = factory.createSTFtnEdn();
-    	CTFtnEdn fe = factory.createCTFtnEdn();
-    	fe.setParent(paragraph);
-    	return fn;
-    }
- 
-    /**
-     * Convert the image from the file into an array of bytes.
-     *
-     * @param file  the image file to be converted
-     * @return      the byte array containing the bytes from the image
-     * @throws FileNotFoundException
-     * @throws IOException
-     */
-    protected static byte[] convertImageToByteArray(File file)
-            throws FileNotFoundException, IOException {
-        InputStream is = new FileInputStream(file );
-        long length = file.length();
-        // You cannot create an array using a long, it needs to be an int.
-        if (length > Integer.MAX_VALUE) {
-            System.out.println("File too large!!");
-        }
-        byte[] bytes = new byte[(int)length];
-        int offset = 0;
-        int numRead = 0;
-        while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
-            offset += numRead;
-        }
-        // Ensure all the bytes have been read
-        if (offset < bytes.length) {
-            System.out.println("Could not completely read file "
-                        +file.getName());
-        }
-        is.close();
-        return bytes;
-    }
-    
-    
-    
-    public static void saveImageFromTheWeb(String imageUrl, String destinationFile) {
+	 * Docx4j contains a utility method to create an image part from an array of
+	 * bytes and then adds it to the given package. In order to be able to add
+	 * this image to a paragraph, we have to convert it into an inline object.
+	 * For this there is also a method, which takes a filename hint, an
+	 * alt-text, two ids and an indication on whether it should be embedded or
+	 * linked to. One id is for the drawing object non-visual properties of the
+	 * document, and the second id is for the non visual drawing properties of
+	 * the picture itself. Finally we add this inline object to the paragraph
+	 * and the paragraph to the main document of the package.
+	 *
+	 * @param wordMLPackage
+	 *            The package we want to add the image to
+	 * @param bytes
+	 *            The bytes of the image
+	 * @throws Exception
+	 *             Sadly the createImageInline method throws an Exception (and
+	 *             not a more specific exception type)
+	 * 
+	 * 
+	 */
+	protected static void addImageToPackage(WordprocessingMLPackage wordMLPackage, byte[] bytes) throws Exception {
+		BinaryPartAbstractImage imagePart = BinaryPartAbstractImage.createImagePart(wordMLPackage, bytes);
+
+		int docPrId = 1;
+		int cNvPrId = 2;
+		Inline inline = imagePart.createImageInline("Filename hint", "Alternative text", docPrId, cNvPrId, false);
+
+		P paragraph = addInlineImageToParagraph(inline);
+
+		wordMLPackage.getMainDocumentPart().addObject(paragraph);
+	}
+
+	/**
+	 * We create an object factory and use it to create a paragraph and a run.
+	 * Then we add the run to the paragraph. Next we create a drawing and add it
+	 * to the run. Finally we add the inline object to the drawing and return
+	 * the paragraph.
+	 *
+	 * @param inline
+	 *            The inline object containing the image.
+	 * @return the paragraph containing the image
+	 */
+	private static P addInlineImageToParagraph(Inline inline) {
+		// Now add the in-line image to a paragraph
+		org.docx4j.wml.ObjectFactory factory = new org.docx4j.wml.ObjectFactory();
+		P paragraph = factory.createP();
+		R run = factory.createR();
+		paragraph.getContent().add(run);
+		Drawing drawing = factory.createDrawing();
+		run.getContent().add(drawing);
+		drawing.getAnchorOrInline().add(inline);
+		return paragraph;
+	}
+
+	private static CTFootnotes createFootnote(P paragraph) {
+		org.docx4j.wml.ObjectFactory factory = new org.docx4j.wml.ObjectFactory();
+		CTFootnotes fn = factory.createCTFootnotes();
+		fn.setParent(paragraph);
+
+		// STFtnEdn sTFtnEdn = factory.createSTFtnEdn();
+		CTFtnEdn fe = factory.createCTFtnEdn();
+		fe.setParent(paragraph);
+		return fn;
+	}
+
+	/**
+	 * Convert the image from the file into an array of bytes.
+	 *
+	 * @param file
+	 *            the image file to be converted
+	 * @return the byte array containing the bytes from the image
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	protected static byte[] convertImageToByteArray(File file) throws FileNotFoundException, IOException {
+		InputStream is = new FileInputStream(file);
+		long length = file.length();
+		// You cannot create an array using a long, it needs to be an int.
+		if (length > Integer.MAX_VALUE) {
+			System.out.println("File too large!!");
+		}
+		byte[] bytes = new byte[(int) length];
+		int offset = 0;
+		int numRead = 0;
+		while (offset < bytes.length && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
+			offset += numRead;
+		}
+		// Ensure all the bytes have been read
+		if (offset < bytes.length) {
+			System.out.println("Could not completely read file " + file.getName());
+		}
+		is.close();
+		return bytes;
+	}
+
+	public static void saveImageFromTheWeb(String imageUrl, String destinationFile) {
 		try {
 			URL url = new URL(imageUrl);
 			InputStream is = url.openStream();
 			if (!new File(destinationFile).exists()) {
 				new File(destinationFile).createNewFile();
 			}
-			
+
 			OutputStream os = new FileOutputStream(destinationFile);
-			
 
 			byte[] b = new byte[2048];
 			int length;
@@ -252,19 +244,19 @@ public class WordDocBuilder{
 			e.printStackTrace();
 		}
 	}
-    
-    public static void main(String[] args){
-    	WordDocBuilder b = new WordDocBuilder();
-    	List<HitBase> content = new ArrayList<HitBase>();
-    	for(int i = 0; i<10; i++){
-    		HitBase h = new HitBase();
-    		h.setTitle("albert einstein "+i);
-    		List<Fragment> frs = new ArrayList<Fragment>();
-    		frs.add(new Fragment(" content "+i, 0));
-    		h.setFragments(frs);
-    		content.add(h);
-    	}
-    	
-    	b.buildWordDoc(content, "mytitle");
-    }
+
+	public static void main(String[] args) {
+		WordDocBuilder b = new WordDocBuilder();
+		List<HitBase> content = new ArrayList<HitBase>();
+		for (int i = 0; i < 10; i++) {
+			HitBase h = new HitBase();
+			h.setTitle("albert einstein " + i);
+			List<Fragment> frs = new ArrayList<Fragment>();
+			frs.add(new Fragment(" content " + i, 0));
+			h.setFragments(frs);
+			content.add(h);
+		}
+
+		b.buildWordDoc(content, "mytitle");
+	}
 }

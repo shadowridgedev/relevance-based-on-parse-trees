@@ -15,8 +15,7 @@ public class EntityExtractionResult {
 	public List<List<ParseTreeNode>> extractedNONSentimentPhrases;
 	public List<String> extractedNONSentimentPhrasesStr;
 	public List<Float> sentimentProfile;
-	
-	
+
 	public List<String> getExtractedSentimentPhrasesStr() {
 		return extractedSentimentPhrasesStr;
 	}
@@ -24,21 +23,22 @@ public class EntityExtractionResult {
 	public void setExtractedSentimentPhrasesStr(List<String> extractedSentimentPhrasesStr) {
 		this.extractedSentimentPhrasesStr = extractedSentimentPhrasesStr;
 	}
+
 	/*
 	 * Licensed to the Apache Software Foundation (ASF) under one or more
-	 * contributor license agreements.  See the NOTICE file distributed with
-	 * this work for additional information regarding copyright ownership.
-	 * The ASF licenses this file to You under the Apache License, Version 2.0
-	 * (the "License"); you may not use this file except in compliance with
-	 * the License. You may obtain a copy of the License at
+	 * contributor license agreements. See the NOTICE file distributed with this
+	 * work for additional information regarding copyright ownership. The ASF
+	 * licenses this file to You under the Apache License, Version 2.0 (the
+	 * "License"); you may not use this file except in compliance with the
+	 * License. You may obtain a copy of the License at
 	 *
-	 *     http://www.apache.org/licenses/LICENSE-2.0
+	 * http://www.apache.org/licenses/LICENSE-2.0
 	 *
 	 * Unless required by applicable law or agreed to in writing, software
-	 * distributed under the License is distributed on an "AS IS" BASIS,
-	 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	 * See the License for the specific language governing permissions and
-	 * limitations under the License.
+	 * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+	 * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+	 * License for the specific language governing permissions and limitations
+	 * under the License.
 	 */
 	public List<List<ParseTreeNode>> getExtractedNONSentimentPhrases() {
 		return extractedNONSentimentPhrases;
@@ -104,22 +104,22 @@ public class EntityExtractionResult {
 	}
 
 	public void setSentimentProfile(List<Float> sentimentProfile) {
-	    this.sentimentProfile = sentimentProfile;
-    }
+		this.sentimentProfile = sentimentProfile;
+	}
 
 	public List<Float> getSentimentProfile() {
 		return sentimentProfile;
 	}
 
 	public void setExtractedNerPhrases(List<List<ParseTreeNode>> extractedNerPhrases) {
-	    this.extractedNerPhrases = extractedNerPhrases;
-	    
-    }
+		this.extractedNerPhrases = extractedNerPhrases;
+
+	}
 
 	public void setExtractedNerPhrasesStr(List<String> extractedNerPhrasesStr) {
-	    this.extractedNerPhrasesStr = extractedNerPhrasesStr;
-	    
-    }
+		this.extractedNerPhrasesStr = extractedNerPhrasesStr;
+
+	}
 
 	public List<List<ParseTreeNode>> getExtractedNerPhrases() {
 		return extractedNerPhrases;
@@ -130,22 +130,22 @@ public class EntityExtractionResult {
 	}
 
 	public void setExtractedNerPhraseTags(List<String> extractedNerPhraseTags) {
-	    this.extractedNerPhraseTags = extractedNerPhraseTags;	    
-    }
+		this.extractedNerPhraseTags = extractedNerPhraseTags;
+	}
 
 	public List<String> getExtractedNerPhraseTags() {
-	    return this.extractedNerPhraseTags;    
-    }
+		return this.extractedNerPhraseTags;
+	}
 
 	public void setExtractedNerExactPhrases(List<List<ParseTreeNode>> extractedNerExactPhrases) {
-	   this.extractedNerExactPhrases = extractedNerExactPhrases;
-	    
-    }
+		this.extractedNerExactPhrases = extractedNerExactPhrases;
+
+	}
 
 	public void setExtractedNerExactStr(List<String> extractedNerExactStr) {
-	    this.extractedNerExactStr = extractedNerExactStr;
-	    
-    }
+		this.extractedNerExactStr = extractedNerExactStr;
+
+	}
 
 	public List<List<ParseTreeNode>> getExtractedNerExactPhrases() {
 		return extractedNerExactPhrases;
@@ -154,5 +154,5 @@ public class EntityExtractionResult {
 	public List<String> getExtractedNerExactStr() {
 		return extractedNerExactStr;
 	}
-	
+
 }

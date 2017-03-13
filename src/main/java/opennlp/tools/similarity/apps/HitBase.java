@@ -27,8 +27,7 @@ import opennlp.tools.similarity.apps.utils.StringDistanceMeasurer;
 import org.apache.commons.lang.StringUtils;
 
 public class HitBase {
-	private static final Logger LOG = Logger
-			.getLogger("opennlp.tools.similarity.apps.HitBase");
+	private static final Logger LOG = Logger.getLogger("opennlp.tools.similarity.apps.HitBase");
 
 	private String abstractText;
 
@@ -160,7 +159,7 @@ public class HitBase {
 
 	public String toString() {
 		// return "\n"+this.getUrl()+" | " +this.getTitle()+ " | "+
-				// this.abstractText ;
+		// this.abstractText ;
 		if (this.getFragments() != null && this.getFragments().size() > 0)
 			return this.getFragments().toString();
 		else
@@ -193,7 +192,7 @@ public class HitBase {
 		Boolean pBreak = true;
 		for (HitBase hit : hits) {
 			try {
-				if (hit.getFragments()==null)	
+				if (hit.getFragments() == null)
 					continue;
 				String fragm = hit.getFragments().toString();
 				if (fragm.length() > 15) {
@@ -212,19 +211,18 @@ public class HitBase {
 			}
 
 		}
-		return buf.toString().replace("[", "").replace("]", "").replace(" | ", "")
-				.replace(".,", ".").replace(".\"", "\"").replace(". .", ".")
-				.replace(",.", ".");
+		return buf.toString().replace("[", "").replace("]", "").replace(" | ", "").replace(".,", ".")
+				.replace(".\"", "\"").replace(". .", ".").replace(",.", ".");
 	}
-	
+
 	public static String produceReferenceSection(List<HitBase> hits) {
 		StringBuffer buf = new StringBuffer();
 		for (HitBase hit : hits) {
 			try {
-				if (hit.getUrl()==null)	
+				if (hit.getUrl() == null)
 					continue;
-				buf.append(hit.getUrl());					
-			
+				buf.append(hit.getUrl());
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -246,7 +244,8 @@ public class HitBase {
 					if (StringUtils.isEmpty(title1) || StringUtils.isEmpty(title2))
 						continue;
 					if (meas.measureStringDistance(title1, title2) > imageDupeThresh) {
-						idsToRemove.add(j); // dupes found, later list member to be deleted
+						idsToRemove.add(j); // dupes found, later list member to
+											// be deleted
 					}
 				}
 			for (int i = 0; i < hits.size(); i++)
@@ -262,7 +261,6 @@ public class HitBase {
 		return hitsDedup;
 	}
 
-
 	public Map<String, String> getSectionHeaderContent() {
 		return sectionHeaderContent;
 	}
@@ -270,5 +268,5 @@ public class HitBase {
 	public void setSectionHeaderContent(Map<String, String> sectionHeaderContent) {
 		this.sectionHeaderContent = sectionHeaderContent;
 	}
-	
+
 }

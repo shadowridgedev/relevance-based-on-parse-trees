@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 /* ----------------------
  * JGraphAdapterDemo.java
  * ----------------------
@@ -41,7 +41,6 @@ import java.util.Set;
 
 import javax.swing.*;
 
-
 import org.jgraph.*;
 import org.jgraph.graph.*;
 
@@ -49,24 +48,23 @@ import org.jgrapht.*;
 import org.jgrapht.ext.*;
 import org.jgrapht.graph.*;
 
-
 import org.jgrapht.graph.DefaultEdge;
 
-public class ParseTreeVisualizer
-extends JApplet
-{
-	//~ Static fields/initializers ---------------------------------------------
+public class ParseTreeVisualizer extends JApplet {
+	// ~ Static fields/initializers
+	// ---------------------------------------------
 
 	private static final long serialVersionUID = 3256346823498765434L;
 	private static final Color DEFAULT_BG_COLOR = Color.decode("#FAFBFF");
 	private static final Dimension DEFAULT_SIZE = new Dimension(1200, 800);
 
-	//~ Instance fields --------------------------------------------------------
+	// ~ Instance fields
+	// --------------------------------------------------------
 
 	//
 	private JGraphModelAdapter<String, DefaultEdge> jgAdapter;
 
-	public void  showGraph(Graph g){
+	public void showGraph(Graph g) {
 		ParseTreeVisualizer applet = new ParseTreeVisualizer();
 		applet.importGraph(g);
 
@@ -89,14 +87,14 @@ extends JApplet
 		getContentPane().add(jgraph);
 		resize(DEFAULT_SIZE);
 
-		Set<String> vertexSet = ( Set<String>)g.vertexSet();
-		int count=0;
-		Map<Integer, Integer> level_count = new HashMap<Integer, Integer> ();
+		Set<String> vertexSet = (Set<String>) g.vertexSet();
+		int count = 0;
+		Map<Integer, Integer> level_count = new HashMap<Integer, Integer>();
 
-		for(String vertexStr: vertexSet){
+		for (String vertexStr : vertexSet) {
 			Integer key = 0;
 			try {
-				if (vertexStr.indexOf('#')>-1)
+				if (vertexStr.indexOf('#') > -1)
 					key = Integer.parseInt(vertexStr.split("#")[1]);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -104,19 +102,18 @@ extends JApplet
 			}
 			Integer howManyAlready = 0;
 
-			if (key>0){
-				 howManyAlready = level_count.get(key);
-				if (howManyAlready==null){
-					howManyAlready=0;
+			if (key > 0) {
+				howManyAlready = level_count.get(key);
+				if (howManyAlready == null) {
+					howManyAlready = 0;
 					level_count.put(key, 1);
 				} else {
-					level_count.put(key, howManyAlready+1);
+					level_count.put(key, howManyAlready + 1);
 				}
 			}
-			positionVertexAt(vertexStr, count+howManyAlready*50, count);
-			count+=20;
+			positionVertexAt(vertexStr, count + howManyAlready * 50, count);
+			count += 20;
 		}
-
 
 	}
 
@@ -124,10 +121,10 @@ extends JApplet
 	 * An alternative starting point for this demo, to also allow running this
 	 * applet as an application.
 	 *
-	 * @param args ignored.
+	 * @param args
+	 *            ignored.
 	 */
-	public static void main(String [] args)
-	{
+	public static void main(String[] args) {
 		ParseTreeVisualizer applet = new ParseTreeVisualizer();
 		applet.init();
 
@@ -139,10 +136,7 @@ extends JApplet
 		frame.setVisible(true);
 	}
 
-
-
-	private void adjustDisplaySettings(JGraph jg)
-	{
+	private void adjustDisplaySettings(JGraph jg) {
 		jg.setPreferredSize(DEFAULT_SIZE);
 
 		Color c = DEFAULT_BG_COLOR;
@@ -161,18 +155,12 @@ extends JApplet
 	}
 
 	@SuppressWarnings("unchecked") // FIXME hb 28-nov-05: See FIXME below
-	private void positionVertexAt(Object vertex, int x, int y)
-	{
+	private void positionVertexAt(Object vertex, int x, int y) {
 		DefaultGraphCell cell = jgAdapter.getVertexCell(vertex);
 		AttributeMap attr = cell.getAttributes();
 		Rectangle2D bounds = GraphConstants.getBounds(attr);
 
-		Rectangle2D newBounds =
-				new Rectangle2D.Double(
-						x,
-						y,
-						bounds.getWidth(),
-						bounds.getHeight());
+		Rectangle2D newBounds = new Rectangle2D.Double(x, y, bounds.getWidth(), bounds.getHeight());
 
 		GraphConstants.setBounds(attr, newBounds);
 

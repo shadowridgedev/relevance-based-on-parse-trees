@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 
 import edu.stanford.nlp.trees.Tree;
 
-
 import opennlp.tools.jsmlearning.ProfileReaderWriter;
 import opennlp.tools.parse_thicket.ParseThicket;
 import opennlp.tools.parse_thicket.apps.MultiSentenceSearchResultsProcessor;
@@ -38,29 +37,29 @@ import opennlp.tools.textsimilarity.ParseTreeChunkListScorer;
 import opennlp.tools.textsimilarity.SentencePairMatchResult;
 import opennlp.tools.textsimilarity.chunker2matcher.ParserChunker2MatcherProcessor;
 
-public class MultiSentenceKernelBasedExtendedForestSearchResultsProcessor  extends MultiSentenceKernelBasedSearchResultsProcessor{
+public class MultiSentenceKernelBasedExtendedForestSearchResultsProcessor
+		extends MultiSentenceKernelBasedSearchResultsProcessor {
 	private static Logger LOG = Logger
 			.getLogger("opennlp.tools.similarity.apps.MultiSentenceKernelBasedExtendedForestSearchResultsProcessor");
 	protected TreeExtenderByAnotherLinkedTree treeExtender = new TreeExtenderByAnotherLinkedTree();
-	
-	
-	
 
 	protected List<String[]> formTreeKernelStructure(String searchResultText, int count, List<HitBase> hits) {
-		List<String[]> treeBankBuffer = new ArrayList<String[]> ();
+		List<String[]> treeBankBuffer = new ArrayList<String[]>();
 		try {
-			// get the parses from original documents, and form the training dataset
+			// get the parses from original documents, and form the training
+			// dataset
 			ParseThicket pt = matcher.buildParseThicketFromTextWithRST(searchResultText);
 			List<String> extendedTreesDump = treeExtender.buildForestForCorefArcs(pt);
-			// if from the first half or ranked docs, then positive, otherwise negative
+			// if from the first half or ranked docs, then positive, otherwise
+			// negative
 			String posOrNeg = null;
-			if (count<hits.size()/2)
-				posOrNeg=" 1 ";
-			else 
-				posOrNeg=" -1 ";
+			if (count < hits.size() / 2)
+				posOrNeg = " 1 ";
+			else
+				posOrNeg = " -1 ";
 			// form the list of training samples
-			for(String t: extendedTreesDump){
-				treeBankBuffer.add(new String[] {posOrNeg+" |BT| "+t+ " |ET|"});
+			for (String t : extendedTreesDump) {
+				treeBankBuffer.add(new String[] { posOrNeg + " |BT| " + t + " |ET|" });
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -69,21 +68,28 @@ public class MultiSentenceKernelBasedExtendedForestSearchResultsProcessor  exten
 		return treeBankBuffer;
 	}
 
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		String query = null;
-		
-		/*" I see no meaningful distinction between complacency or complicity in the military's latest failure to uphold their own " +
-				"standards of conduct. Nor do I see a distinction between the service member who orchestrated this offense and the chain of " +
-				"command that was either oblivious to or tolerant of criminal behavior";
-		
-		query = "I am now living abroad and have health insurance from Russia. How can I avoid penalty for not having health insurance in US";
-		
-		query = "ECUADOR'S PRESIDENT RAFAEL CORREA SAYS U.S. VP JOE BIDEN WANTS HIM TO REFUSE WHISTLEBLOWER EDWARD SNOWDEN'S BID FOR ASYLUM";
-		query = "how to pay tax on foreign income from real estate";
-		*/
-		if (args!=null && args.length>0)
+
+		/*
+		 * " I see no meaningful distinction between complacency or complicity in the military's latest failure to uphold their own "
+		 * +
+		 * "standards of conduct. Nor do I see a distinction between the service member who orchestrated this offense and the chain of "
+		 * +
+		 * "command that was either oblivious to or tolerant of criminal behavior"
+		 * ;
+		 * 
+		 * query =
+		 * "I am now living abroad and have health insurance from Russia. How can I avoid penalty for not having health insurance in US"
+		 * ;
+		 * 
+		 * query =
+		 * "ECUADOR'S PRESIDENT RAFAEL CORREA SAYS U.S. VP JOE BIDEN WANTS HIM TO REFUSE WHISTLEBLOWER EDWARD SNOWDEN'S BID FOR ASYLUM"
+		 * ; query = "how to pay tax on foreign income from real estate";
+		 */
+		if (args != null && args.length > 0)
 			query = args[0];
-		
+
 		MultiSentenceKernelBasedExtendedForestSearchResultsProcessor proc = new MultiSentenceKernelBasedExtendedForestSearchResultsProcessor();
 		proc.setKernelPath("C:\\stanford-corenlp\\tree_kernel\\");
 		proc.runSearchViaAPI(query);

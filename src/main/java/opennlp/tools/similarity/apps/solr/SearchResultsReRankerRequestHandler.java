@@ -62,50 +62,43 @@ import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 
-
-
 public class SearchResultsReRankerRequestHandler extends SearchHandler {
 	private static Logger LOG = Logger
 			.getLogger("com.become.search.requestHandlers.SearchResultsReRankerRequestHandler");
 	private final static int MAX_SEARCH_RESULTS = 100;
 	private ParseTreeChunkListScorer parseTreeChunkListScorer = new ParseTreeChunkListScorer();
 	private ParserChunker2MatcherProcessor sm = null;
-	private int MAX_QUERY_LENGTH_NOT_TO_RERANK=3;
+	private int MAX_QUERY_LENGTH_NOT_TO_RERANK = 3;
 	private static String resourceDir = "/home/solr/solr-4.4.0/example/src/test/resources";
-	//"C:/workspace/TestSolr/src/test/resources";
+	// "C:/workspace/TestSolr/src/test/resources";
 
-	//"/data1/solr/example/src/test/resources";
+	// "/data1/solr/example/src/test/resources";
 
-	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp){
+	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) {
 		// get query string
 		String requestExpression = req.getParamString();
 		String[] exprParts = requestExpression.split("&");
-		for(String part: exprParts){
+		for (String part : exprParts) {
 			if (part.startsWith("q="))
-				requestExpression = part;			
+				requestExpression = part;
 		}
 		String query = StringUtils.substringAfter(requestExpression, ":");
 		LOG.info(requestExpression);
 
-
 		SolrParams ps = req.getOriginalParams();
-		Iterator<String> iter =  ps.getParameterNamesIterator();
+		Iterator<String> iter = ps.getParameterNamesIterator();
 		List<String> keys = new ArrayList<String>();
-		while(iter.hasNext()){
+		while (iter.hasNext()) {
 			keys.add(iter.next());
 		}
 
 		List<HitBase> searchResults = new ArrayList<HitBase>();
 
+		for (Integer i = 0; i < MAX_SEARCH_RESULTS; i++) {
+			String title = req.getParams().get("t" + i.toString());
+			String descr = req.getParams().get("d" + i.toString());
 
-
-
-
-		for ( Integer i=0; i< MAX_SEARCH_RESULTS; i++){
-			String title = req.getParams().get("t"+i.toString());
-			String descr = req.getParams().get("d"+i.toString());
-
-			if(title==null || descr==null)
+			if (title == null || descr == null)
 				continue;
 
 			HitBase hit = new HitBase();
@@ -117,14 +110,18 @@ public class SearchResultsReRankerRequestHandler extends SearchHandler {
 
 		/*
 		 * http://173.255.254.250:8983/solr/collection1/reranker/?
-		 * q=search_keywords:design+iphone+cases&fields=spend+a+day+with+a+custom+iPhone+case&fields=Add+style+to+your+every+day+fresh+design+with+a+custom+iPhone+case&fields=Add+style+to+your+every+day+with+mobile+case+for+your+family&fields=Add+style+to+your+iPhone+and+iPad&fields=Add+Apple+fashion+to+your+iPhone+and+iPad
+		 * q=search_keywords:design+iphone+cases&fields=spend+a+day+with+a+
+		 * custom+iPhone+case&fields=Add+style+to+your+every+day+fresh+design+
+		 * with+a+custom+iPhone+case&fields=Add+style+to+your+every+day+with+
+		 * mobile+case+for+your+family&fields=Add+style+to+your+iPhone+and+iPad&
+		 * fields=Add+Apple+fashion+to+your+iPhone+and+iPad
 		 * 
 		 */
 
-		if (searchResults.size()<1) {
-			int count=0;
-			for(String val : exprParts){
-				if (val.startsWith("fields=")){
+		if (searchResults.size() < 1) {
+			int count = 0;
+			for (String val : exprParts) {
+				if (val.startsWith("fields=")) {
 					val = StringUtils.mid(val, 7, val.length());
 					HitBase hit = new HitBase();
 					hit.setTitle("");
@@ -137,56 +134,51 @@ public class SearchResultsReRankerRequestHandler extends SearchHandler {
 			}
 		}
 
-
 		List<HitBase> reRankedResults = null;
 		query = query.replace('+', ' ');
-		if (tooFewKeywords(query)|| orQuery(query)){
+		if (tooFewKeywords(query) || orQuery(query)) {
 			reRankedResults = searchResults;
-			LOG.info("No re-ranking for "+query);
-		}
-		else 
+			LOG.info("No re-ranking for " + query);
+		} else
 			reRankedResults = calculateMatchScoreResortHits(searchResults, query);
 		/*
-		 * <scores>
-<score index="2">3.0005</score>
-<score index="1">2.101</score>
-<score index="3">2.1003333333333334</score>
-<score index="4">2.00025</score>
-<score index="5">1.1002</score>
-</scores>
+		 * <scores> <score index="2">3.0005</score> <score
+		 * index="1">2.101</score> <score index="3">2.1003333333333334</score>
+		 * <score index="4">2.00025</score> <score index="5">1.1002</score>
+		 * </scores>
 		 * 
 		 * 
 		 */
-		StringBuffer buf = new StringBuffer(); 
+		StringBuffer buf = new StringBuffer();
 		buf.append("<scores>");
-		for(HitBase hit: reRankedResults){
-			buf.append("<score index=\""+hit.getSource()+"\">"+hit.getGenerWithQueryScore()+"</score>");				
+		for (HitBase hit : reRankedResults) {
+			buf.append("<score index=\"" + hit.getSource() + "\">" + hit.getGenerWithQueryScore() + "</score>");
 		}
 		buf.append("</scores>");
 
 		NamedList<Object> scoreNum = new NamedList<Object>();
-		for(HitBase hit: reRankedResults){
-			scoreNum.add(hit.getSource(), hit.getGenerWithQueryScore());				
+		for (HitBase hit : reRankedResults) {
+			scoreNum.add(hit.getSource(), hit.getGenerWithQueryScore());
 		}
-		
-		StringBuffer bufNums = new StringBuffer(); 
+
+		StringBuffer bufNums = new StringBuffer();
 		bufNums.append("order>");
-		for(HitBase hit: reRankedResults){
-			bufNums.append(hit.getSource()+"_");				
+		for (HitBase hit : reRankedResults) {
+			bufNums.append(hit.getSource() + "_");
 		}
 		bufNums.append("/order>");
-		
-		LOG.info("re-ranking results: "+buf.toString());
+
+		LOG.info("re-ranking results: " + buf.toString());
 		NamedList<Object> values = rsp.getValues();
 		values.remove("response");
-		values.add("response", scoreNum); 
-		//values.add("new_order", bufNums.toString().trim());
+		values.add("response", scoreNum);
+		// values.add("new_order", bufNums.toString().trim());
 		rsp.setAllValues(values);
-		
+
 	}
 
 	private boolean orQuery(String query) {
-		if (query.indexOf('|')>-1)
+		if (query.indexOf('|') > -1)
 			return true;
 
 		return false;
@@ -194,33 +186,35 @@ public class SearchResultsReRankerRequestHandler extends SearchHandler {
 
 	private boolean tooFewKeywords(String query) {
 		String[] parts = query.split(" ");
-		if (parts!=null && parts.length< MAX_QUERY_LENGTH_NOT_TO_RERANK)
+		if (parts != null && parts.length < MAX_QUERY_LENGTH_NOT_TO_RERANK)
 			return true;
 
 		return false;
 	}
 
-	private List<HitBase> calculateMatchScoreResortHits(List<HitBase> hits,
-			String searchQuery) {
+	private List<HitBase> calculateMatchScoreResortHits(List<HitBase> hits, String searchQuery) {
 		try {
-			sm =  ParserChunker2MatcherProcessor.getInstance(resourceDir);
-		} catch (Exception e){
+			sm = ParserChunker2MatcherProcessor.getInstance(resourceDir);
+		} catch (Exception e) {
 			LOG.severe(e.getMessage());
 		}
 		List<HitBase> newHitList = new ArrayList<HitBase>();
 
-
-		int count=1;
+		int count = 1;
 		for (HitBase hit : hits) {
 			String snapshot = hit.getAbstractText();
 			snapshot += " . " + hit.getTitle();
 			Double score = 0.0;
 			try {
-				SentencePairMatchResult matchRes = sm.assessRelevance(snapshot,
-						searchQuery);
-				List<List<ParseTreeChunk>> match = matchRes.getMatchResult(); // we need the second member
-				// so that when scores are the same, original order is maintained
-				score = parseTreeChunkListScorer.getParseTreeChunkListScore(match)+0.001/(double)count;
+				SentencePairMatchResult matchRes = sm.assessRelevance(snapshot, searchQuery);
+				List<List<ParseTreeChunk>> match = matchRes.getMatchResult(); // we
+																				// need
+																				// the
+																				// second
+																				// member
+				// so that when scores are the same, original order is
+				// maintained
+				score = parseTreeChunkListScorer.getParseTreeChunkListScore(match) + 0.001 / (double) count;
 			} catch (Exception e) {
 				LOG.info(e.getMessage());
 				e.printStackTrace();
@@ -235,25 +229,34 @@ public class SearchResultsReRankerRequestHandler extends SearchHandler {
 		return newHitList;
 	}
 
-
 	public class HitBaseComparable implements Comparator<HitBase> {
 		// @Override
 		public int compare(HitBase o1, HitBase o2) {
-			return (o1.getGenerWithQueryScore() > o2.getGenerWithQueryScore() ? -1
-					: (o1 == o2 ? 0 : 1));
+			return (o1.getGenerWithQueryScore() > o2.getGenerWithQueryScore() ? -1 : (o1 == o2 ? 0 : 1));
 		}
 	}
 
 }
 
 /*
-
-http://dev1.exava.us:8086/solr/collection1/reranker/?q=search_keywords:I+want+style+in+my+every+day+fresh+design+iphone+cases
-&t1=Personalized+iPhone+4+Cases&d1=spend+a+day+with+a+custom+iPhone+case
-&t2=iPhone+Cases+to+spend+a+day&d2=Add+style+to+your+every+day+fresh+design+with+a+custom+iPhone+case
-&t3=Plastic+iPhone+Cases&d3=Add+style+to+your+every+day+with+mobile+case+for+your+family
-&t4=Personalized+iPhone+and+iPad+Cases&d4=Add+style+to+your+iPhone+and+iPad
-&t5=iPhone+accessories+from+Apple&d5=Add+Apple+fashion+to+your+iPhone+and+iPad
-
-http://dev1.exava.us:8086/solr/collection1/reranker/?q=search_keywords:I+want+style+in+my+every+day+fresh+design+iphone+cases&t1=Personalized+iPhone+4+Cases&d1=spend+a+day+with+a+custom+iPhone+case&t2=iPhone+Cases+to+spend+a+day&d2=Add+style+to+your+every+day+fresh+design+with+a+custom+iPhone+case&t3=Plastic+iPhone+Cases&d3=Add+style+to+your+every+day+with+mobile+case+for+your+family&t4=Personalized+iPhone+and+iPad+Cases&d4=Add+style+to+your+iPhone+and+iPad&t5=iPhone+accessories+from+Apple&d5=Add+Apple+fashion+to+your+iPhone+and+iPad
+ * 
+ * http://dev1.exava.us:8086/solr/collection1/reranker/?q=search_keywords:I+want
+ * +style+in+my+every+day+fresh+design+iphone+cases
+ * &t1=Personalized+iPhone+4+Cases&d1=spend+a+day+with+a+custom+iPhone+case
+ * &t2=iPhone+Cases+to+spend+a+day&d2=Add+style+to+your+every+day+fresh+design+
+ * with+a+custom+iPhone+case
+ * &t3=Plastic+iPhone+Cases&d3=Add+style+to+your+every+day+with+mobile+case+for+
+ * your+family
+ * &t4=Personalized+iPhone+and+iPad+Cases&d4=Add+style+to+your+iPhone+and+iPad
+ * &t5=iPhone+accessories+from+Apple&d5=Add+Apple+fashion+to+your+iPhone+and+
+ * iPad
+ * 
+ * http://dev1.exava.us:8086/solr/collection1/reranker/?q=search_keywords:I+want
+ * +style+in+my+every+day+fresh+design+iphone+cases&t1=Personalized+iPhone+4+
+ * Cases&d1=spend+a+day+with+a+custom+iPhone+case&t2=iPhone+Cases+to+spend+a+day
+ * &d2=Add+style+to+your+every+day+fresh+design+with+a+custom+iPhone+case&t3=
+ * Plastic+iPhone+Cases&d3=Add+style+to+your+every+day+with+mobile+case+for+your
+ * +family&t4=Personalized+iPhone+and+iPad+Cases&d4=Add+style+to+your+iPhone+and
+ * +iPad&t5=iPhone+accessories+from+Apple&d5=Add+Apple+fashion+to+your+iPhone+
+ * and+iPad
  */

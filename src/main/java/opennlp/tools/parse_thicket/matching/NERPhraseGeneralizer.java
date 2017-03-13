@@ -21,15 +21,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-
-
-
-
-
-
-
-
-
 import opennlp.tools.parse_thicket.IGeneralizer;
 import opennlp.tools.parse_thicket.ParseTreeNode;
 import opennlp.tools.stemmer.PStemmer;
@@ -40,27 +31,25 @@ import opennlp.tools.textsimilarity.ParseTreeChunk;
 
 public class NERPhraseGeneralizer extends PhraseGeneralizer {
 
-	/* alignment is based on NER values, not on POS now
+	/*
+	 * alignment is based on NER values, not on POS now
 	 * 
 	 */
 
-
 	/**
-	 * key matching function which takes two phrases, aligns them and finds a set
-	 * of maximum common sub-phrase
+	 * key matching function which takes two phrases, aligns them and finds a
+	 * set of maximum common sub-phrase
 	 * 
 	 * @param chunk1
 	 * @param chunk2
 	 * @return
 	 */
 	@Override
-	public List<ParseTreeChunk> generalize(
-			Object chunk1o, Object chunk2o) {
+	public List<ParseTreeChunk> generalize(Object chunk1o, Object chunk2o) {
 
-		ParseTreeChunk chunk1 = (ParseTreeChunk)chunk1o, chunk2 = (ParseTreeChunk)chunk2o;
+		ParseTreeChunk chunk1 = (ParseTreeChunk) chunk1o, chunk2 = (ParseTreeChunk) chunk2o;
 		List<ParseTreeNode> results = new ArrayList<ParseTreeNode>();
 		List<ParseTreeChunk> resultChunks = new ArrayList<ParseTreeChunk>();
-
 
 		List<String> pos1 = chunk1.getPOSs();
 		List<String> pos2 = chunk2.getPOSs();
@@ -70,22 +59,19 @@ public class NERPhraseGeneralizer extends PhraseGeneralizer {
 		List<String> ner1 = new ArrayList<String>();
 		List<String> ner2 = new ArrayList<String>();
 
-
-		for (ParseTreeNode node: chunk1.getParseTreeNodes()) {
-			if (node.getNe()!=null && !node.getNe().equals("O"))
+		for (ParseTreeNode node : chunk1.getParseTreeNodes()) {
+			if (node.getNe() != null && !node.getNe().equals("O"))
 				ner1.add(node.getNe());
 		}
 
-		for (ParseTreeNode node: chunk2.getParseTreeNodes()) {
-			if (node.getNe()!=null && !node.getNe().equals("O"))
+		for (ParseTreeNode node : chunk2.getParseTreeNodes()) {
+			if (node.getNe() != null && !node.getNe().equals("O"))
 				ner2.add(node.getNe());
 		}
-
 
 		List<String> overlap = new ArrayList<String>(ner1);
 		overlap.retainAll(ner2);
 		overlap = new ArrayList<String>(new HashSet<String>(overlap));
-
 
 		if (overlap == null || overlap.size() < 1)
 			return null;
@@ -98,19 +84,19 @@ public class NERPhraseGeneralizer extends PhraseGeneralizer {
 			occur2.add(i2);
 		}
 
-
-		// for verbs find alignment even if no same verb lemmas, just any pair of verbs. Usually should be 0,0
+		// for verbs find alignment even if no same verb lemmas, just any pair
+		// of verbs. Usually should be 0,0
 		if (chunk1.getMainPOS().startsWith("VP") && chunk2.getMainPOS().startsWith("VP")) {
 			Integer i1 = null, i2 = null;
-			for(int i=0; i< pos1.size(); i++){
-				if (pos1.get(i).startsWith("VB")){
+			for (int i = 0; i < pos1.size(); i++) {
+				if (pos1.get(i).startsWith("VB")) {
 					i1 = i;
 					break;
 				}
 			}
 
-			for(int i=0; i< pos2.size(); i++){
-				if (pos2.get(i).startsWith("VB")){
+			for (int i = 0; i < pos2.size(); i++) {
+				if (pos2.get(i).startsWith("VB")) {
 					i2 = i;
 					break;
 				}
@@ -128,12 +114,11 @@ public class NERPhraseGeneralizer extends PhraseGeneralizer {
 		accum.add(new int[] { occur1.get(0), occur2.get(0) });
 		for (int i = 1; i < occur1.size(); i++) {
 
-			if (occur1.get(i) > occur1.get(i - 1)
-					&& occur2.get(i) > occur2.get(i - 1))
+			if (occur1.get(i) > occur1.get(i - 1) && occur2.get(i) > occur2.get(i - 1))
 				accum.add(new int[] { occur1.get(i), occur2.get(i) });
 			else {
 				overlapsPlaus.add(accum);
-				if (occur1!=null && occur2!=null && i<occur1.size() &&  i<occur2.size() ){
+				if (occur1 != null && occur2 != null && i < occur1.size() && i < occur2.size()) {
 					accum = new ArrayList<int[]>();
 					accum.add(new int[] { occur1.get(i), occur2.get(i) });
 				}
@@ -142,7 +127,6 @@ public class NERPhraseGeneralizer extends PhraseGeneralizer {
 		if (accum.size() > 0) {
 			overlapsPlaus.add(accum);
 		}
-
 
 		for (List<int[]> occur : overlapsPlaus) {
 			List<Integer> occr1 = new ArrayList<Integer>(), occr2 = new ArrayList<Integer>();
@@ -162,63 +146,64 @@ public class NERPhraseGeneralizer extends PhraseGeneralizer {
 			}
 			int k1max = pos1.size() - 1, k2max = pos2.size() - 1;
 			while (k1 <= k1max && k2 <= k2max) {
-				/*        // first check if the same POS
-        String sim = posManager.similarPOS(pos1.get(k1), pos2.get(k2));
-        String lemmaMatch = lemmaFormManager.matchLemmas(ps, lem1.get(k1),
-            lem2.get(k2), sim);
-				 */      
+				/*
+				 * // first check if the same POS String sim =
+				 * posManager.similarPOS(pos1.get(k1), pos2.get(k2)); String
+				 * lemmaMatch = lemmaFormManager.matchLemmas(ps, lem1.get(k1),
+				 * lem2.get(k2), sim);
+				 */
 				String sim = null;
-				List<String> sims = posManager.//similarPOS(pos1.get(k1), pos2.get(k2));
+				List<String> sims = posManager.// similarPOS(pos1.get(k1),
+												// pos2.get(k2));
 						generalize(pos1.get(k1), pos2.get(k2));
 				if (!sims.isEmpty())
 					sim = sims.get(0);
 
-				String lemmaMatch = null;		
-				List<String> lemmaMatchs = lemmaFormManager.//matchLemmas(ps, 
-						generalize(lem1.get(k1),
-								lem2.get(k2));
+				String lemmaMatch = null;
+				List<String> lemmaMatchs = lemmaFormManager.// matchLemmas(ps,
+						generalize(lem1.get(k1), lem2.get(k2));
 				if (!lemmaMatchs.isEmpty())
 					lemmaMatch = lemmaMatchs.get(0);
 
-
-
-				if ((sim != null)
-						&& (lemmaMatch == null || (lemmaMatch != null && !lemmaMatch
-						.equals("fail")))) {
+				if ((sim != null) && (lemmaMatch == null || (lemmaMatch != null && !lemmaMatch.equals("fail")))) {
 					commonPOS.add(pos1.get(k1));
 
-
 					// doing parse tree node generalization
-					List<ParseTreeNode> genRes =  nodeGen.generalize(chunk1.getParseTreeNodes().get(k1), chunk2.getParseTreeNodes().get(k2)); 
-					if (genRes.size()==1)
+					List<ParseTreeNode> genRes = nodeGen.generalize(chunk1.getParseTreeNodes().get(k1),
+							chunk2.getParseTreeNodes().get(k2));
+					if (genRes.size() == 1)
 						results.add(genRes.get(0));
 
 					if (lemmaMatch != null) {
 						commonLemmas.add(lemmaMatch);
 						// System.out.println("Added "+lemmaMatch);
 						if (k1 == occr1.get(ov1) && k2 == occr2.get(ov2))
-							bReachedCommonWord = true; // now we can have different increment
+							bReachedCommonWord = true; // now we can have
+														// different increment
 						// opera
 						else {
-							if (occr1.size() > ov1 + 1 && occr2.size() > ov2 + 1
-									&& k1 == occr1.get(ov1 + 1) && k2 == occr2.get(ov2 + 1)) {
+							if (occr1.size() > ov1 + 1 && occr2.size() > ov2 + 1 && k1 == occr1.get(ov1 + 1)
+									&& k2 == occr2.get(ov2 + 1)) {
 								ov1++;
 								ov2++;
 								bReachedCommonWord = true;
 							}
 							// else
-								// System.err.println("Next match reached '"+lemmaMatch+
+							// System.err.println("Next match reached
+							// '"+lemmaMatch+
 							// "' | k1 - k2: "+k1 + " "+k2 +
 							// "| occur index ov1-ov2 "+
 							// ov1+" "+ov2+
-							// "| identified positions of match: occr1.get(ov1) - occr2.get(ov1) "
+							// "| identified positions of match: occr1.get(ov1)
+							// - occr2.get(ov1) "
 							// +
 							// occr1.get(ov1) + " "+ occr2.get(ov1));
 						}
 					} else {
 						commonLemmas.add("*");
-					} // the same parts of speech, proceed to the next word in both
-					// expressions
+					} // the same parts of speech, proceed to the next word in
+						// both
+						// expressions
 					k1++;
 					k2++;
 
@@ -227,7 +212,8 @@ public class NERPhraseGeneralizer extends PhraseGeneralizer {
 					k2++;
 				} // still searching
 				else {
-					// different parts of speech, jump to the next identified common word
+					// different parts of speech, jump to the next identified
+					// common word
 					ov1++;
 					ov2++;
 					if (ov1 > occr1.size() - 1 || ov2 > occr2.size() - 1)
@@ -236,7 +222,9 @@ public class NERPhraseGeneralizer extends PhraseGeneralizer {
 					int kk1 = occr1.get(ov1) - 2, // new positions of iterators
 							kk2 = occr2.get(ov2) - 2;
 					int countMove = 0;
-					while ((kk1 < k1 + 1 || kk2 < k2 + 1) && countMove < 2) { // if it is
+					while ((kk1 < k1 + 1 || kk2 < k2 + 1) && countMove < 2) { // if
+																				// it
+																				// is
 						// behind
 						// current
 						// position,
@@ -260,7 +248,6 @@ public class NERPhraseGeneralizer extends PhraseGeneralizer {
 			}
 			ParseTreeChunk currResult = new ParseTreeChunk(results),
 					currResultOld = new ParseTreeChunk(commonLemmas, commonPOS, 0, 0);
-
 
 			resultChunks.add(currResult);
 		}

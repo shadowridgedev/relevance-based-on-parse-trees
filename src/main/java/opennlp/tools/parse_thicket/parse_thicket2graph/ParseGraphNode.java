@@ -21,18 +21,15 @@ import java.util.List;
 import opennlp.tools.parse_thicket.ParseTreeNode;
 import opennlp.tools.parse_thicket.matching.PT2ThicketPhraseBuilder;
 
-
 import edu.stanford.nlp.trees.Tree;
 
 public class ParseGraphNode {
-	 PT2ThicketPhraseBuilder phraseBuilder = new PT2ThicketPhraseBuilder();
-	 
+	PT2ThicketPhraseBuilder phraseBuilder = new PT2ThicketPhraseBuilder();
+
 	private Tree tree;
 	private String label;
 	private List<List<ParseTreeNode>> ptNodes;
-	
-	
-	
+
 	public List<List<ParseTreeNode>> getPtNodes() {
 		return ptNodes;
 	}
@@ -41,7 +38,7 @@ public class ParseGraphNode {
 		super();
 		this.tree = tree;
 		this.label = label;
-		ptNodes =  phraseBuilder.buildPT2ptPhrasesForASentence(tree, null);
+		ptNodes = phraseBuilder.buildPT2ptPhrasesForASentence(tree, null);
 	}
 
 	public Tree getTree() {
@@ -60,8 +57,7 @@ public class ParseGraphNode {
 		this.label = label;
 	}
 
-	public String toString(){
+	public String toString() {
 		return label;
 	}
 }
-	

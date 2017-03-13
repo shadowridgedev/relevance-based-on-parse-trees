@@ -77,24 +77,24 @@ import org.apache.solr.util.SolrPluginUtils;
 
 public class QueryExpansionRequestHandler extends SearchHandler {
 
-	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp){
+	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) {
 		try {
-			//System.out.println("request before ="+req);
+			// System.out.println("request before ="+req);
 			SolrQueryRequest req1 = substituteField(req);
-			//System.out.println("request after ="+req1);
+			// System.out.println("request after ="+req1);
 			super.handleRequestBody(req1, rsp);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
-	public static SolrQueryRequest substituteField(SolrQueryRequest req){
+	public static SolrQueryRequest substituteField(SolrQueryRequest req) {
 		SolrParams params = req.getParams();
 		String query = params.get("q");
-		System.out.println("query before ="+query);
+		System.out.println("query before =" + query);
 		query = query.replace(' ', '_');
-		System.out.println("query after ="+query);
+		System.out.println("query after =" + query);
 		NamedList values = params.toNamedList();
 		values.remove("q");
 		values.add("q", query);

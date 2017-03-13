@@ -45,7 +45,7 @@ public class TwitterFilter {
 	protected static PT2ThicketPhraseBuilder phraseBuilder;
 	protected static SentimentVocab sVocab = SentimentVocab.getInstance();
 	String resourceDirSentimentList = null;
-	Set<String> sentimentVcb = new HashSet<String> ();
+	Set<String> sentimentVcb = new HashSet<String>();
 
 	static {
 		synchronized (TwitterFilter.class) {
@@ -54,69 +54,69 @@ public class TwitterFilter {
 		}
 	}
 
-	public TwitterFilter(){
+	public TwitterFilter() {
 		try {
-			resourceDirSentimentList = new File( "." ).getCanonicalPath()+"/src/test/resources/opinions/sentiment_listReduced.csv";
+			resourceDirSentimentList = new File(".").getCanonicalPath()
+					+ "/src/test/resources/opinions/sentiment_listReduced.csv";
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		List<String[]> sentimentList=null;
+		List<String[]> sentimentList = null;
 		sentimentList = ProfileReaderWriter.readProfiles(resourceDirSentimentList);
-		for(String[] line: sentimentList){
+		for (String[] line : sentimentList) {
 			sentimentVcb.add(line[0]);
 		}
 	}
 
-	private boolean isSentimentWord(String word){
+	private boolean isSentimentWord(String word) {
 		if (sentimentVcb.contains(word))
 			return true;
 		else
-			return false;		
+			return false;
 	}
 
-	public EntityExtractionResult extractEntities(String para){
+	public EntityExtractionResult extractEntities(String para) {
 		List<List<ParseTreeNode>> extractedNERs = new ArrayList<List<ParseTreeNode>>();
 		List<String> extractedNERsWords = new ArrayList<String>();
-		List<List<ParseTreeNode>> extractedSentimentPhrases = 
-				new ArrayList<List<ParseTreeNode>>();
+		List<List<ParseTreeNode>> extractedSentimentPhrases = new ArrayList<List<ParseTreeNode>>();
 		EntityExtractionResult result = new EntityExtractionResult();
 
 		ParseThicket pt = null;
 
-		System.out.println("Processing paragraph of length "+para.length() + " | "+ para);
+		System.out.println("Processing paragraph of length " + para.length() + " | " + para);
 		pt = matcher.buildParseThicketFromTextWithRST(para);
 		List<List<ParseTreeNode>> nodeList = pt.getSentenceNodes();
 
-
-		for(List<ParseTreeNode> sentence: nodeList){
-			System.out.println("   Processing sentence: "+ sentence);
-			boolean bInsideNER = false; 
+		for (List<ParseTreeNode> sentence : nodeList) {
+			System.out.println("   Processing sentence: " + sentence);
+			boolean bInsideNER = false;
 			String currentPhrase = "";
-			List<ParseTreeNode> currentPhraseNode = new ArrayList<ParseTreeNode>(); 
-			for(ParseTreeNode word: sentence){
-				if (isNERforPhraseExtraction(word)){
-					System.out.println("++Found word ="+word + " | NER="+ word.getNe());
-					if (bInsideNER){
-						currentPhrase += " "+word.getWord();
+			List<ParseTreeNode> currentPhraseNode = new ArrayList<ParseTreeNode>();
+			for (ParseTreeNode word : sentence) {
+				if (isNERforPhraseExtraction(word)) {
+					System.out.println("++Found word =" + word + " | NER=" + word.getNe());
+					if (bInsideNER) {
+						currentPhrase += " " + word.getWord();
 						currentPhraseNode.add(word);
 					} else {
-						bInsideNER=true;
+						bInsideNER = true;
 						currentPhrase = word.getWord();
 						currentPhraseNode.add(word);
 					}
 				} else {
-					if (bInsideNER){
-						if (currentPhrase.indexOf(' ')>-1) // at least two tokens
+					if (bInsideNER) {
+						if (currentPhrase.indexOf(' ') > -1) // at least two
+																// tokens
 							extractedNERsWords.add(currentPhrase);
-							extractedNERs.add(currentPhraseNode);
+						extractedNERs.add(currentPhraseNode);
 						currentPhrase = "";
-						bInsideNER=false;
+						bInsideNER = false;
 					} else {
 						// do nothing, continue scan
 					}
 				}
 			}
-			if (currentPhrase.length()>1 && currentPhrase.indexOf(' ')>-1){
+			if (currentPhrase.length() > 1 && currentPhrase.indexOf(' ') > -1) {
 				extractedNERs.add(currentPhraseNode);
 				extractedNERsWords.add(currentPhrase);
 			}
@@ -124,16 +124,16 @@ public class TwitterFilter {
 			Set<String> foundSentimentWords = new HashSet<String>();
 			// now we extract phrases
 			List<List<ParseTreeNode>> phrases = pt.getPhrases();
-			for(List<ParseTreeNode> phrase: phrases){
+			for (List<ParseTreeNode> phrase : phrases) {
 				// find a noun phrase under sentiment
 				try {
-					for(int i = phrase.size()-1; i>-1; i--){
+					for (int i = phrase.size() - 1; i > -1; i--) {
 						ParseTreeNode word = phrase.get(i);
-						if ((isSentimentWord(word.getWord()) ||
-								sVocab.isSentimentWord(word.getWord()) && !foundSentimentWords.contains(word.getWord()) )){
+						if ((isSentimentWord(word.getWord()) || sVocab.isSentimentWord(word.getWord())
+								&& !foundSentimentWords.contains(word.getWord()))) {
 							foundSentimentWords.add(word.getWord());
-							System.out.println("Found opinionated phrase "+phrase.toString());
-							extractedSentimentPhrases.add(phrase);			
+							System.out.println("Found opinionated phrase " + phrase.toString());
+							extractedSentimentPhrases.add(phrase);
 							break;
 						}
 					}
@@ -142,24 +142,21 @@ public class TwitterFilter {
 				}
 			}
 
-		} 
+		}
 		result.setExtractedNER(extractedNERs);
 		result.setExtractedNERWords(extractedNERsWords);
 		result.setExtractedSentimentPhrases(extractedSentimentPhrases);
 		return result;
 	}
 
-
-
-	private boolean isNERforPhraseExtraction(ParseTreeNode word){
-		if ((word.getNe().equals("ORGANIZATION") ||word.getNe().equals("LOCATION") || word.getNe().equals("PERSON") ) &&
-				(word.getPos().startsWith("NN") || word.getPos().startsWith("PR") || word.getPos().startsWith("IN")|| 
-						word.getPos().startsWith("JJ") || word.getPos().startsWith("DT")  ))
+	private boolean isNERforPhraseExtraction(ParseTreeNode word) {
+		if ((word.getNe().equals("ORGANIZATION") || word.getNe().equals("LOCATION") || word.getNe().equals("PERSON"))
+				&& (word.getPos().startsWith("NN") || word.getPos().startsWith("PR") || word.getPos().startsWith("IN")
+						|| word.getPos().startsWith("JJ") || word.getPos().startsWith("DT")))
 			return true;
 
 		return false;
 
 	}
-
 
 }

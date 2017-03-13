@@ -34,7 +34,7 @@ public class PersonalInformationExtractor {
 	private ArrayList<File> queue = new ArrayList<File>();
 	private Tika tika = new Tika();
 
-	public void runExtractor(String filename){
+	public void runExtractor(String filename) {
 		String content = null;
 		try {
 			content = FileUtils.readFileToString(new File(filename));
@@ -43,19 +43,19 @@ public class PersonalInformationExtractor {
 			e.printStackTrace();
 		}
 
-
-		extractor.buildTemplates(new String[] { "John Doe send his California driver license 1234567 . "
-				+ "Jill Jones received her Ohio license 4567456. ", 
+		extractor.buildTemplates(new String[] {
+				"John Doe send his California driver license 1234567 . "
+						+ "Jill Jones received her Ohio license 4567456. ",
 				" Mary Poppins got her identification 8765. Jorge Malony sold his identification 9876. ",
-				//" President Jorge Smith of Microsoft used his id 4567. Manager John Smith of Google used his id 8765. "
+				// " President Jorge Smith of Microsoft used his id 4567.
+				// Manager John Smith of Google used his id 8765. "
 				" Johh Doe 123. Don Joe 1323. "
 
 		});
 
-		List<GeneralizationResult>  res = extractor.doIE( content);
+		List<GeneralizationResult> res = extractor.doIE(content);
 
 	}
-
 
 	private void addFiles(File file) {
 
@@ -79,12 +79,12 @@ public class PersonalInformationExtractor {
 	}
 
 	public void processDirectory(String filename, String template) throws IOException {
-		List<String[]> report = new ArrayList<String[]>(); 
-		report.add(new String[]{"filename", "text",  "generalization", "fired?" });
+		List<String[]> report = new ArrayList<String[]>();
+		report.add(new String[] { "filename", "text", "generalization", "fired?" });
 		String templateStr = null;
 		try {
 
-			templateStr =  FileUtils.readFileToString(new File(template));
+			templateStr = FileUtils.readFileToString(new File(template));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -96,20 +96,20 @@ public class PersonalInformationExtractor {
 
 		addFiles(new File(filename));
 
-
 		for (File f : queue) {
-			String content=null;
+			String content = null;
 			try {
 				content = tika.parseToString(f);
-				List<GeneralizationResult>  res = extractor.doIE( content);
+				List<GeneralizationResult> res = extractor.doIE(content);
 
-				for(GeneralizationResult gr: res){
-					report.add(new String[]{filename, gr.getText(),  gr.getGen().toString(), gr.getbFire().toString() });
+				for (GeneralizationResult gr : res) {
+					report.add(
+							new String[] { filename, gr.getText(), gr.getGen().toString(), gr.getbFire().toString() });
 				}
 
 			} catch (TikaException e) {
 				System.out.println("Tika problem with file" + f.getAbsolutePath());
-			} catch (Exception ee){
+			} catch (Exception ee) {
 				ee.printStackTrace();
 			}
 			ProfileReaderWriter.writeReport(report, "PII_report.csv");
@@ -118,12 +118,11 @@ public class PersonalInformationExtractor {
 		queue.clear();
 	}
 
-
-	public void runExtractor(String filename, String template){
+	public void runExtractor(String filename, String template) {
 		String content = null, templateStr = null;
 		try {
 			content = FileUtils.readFileToString(new File(filename));
-			templateStr =  FileUtils.readFileToString(new File(template));
+			templateStr = FileUtils.readFileToString(new File(template));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -133,24 +132,25 @@ public class PersonalInformationExtractor {
 
 		extractor.buildTemplates(samples);
 
-		List<GeneralizationResult>  res = extractor.doIE( content);
+		List<GeneralizationResult> res = extractor.doIE(content);
 		List<String[]> report = new ArrayList<String[]>();
 
-		for(GeneralizationResult gr: res){
-			report.add(new String[]{filename, gr.getText(),  gr.getGen().toString(), gr.getbFire().toString() });
+		for (GeneralizationResult gr : res) {
+			report.add(new String[] { filename, gr.getText(), gr.getGen().toString(), gr.getbFire().toString() });
 		}
-
 
 	}
 
-	public static void main(String[] args){
-		//String filename = "/Users/borisgalitsky/Documents/workspace/deepContentInspection/src/test/resources/pii/agreement.txt";
-		
-		if (args ==null || args.length!=3)
-			System.err.println("Usage: java -Xmx10g -jar *.jar path-to-resources path-to-file-to-analyze path-to-file-with_samples\n");
+	public static void main(String[] args) {
+		// String filename =
+		// "/Users/borisgalitsky/Documents/workspace/deepContentInspection/src/test/resources/pii/agreement.txt";
+
+		if (args == null || args.length != 3)
+			System.err.println(
+					"Usage: java -Xmx10g -jar *.jar path-to-resources path-to-file-to-analyze path-to-file-with_samples\n");
 		try {
 			VerbNetProcessor.getInstance(args[0]);
-			new PersonalInformationExtractor().processDirectory( args[1], args[2]);
+			new PersonalInformationExtractor().processDirectory(args[1], args[2]);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

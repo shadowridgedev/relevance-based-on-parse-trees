@@ -31,44 +31,45 @@ import org.apache.commons.lang.StringUtils;
 
 public class TSNE_ImporterProcessor {
 	private static String importFilePath = "all-tsne2.txt";
-	public String resourceWorkDir = new File(".").getAbsolutePath().replace("/.", "") + 
-			"/src/test/resources/style_recognizer/";
+	public String resourceWorkDir = new File(".").getAbsolutePath().replace("/.", "")
+			+ "/src/test/resources/style_recognizer/";
 
 	public void importFileCreatClassifDirs() {
 		Map<Integer, String> id_Text = new HashMap<Integer, String>();
 		Map<Integer, String> id_Label = new HashMap<Integer, String>();
 
 		try {
-			FileUtils.cleanDirectory(new File(resourceWorkDir+"/txt"));
+			FileUtils.cleanDirectory(new File(resourceWorkDir + "/txt"));
 		} catch (IOException e2) {
 			e2.printStackTrace();
 		}
 
 		String text = null;
 		try {
-			text = FileUtils.readFileToString(new File(resourceWorkDir+importFilePath ), Charset.defaultCharset().toString());
+			text = FileUtils.readFileToString(new File(resourceWorkDir + importFilePath),
+					Charset.defaultCharset().toString());
 		} catch (IOException e) {
 
 			e.printStackTrace();
 		}
 
 		String[] portions = StringUtils.substringsBetween(text, "<text ", "/text>");
-		for(int i=0; i<portions.length; i++){
+		for (int i = 0; i < portions.length; i++) {
 			String label = StringUtils.substringBetween(portions[i], "id=\"", "\">");
-			String po =  StringUtils.substringBetween(portions[i],  "\">", "<");
+			String po = StringUtils.substringBetween(portions[i], "\">", "<");
 			id_Text.put(i, po);
 			id_Label.put(i, label);
-			if (true){
+			if (true) {
 				String localDirName = label.substring(0, 4);
-				if (!new File(resourceWorkDir+"txt/"+localDirName).exists())
+				if (!new File(resourceWorkDir + "txt/" + localDirName).exists())
 					try {
-						FileUtils.forceMkdir(new File(resourceWorkDir+"txt/"+localDirName));
+						FileUtils.forceMkdir(new File(resourceWorkDir + "txt/" + localDirName));
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
 				try {
 					label = label.replace('/', '_');
-					String fullPath = resourceWorkDir+"txt/"+localDirName+"/"+i+label+".txt";
+					String fullPath = resourceWorkDir + "txt/" + localDirName + "/" + i + label + ".txt";
 					FileUtils.writeStringToFile(new File(fullPath), po);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -78,17 +79,16 @@ public class TSNE_ImporterProcessor {
 
 	}
 
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		TSNE_ImporterProcessor thisProc = new TSNE_ImporterProcessor();
 		thisProc.importFileCreatClassifDirs();
 
-		VerbNetProcessor p = VerbNetProcessor.
-				getInstance("/Users/borisgalitsky/Documents/workspace/deepContentInspection/src/test/resources"); 
+		VerbNetProcessor p = VerbNetProcessor
+				.getInstance("/Users/borisgalitsky/Documents/workspace/deepContentInspection/src/test/resources");
 
 		TreeKernelBasedClassifierMultiplePara proc = new TreeKernelBasedClassifierMultiplePara();
 		proc.setKernelPath("/Users/borisgalitsky/Documents/tree_kernel/");
-		proc.trainClassifier(thisProc.resourceWorkDir+"/txt/Tele", 
-				thisProc.resourceWorkDir+"/txt/Tels");
-		//www.sciencedirect.com/science/article/pii/S095070511300138X
+		proc.trainClassifier(thisProc.resourceWorkDir + "/txt/Tele", thisProc.resourceWorkDir + "/txt/Tels");
+		// www.sciencedirect.com/science/article/pii/S095070511300138X
 	}
 }

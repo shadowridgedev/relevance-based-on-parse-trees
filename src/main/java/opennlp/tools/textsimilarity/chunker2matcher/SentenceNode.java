@@ -27,73 +27,72 @@ import opennlp.tools.textsimilarity.ParseTreeChunk;
  * 
  */
 public class SentenceNode extends PhraseNode {
-  private String sentence;
+	private String sentence;
 
-  public SentenceNode(String sentence, List<SyntacticTreeNode> children) {
-    super(ParserConstants.TYPE_S, children);
+	public SentenceNode(String sentence, List<SyntacticTreeNode> children) {
+		super(ParserConstants.TYPE_S, children);
 
-    this.sentence = sentence;
-  }
+		this.sentence = sentence;
+	}
 
-  @Override
-  public String getText() {
-    return sentence;
-  }
+	@Override
+	public String getText() {
+		return sentence;
+	}
 
-  public String getSentence() {
-    return sentence;
-  }
+	public String getSentence() {
+		return sentence;
+	}
 
-  public void setSentence(String sentence) {
-    this.sentence = sentence;
-  }
+	public void setSentence(String sentence) {
+		this.sentence = sentence;
+	}
 
-  @Override
-  public String toStringIndented(int numTabs) {
-    StringBuilder builder = new StringBuilder();
-    String indent = SyntacticTreeNode.getIndent(numTabs);
+	@Override
+	public String toStringIndented(int numTabs) {
+		StringBuilder builder = new StringBuilder();
+		String indent = SyntacticTreeNode.getIndent(numTabs);
 
-    // output the sentence
-    builder.append(indent).append(sentence).append("\n");
-    builder.append(super.toStringIndented(numTabs));
+		// output the sentence
+		builder.append(indent).append(sentence).append("\n");
+		builder.append(super.toStringIndented(numTabs));
 
-    return builder.toString();
-  }
+		return builder.toString();
+	}
 
-  @Override
-  public List<String> getOrderedPOSList() {
-    List<String> types = new ArrayList<String>();
-    if (this.getChildren() != null && this.getChildren().size() > 0) {
-      for (SyntacticTreeNode child : this.getChildren()) {
-        types.addAll(child.getOrderedPOSList());
-      }
-    }
-    return types;
-  }
+	@Override
+	public List<String> getOrderedPOSList() {
+		List<String> types = new ArrayList<String>();
+		if (this.getChildren() != null && this.getChildren().size() > 0) {
+			for (SyntacticTreeNode child : this.getChildren()) {
+				types.addAll(child.getOrderedPOSList());
+			}
+		}
+		return types;
+	}
 
-  @Override
-  public List<String> getOrderedLemmaList() {
-    List<String> types = new ArrayList<String>();
-    if (this.getChildren() != null && this.getChildren().size() > 0) {
-      for (SyntacticTreeNode child : this.getChildren()) {
-        types.addAll(child.getOrderedLemmaList());
-      }
-    }
-    return types;
-  }
+	@Override
+	public List<String> getOrderedLemmaList() {
+		List<String> types = new ArrayList<String>();
+		if (this.getChildren() != null && this.getChildren().size() > 0) {
+			for (SyntacticTreeNode child : this.getChildren()) {
+				types.addAll(child.getOrderedLemmaList());
+			}
+		}
+		return types;
+	}
 
-  public List<ParseTreeChunk> getParseTreeChunkList() {
-    List<ParseTreeChunk> chunks = new ArrayList<ParseTreeChunk>();
+	public List<ParseTreeChunk> getParseTreeChunkList() {
+		List<ParseTreeChunk> chunks = new ArrayList<ParseTreeChunk>();
 
-    if (this.getChildren() != null && this.getChildren().size() > 0) {
-      for (SyntacticTreeNode child : this.getChildren()) {
-        // if (child.getType().endsWith("P"))
-        chunks.add(new ParseTreeChunk(child.getType(), child
-            .getOrderedPOSList(), child.getOrderedLemmaList()));
-      }
-    }
-    return chunks;
-  }
+		if (this.getChildren() != null && this.getChildren().size() > 0) {
+			for (SyntacticTreeNode child : this.getChildren()) {
+				// if (child.getType().endsWith("P"))
+				chunks.add(new ParseTreeChunk(child.getType(), child.getOrderedPOSList(), child.getOrderedLemmaList()));
+			}
+		}
+		return chunks;
+	}
 
 }
 

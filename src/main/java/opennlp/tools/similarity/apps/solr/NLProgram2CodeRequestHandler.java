@@ -65,71 +65,75 @@ import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
 
-
-
 public class NLProgram2CodeRequestHandler extends SearchHandler {
-	private static Logger LOG = Logger
-			.getLogger("opennlp.tools.similarity.apps.solr.NLProgram2CodeRequestHandler");
+	private static Logger LOG = Logger.getLogger("opennlp.tools.similarity.apps.solr.NLProgram2CodeRequestHandler");
 	private final static int MAX_SEARCH_RESULTS = 100;
 	private ParseTreeChunkListScorer parseTreeChunkListScorer = new ParseTreeChunkListScorer();
 	private ParserChunker2MatcherProcessor sm = null;
-	private int MAX_QUERY_LENGTH_NOT_TO_RERANK=3;
-	private static String resourceDir = //"/home/solr/solr-4.4.0/example/src/test/resources";
-	"C:/workspace/TestSolr/src/test/resources";
+	private int MAX_QUERY_LENGTH_NOT_TO_RERANK = 3;
+	private static String resourceDir = // "/home/solr/solr-4.4.0/example/src/test/resources";
+			"C:/workspace/TestSolr/src/test/resources";
 
-	//"/data1/solr/example/src/test/resources";
-	
+	// "/data1/solr/example/src/test/resources";
+
 	NL2Obj compiler = new NL2ObjCreateAssign(resourceDir);
 
-	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp){
+	public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) {
 		// get query string
 		String requestExpression = req.getParamString();
 		String[] exprParts = requestExpression.split("&");
 		String[] text = new String[exprParts.length];
-			int count=0;
-			for(String val : exprParts){
-				if (val.startsWith("line=")){
-					val = StringUtils.mid(val, 5, val.length());
-					text[count] = val;
-					count++;
-				}
-
+		int count = 0;
+		for (String val : exprParts) {
+			if (val.startsWith("line=")) {
+				val = StringUtils.mid(val, 5, val.length());
+				text[count] = val;
+				count++;
 			}
-		
 
-			StringBuffer buf = new StringBuffer();
-		    for(String sent:text){
-		      ObjectPhraseListForSentence opls=null;
-		      try {
-		        opls = compiler.convertSentenceToControlObjectPhrase(sent);
-		      } catch (Exception e) {
-		        e.printStackTrace();
-		      }
-		      System.out.println(sent+"\n"+opls+"\n");
-		      buf.append(sent+"\n |=> "+opls+"\n");
-		    }
-		
-		
-		LOG.info("re-ranking results: "+buf.toString());
+		}
+
+		StringBuffer buf = new StringBuffer();
+		for (String sent : text) {
+			ObjectPhraseListForSentence opls = null;
+			try {
+				opls = compiler.convertSentenceToControlObjectPhrase(sent);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			System.out.println(sent + "\n" + opls + "\n");
+			buf.append(sent + "\n |=> " + opls + "\n");
+		}
+
+		LOG.info("re-ranking results: " + buf.toString());
 		NamedList<Object> values = rsp.getValues();
 		values.remove("response");
 		values.add("response", buf.toString().trim());
 		rsp.setAllValues(values);
-		
-	}
 
-	
+	}
 
 }
 
 /*
-
-http://dev1.exava.us:8086/solr/collection1/reranker/?q=search_keywords:I+want+style+in+my+every+day+fresh+design+iphone+cases
-&t1=Personalized+iPhone+4+Cases&d1=spend+a+day+with+a+custom+iPhone+case
-&t2=iPhone+Cases+to+spend+a+day&d2=Add+style+to+your+every+day+fresh+design+with+a+custom+iPhone+case
-&t3=Plastic+iPhone+Cases&d3=Add+style+to+your+every+day+with+mobile+case+for+your+family
-&t4=Personalized+iPhone+and+iPad+Cases&d4=Add+style+to+your+iPhone+and+iPad
-&t5=iPhone+accessories+from+Apple&d5=Add+Apple+fashion+to+your+iPhone+and+iPad
-
-http://dev1.exava.us:8086/solr/collection1/reranker/?q=search_keywords:I+want+style+in+my+every+day+fresh+design+iphone+cases&t1=Personalized+iPhone+4+Cases&d1=spend+a+day+with+a+custom+iPhone+case&t2=iPhone+Cases+to+spend+a+day&d2=Add+style+to+your+every+day+fresh+design+with+a+custom+iPhone+case&t3=Plastic+iPhone+Cases&d3=Add+style+to+your+every+day+with+mobile+case+for+your+family&t4=Personalized+iPhone+and+iPad+Cases&d4=Add+style+to+your+iPhone+and+iPad&t5=iPhone+accessories+from+Apple&d5=Add+Apple+fashion+to+your+iPhone+and+iPad
+ * 
+ * http://dev1.exava.us:8086/solr/collection1/reranker/?q=search_keywords:I+want
+ * +style+in+my+every+day+fresh+design+iphone+cases
+ * &t1=Personalized+iPhone+4+Cases&d1=spend+a+day+with+a+custom+iPhone+case
+ * &t2=iPhone+Cases+to+spend+a+day&d2=Add+style+to+your+every+day+fresh+design+
+ * with+a+custom+iPhone+case
+ * &t3=Plastic+iPhone+Cases&d3=Add+style+to+your+every+day+with+mobile+case+for+
+ * your+family
+ * &t4=Personalized+iPhone+and+iPad+Cases&d4=Add+style+to+your+iPhone+and+iPad
+ * &t5=iPhone+accessories+from+Apple&d5=Add+Apple+fashion+to+your+iPhone+and+
+ * iPad
+ * 
+ * http://dev1.exava.us:8086/solr/collection1/reranker/?q=search_keywords:I+want
+ * +style+in+my+every+day+fresh+design+iphone+cases&t1=Personalized+iPhone+4+
+ * Cases&d1=spend+a+day+with+a+custom+iPhone+case&t2=iPhone+Cases+to+spend+a+day
+ * &d2=Add+style+to+your+every+day+fresh+design+with+a+custom+iPhone+case&t3=
+ * Plastic+iPhone+Cases&d3=Add+style+to+your+every+day+with+mobile+case+for+your
+ * +family&t4=Personalized+iPhone+and+iPad+Cases&d4=Add+style+to+your+iPhone+and
+ * +iPad&t5=iPhone+accessories+from+Apple&d5=Add+Apple+fashion+to+your+iPhone+
+ * and+iPad
  */

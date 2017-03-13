@@ -25,8 +25,9 @@ import opennlp.tools.coref.mention.Dictionary;
 public class WordDictionary {
 	private static final String[][] SPECIAL_CASES = { { "lens", "lenses" } };
 
-	//private static final String WORDNET_PROPERTITES_KEY = "wordnet.propertites.file";
-	//private static final String PROPERTIES_FILE = null;;
+	// private static final String WORDNET_PROPERTITES_KEY =
+	// "wordnet.propertites.file";
+	// private static final String PROPERTIES_FILE = null;;
 
 	// private static final String DATA_DIR;
 	private static WordDictionary instance;
@@ -34,11 +35,11 @@ public class WordDictionary {
 	private Dictionary dictionary;
 	private Map<String, String> specialCaseMap;
 
-	/*static {
-		ConfigProperties config = ConfigFactory.getInstance()
-				.getConfigProperties(ConfigFactory.NLP_CONFIG_PATH);
-		PROPERTIES_FILE = config.getProperty(WORDNET_PROPERTITES_KEY);
-	}*/
+	/*
+	 * static { ConfigProperties config = ConfigFactory.getInstance()
+	 * .getConfigProperties(ConfigFactory.NLP_CONFIG_PATH); PROPERTIES_FILE =
+	 * config.getProperty(WORDNET_PROPERTITES_KEY); }
+	 */
 
 	public synchronized static WordDictionary getInstance() {
 		if (instance == null)
@@ -133,22 +134,18 @@ public class WordDictionary {
 
 	public static void main(String[] args) {
 		String[] verbs = { "is", "has", "were", "likes", "TaKen", "going" };
-		String[] nouns = { "efficient", "Cars", "lens", "wives", "lenses",
-				"photos" };
+		String[] nouns = { "efficient", "Cars", "lens", "wives", "lenses", "photos" };
 		String[] adverbs = { "would", "could", "should", "might" };
 		WordDictionary dictionary = WordDictionary.getInstance();
 
 		for (String word : verbs) {
-			System.out
-					.println(word + " ==> " + dictionary.getLemma(word, "VB"));
+			System.out.println(word + " ==> " + dictionary.getLemma(word, "VB"));
 		}
 		for (String word : nouns) {
-			System.out
-					.println(word + " ==> " + dictionary.getLemma(word, "NN"));
+			System.out.println(word + " ==> " + dictionary.getLemma(word, "NN"));
 		}
 		for (String word : adverbs) {
-			System.out
-					.println(word + " ==> " + dictionary.getLemma(word, "JJ"));
+			System.out.println(word + " ==> " + dictionary.getLemma(word, "JJ"));
 		}
 	}
 }

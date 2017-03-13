@@ -26,57 +26,62 @@ import java.util.Stack;
 public class BracesProcessor {
 	private static final int MIN_BRACES_CNT = 5;
 
-	private static final char L_PAREN    = '(';
-	private static final char R_PAREN    = ')';
-	private static final char L_BRACE    = '{';
-	private static final char R_BRACE    = '}';
-	private static final char L_BRACKET  = '[';
-	private static final char R_BRACKET  = ']';
-	private  Stack<Character> stackIncremental = new Stack<Character>();
+	private static final char L_PAREN = '(';
+	private static final char R_PAREN = ')';
+	private static final char L_BRACE = '{';
+	private static final char R_BRACE = '}';
+	private static final char L_BRACKET = '[';
+	private static final char R_BRACKET = ']';
+	private Stack<Character> stackIncremental = new Stack<Character>();
 	private int count = 0;
 	private Boolean balancedSoFar = true;
 
-	public Boolean getBalancedBracesResult(){
+	public Boolean getBalancedBracesResult() {
 		if (balancedSoFar)
-			return (stackIncremental.isEmpty() && count> MIN_BRACES_CNT);
-		else 
+			return (stackIncremental.isEmpty() && count > MIN_BRACES_CNT);
+		else
 			return false;
 	}
 
 	public void analyzeBalancedBracesAddPortionIncremental(String s) {
 
-
 		for (int i = 0; i < s.length(); i++) {
 
-			if      (s.charAt(i) == L_PAREN)   {
+			if (s.charAt(i) == L_PAREN) {
 				stackIncremental.push(L_PAREN);
 				count++;
 
 			}
 
-			else if (s.charAt(i) == L_BRACE)   {
+			else if (s.charAt(i) == L_BRACE) {
 				stackIncremental.push(L_BRACE);
 				count++;
 			}
 
-			else if (s.charAt(i) == L_BRACKET){
+			else if (s.charAt(i) == L_BRACKET) {
 				stackIncremental.push(L_BRACKET);
 				count++;
 			}
 
 			else if (s.charAt(i) == R_PAREN) {
-				if (stackIncremental.isEmpty())        balancedSoFar = false;
-				if (stackIncremental.pop() != L_PAREN) balancedSoFar = false;
+				if (stackIncremental.isEmpty())
+					balancedSoFar = false;
+				if (stackIncremental.pop() != L_PAREN)
+					balancedSoFar = false;
 			}
 
 			else if (s.charAt(i) == R_BRACE) {
-				if (stackIncremental.isEmpty())        balancedSoFar = false;
-				if (stackIncremental.pop() != L_BRACE) balancedSoFar = false;
+				if (stackIncremental.isEmpty())
+					balancedSoFar = false;
+				if (stackIncremental.pop() != L_BRACE)
+					balancedSoFar = false;
 			}
 
 			else if (s.charAt(i) == R_BRACKET) {
-				if (stackIncremental.isEmpty())        balancedSoFar = false;
-				if (stackIncremental.pop() != L_BRACKET) balancedSoFar = false;
+				if (stackIncremental.isEmpty())
+					balancedSoFar = false;
+				if (stackIncremental.pop() != L_BRACKET)
+					balancedSoFar = false;
 			}
 
 			// ignore all other characters
@@ -90,35 +95,41 @@ public class BracesProcessor {
 		Stack<Character> stack = new Stack<Character>();
 		for (int i = 0; i < s.length(); i++) {
 
-			if      (s.charAt(i) == L_PAREN)   {
+			if (s.charAt(i) == L_PAREN) {
 				stack.push(L_PAREN);
 				count++;
 
 			}
 
-			else if (s.charAt(i) == L_BRACE)   {
+			else if (s.charAt(i) == L_BRACE) {
 				stack.push(L_BRACE);
 				count++;
 			}
 
-			else if (s.charAt(i) == L_BRACKET){
+			else if (s.charAt(i) == L_BRACKET) {
 				stack.push(L_BRACKET);
 				count++;
 			}
 
 			else if (s.charAt(i) == R_PAREN) {
-				if (stack.isEmpty())        return false;
-				if (stack.pop() != L_PAREN) return false;
+				if (stack.isEmpty())
+					return false;
+				if (stack.pop() != L_PAREN)
+					return false;
 			}
 
 			else if (s.charAt(i) == R_BRACE) {
-				if (stack.isEmpty())        return false;
-				if (stack.pop() != L_BRACE) return false;
+				if (stack.isEmpty())
+					return false;
+				if (stack.pop() != L_BRACE)
+					return false;
 			}
 
 			else if (s.charAt(i) == R_BRACKET) {
-				if (stack.isEmpty())        return false;
-				if (stack.pop() != L_BRACKET) return false;
+				if (stack.isEmpty())
+					return false;
+				if (stack.pop() != L_BRACKET)
+					return false;
 			}
 
 			// ignore all other characters
@@ -127,32 +138,25 @@ public class BracesProcessor {
 		return (stack.isEmpty());
 	}
 
-	public static boolean checkParentesis(String str)
-	{
+	public static boolean checkParentesis(String str) {
 		if (str.isEmpty())
 			return true;
 
 		Stack<Character> stack = new Stack<Character>();
-		for (int i = 0; i < str.length(); i++)
-		{
+		for (int i = 0; i < str.length(); i++) {
 			char current = str.charAt(i);
-			if (current == '{' || current == '(' || current == '[')
-			{
+			if (current == '{' || current == '(' || current == '[') {
 				stack.push(current);
 			}
 
-
-			if (current == '}' || current == ')' || current == ']')
-			{
+			if (current == '}' || current == ')' || current == ']') {
 				if (stack.isEmpty())
 					return false;
 
 				char last = stack.peek();
-				if (current == '}' && (last == '{' || current == ')')
-						&& last == '(' || (current == ']'
-						&& last == '['))
+				if (current == '}' && (last == '{' || current == ')') && last == '(' || (current == ']' && last == '['))
 					stack.pop();
-				else 
+				else
 					return false;
 			}
 
@@ -165,33 +169,31 @@ public class BracesProcessor {
 		Stack<Character> stack = new Stack<Character>();
 
 		char c;
-		for(int i=0; i < str.length(); i++) {
+		for (int i = 0; i < str.length(); i++) {
 			c = str.charAt(i);
 
-			if(c == '{')
+			if (c == '{')
 				return false;
 
-			if(c == '(')
+			if (c == '(')
 				stack.push(c);
 
-			if(c == '{') {
+			if (c == '{') {
 				stack.push(c);
-				if(c == '}')
-					if(stack.empty())
+				if (c == '}')
+					if (stack.empty())
 						return false;
-					else if(stack.peek() == '{')
+					else if (stack.peek() == '{')
 						stack.pop();
-			}
-			else if(c == ')')
-				if(stack.empty())
+			} else if (c == ')')
+				if (stack.empty())
 					return false;
-				else if(stack.peek() == '(')
+				else if (stack.peek() == '(')
 					stack.pop();
 				else
 					return false;
 		}
 		return stack.empty();
 	}
-
 
 }

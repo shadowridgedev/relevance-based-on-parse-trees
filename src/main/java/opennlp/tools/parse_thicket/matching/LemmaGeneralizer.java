@@ -28,12 +28,12 @@ public class LemmaGeneralizer implements IGeneralizer<String> {
 	public static final String w2vPrefix = "w2v_";
 	PStemmer ps = new PStemmer();
 	String pos = null;
-	/*W2VDistanceMeasurer w2v = null; 
-	public LemmaGeneralizer() {
-		w2v = W2VDistanceMeasurer.getInstance();
-    } */
+	/*
+	 * W2VDistanceMeasurer w2v = null; public LemmaGeneralizer() { w2v =
+	 * W2VDistanceMeasurer.getInstance(); }
+	 */
 
-	public void setPOS(String posToSet){
+	public void setPOS(String posToSet) {
 		this.pos = posToSet;
 	}
 
@@ -42,53 +42,43 @@ public class LemmaGeneralizer implements IGeneralizer<String> {
 		List<String> results = new ArrayList<String>();
 		boolean bEqual = false;
 
-		String lemma1 = (String)o1, lemma2 = (String)o2;
-	
-			
-			lemma1 = lemma1.toLowerCase();
-			lemma2 = lemma2.toLowerCase();
+		String lemma1 = (String) o1, lemma2 = (String) o2;
 
-			if (lemma1.equals(lemma2)) {
-				bEqual = true;
-				results.add(lemma1);
-				return results;
-			}
+		lemma1 = lemma1.toLowerCase();
+		lemma2 = lemma2.toLowerCase();
 
-
-			if ((lemma1.equals(lemma2 + "s") || lemma2.equals(lemma1 + "s"))
-					|| lemma1.endsWith(lemma2) || lemma2.endsWith(lemma1)
-					|| lemma1.startsWith(lemma2) || lemma2.startsWith(lemma1)) {
-				bEqual = true;
-				results.add(lemma1);
-				return results;
-			}
-
-			try {
-				if (ps != null) {
-					if (ps.stem(lemma1).toString()
-							.equalsIgnoreCase(ps.stem(lemma2).toString())) {
-						bEqual = true;
-						results.add(lemma1);
-						return results;
-					}
-				}
-			} catch (Exception e) {
-				System.err.println("Problem processing " + lemma1 + " " + lemma2);
-				return results;
-			}
-			/* if different words, then compute word2vec distance and write the value as a string
-			if (w2v.vec!=null){
-				double value = w2v.vec.similarity(lemma1,  lemma2);
-				results.add(w2vPrefix+new Float(value).toString());
-			} */
+		if (lemma1.equals(lemma2)) {
+			bEqual = true;
+			results.add(lemma1);
 			return results;
 		}
 
+		if ((lemma1.equals(lemma2 + "s") || lemma2.equals(lemma1 + "s")) || lemma1.endsWith(lemma2)
+				|| lemma2.endsWith(lemma1) || lemma1.startsWith(lemma2) || lemma2.startsWith(lemma1)) {
+			bEqual = true;
+			results.add(lemma1);
+			return results;
+		}
 
-
-		
-
-
-
-
+		try {
+			if (ps != null) {
+				if (ps.stem(lemma1).toString().equalsIgnoreCase(ps.stem(lemma2).toString())) {
+					bEqual = true;
+					results.add(lemma1);
+					return results;
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("Problem processing " + lemma1 + " " + lemma2);
+			return results;
+		}
+		/*
+		 * if different words, then compute word2vec distance and write the
+		 * value as a string if (w2v.vec!=null){ double value =
+		 * w2v.vec.similarity(lemma1, lemma2); results.add(w2vPrefix+new
+		 * Float(value).toString()); }
+		 */
+		return results;
 	}
+
+}

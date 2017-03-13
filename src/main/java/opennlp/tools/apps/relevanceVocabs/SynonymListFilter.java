@@ -39,15 +39,13 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 public class SynonymListFilter {
-	SynonymMap map=null;
-	
-	public SynonymListFilter(String dir){
-		dir = dir.replace("maps/analytics","");
+	SynonymMap map = null;
+
+	public SynonymListFilter(String dir) {
+		dir = dir.replace("maps/analytics", "");
 		try {
-			map = new SynonymMap( new FileInputStream(dir+"wn_s.pl"));
+			map = new SynonymMap(new FileInputStream(dir + "wn_s.pl"));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -56,49 +54,50 @@ public class SynonymListFilter {
 			e.printStackTrace();
 		}
 	}
-	
+
 	protected static Map<String, List<String>> filteredKeyword_synonyms = new HashMap<String, List<String>>();
 
 	static public List<String> getFileLines(File aFile) {
 
 		List<String> items = new ArrayList<String>();
 
-		StringBuilder contents = new StringBuilder();		    
+		StringBuilder contents = new StringBuilder();
 		try {
 
-			BufferedReader input =  new BufferedReader(new FileReader(aFile));
+			BufferedReader input = new BufferedReader(new FileReader(aFile));
 			try {
-				String line = null; //not declared within while loop
-				while (( line = input.readLine()) != null){
+				String line = null; // not declared within while loop
+				while ((line = input.readLine()) != null) {
 					int endOfWord = line.indexOf(';');
-					if (endOfWord>2)
-						line = line.substring(1, endOfWord -1 );
+					if (endOfWord > 2)
+						line = line.substring(1, endOfWord - 1);
 
 					items.add(line);
 
 				}
-			}
-			finally {
+			} finally {
 				input.close();
 			}
-		}
-		catch (IOException ex){
+		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
 
 		return items;
 	}
-	public String getSynonym (String word){
-			String[] synonyms = map.getSynonyms(word);
-			if (synonyms==null || synonyms.length<1)
-				return null;
-			int index = (int) Math.floor(Math.random()*(double)synonyms.length);
-			System.out.println("Found synonyms "+Arrays.asList(synonyms).toString()+ " | selected synonym = "+synonyms[index] +" | for the input = "+ word);
-			return synonyms[index];
-			
-	}	
-	public static void main(String[] args){
-		SynonymListFilter filter = new  SynonymListFilter("/src/test/resources");
+
+	public String getSynonym(String word) {
+		String[] synonyms = map.getSynonyms(word);
+		if (synonyms == null || synonyms.length < 1)
+			return null;
+		int index = (int) Math.floor(Math.random() * (double) synonyms.length);
+		System.out.println("Found synonyms " + Arrays.asList(synonyms).toString() + " | selected synonym = "
+				+ synonyms[index] + " | for the input = " + word);
+		return synonyms[index];
+
+	}
+
+	public static void main(String[] args) {
+		SynonymListFilter filter = new SynonymListFilter("/src/test/resources");
 		String syn = filter.getSynonym("bring");
 		syn = filter.getSynonym("yell");
 	}

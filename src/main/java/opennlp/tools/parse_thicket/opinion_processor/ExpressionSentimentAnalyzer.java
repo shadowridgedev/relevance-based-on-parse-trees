@@ -50,7 +50,8 @@ public class ExpressionSentimentAnalyzer {
 	}
 
 	public static void main(String[] args) {
-		float sent = new ExpressionSentimentAnalyzer().findSentiment("poor president nomee Hilary Clinton visited Mexico");
+		float sent = new ExpressionSentimentAnalyzer()
+				.findSentiment("poor president nomee Hilary Clinton visited Mexico");
 		System.out.println(sent);
 	}
 }

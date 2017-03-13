@@ -30,23 +30,19 @@ import net.billylieurance.azuresearch.AzureSearchResultSet;
 import net.billylieurance.azuresearch.AzureSearchWebQuery;
 import net.billylieurance.azuresearch.AzureSearchWebResult;
 
-public class YahooAnswersMiner extends BingQueryRunner{
+public class YahooAnswersMiner extends BingQueryRunner {
 
-	private static final Logger LOG = Logger
-			.getLogger("opennlp.tools.similarity.apps.YahooAnswersMiner");
+	private static final Logger LOG = Logger.getLogger("opennlp.tools.similarity.apps.YahooAnswersMiner");
 	private int page = 0;
 	private static final int hitsPerPage = 50;
 
-	
-
-
 	public List<HitBase> runSearch(String query, int totalPages) {
-		int count=0;
+		int count = 0;
 		List<HitBase> results = new ArrayList<HitBase>();
-		while(totalPages>page*hitsPerPage){
+		while (totalPages > page * hitsPerPage) {
 			List<HitBase> res = runSearch(query);
 			results.addAll(res);
-			if (count>10)
+			if (count > 10)
 				break;
 			count++;
 		}
@@ -54,32 +50,29 @@ public class YahooAnswersMiner extends BingQueryRunner{
 		return results;
 	}
 
-
 	public static void main(String[] args) {
 		YahooAnswersMiner self = new YahooAnswersMiner();
 		RelatedSentenceFinder extractor = new RelatedSentenceFinder();
 		String topic = "obamacare";
 
-		List<HitBase> resp = self
-				.runSearch(topic, 150);
+		List<HitBase> resp = self.runSearch(topic, 150);
 		System.out.print(resp.get(0));
 		List<String[]> data = new ArrayList<String[]>();
 
+		for (HitBase item : resp) {
+			Triple<List<String>, String, String[]> fragmentExtractionResults = extractor
+					.formCandidateFragmentsForPage(item, topic, null);
 
-		for(HitBase item: resp){	      
-			Triple<List<String>, String, String[]> fragmentExtractionResults = 
-					extractor.formCandidateFragmentsForPage(item, topic, null);
-
-			List<String> allFragms = (List<String>)fragmentExtractionResults.getFirst();
-			String downloadedPage = (String)fragmentExtractionResults.getSecond();
-			String[] sents = (String[])fragmentExtractionResults.getThird();
+			List<String> allFragms = (List<String>) fragmentExtractionResults.getFirst();
+			String downloadedPage = (String) fragmentExtractionResults.getSecond();
+			String[] sents = (String[]) fragmentExtractionResults.getThird();
 
 			for (String fragment : allFragms) {
 				String[] candidateSentences = extractor.formCandidateSentences(fragment, fragmentExtractionResults);
 				System.out.println(candidateSentences);
 				data.add(candidateSentences);
 			}
-			
+
 		}
 
 		ProfileReaderWriter.writeReport(data, "multi_sentence_queries.csv");

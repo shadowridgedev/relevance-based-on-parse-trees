@@ -38,7 +38,7 @@ import opennlp.tools.textsimilarity.ParseTreeMatcherDeterministic;
 import opennlp.tools.textsimilarity.SentencePairMatchResult;
 import opennlp.tools.textsimilarity.chunker2matcher.ParserChunker2MatcherProcessor;
 
-public class MatcherExternalRST extends Matcher implements IGeneralizer<List<List<ParseTreeNode>>>{
+public class MatcherExternalRST extends Matcher implements IGeneralizer<List<List<ParseTreeNode>>> {
 
 	ParseCorefBuilderWithNERandRST ptBuilderRST = new ParseCorefBuilderWithNERandRST();
 	PT2ThicketPhraseBuilder phraseBuilder = new PT2ThicketPhraseBuilder();
@@ -53,44 +53,42 @@ public class MatcherExternalRST extends Matcher implements IGeneralizer<List<Lis
 		List<List<ParseTreeNode>> phrs1 = phraseBuilder.buildPT2ptPhrases(pt1);
 		List<List<ParseTreeNode>> phrs2 = phraseBuilder.buildPT2ptPhrases(pt2);
 		// group phrases by type
-		List<List<ParseTreeChunk>> sent1GrpLst = formGroupedPhrasesFromChunksForPara(phrs1), 
+		List<List<ParseTreeChunk>> sent1GrpLst = formGroupedPhrasesFromChunksForPara(phrs1),
 				sent2GrpLst = formGroupedPhrasesFromChunksForPara(phrs2);
 
-		
 		List<List<ParseTreeChunk>> res = pgGen.generalize(sent1GrpLst, sent2GrpLst);
-				
+
 		return res;
 
 	}
-	
-	// this function is the main entry point into the PT builder if rst arcs are required
-		public ParseThicket buildParseThicketFromTextWithRST(String para){
-			ParseThicket pt = ptBuilderRST.buildParseThicket(para);
-			
-			List<List<ParseTreeNode>> phrs = phraseBuilder.buildPT2ptPhrases(pt);
-			if (pt!=null)
-				pt.setPhrases(phrs);
-			return pt;	
-		}
-	
+
+	// this function is the main entry point into the PT builder if rst arcs are
+	// required
+	public ParseThicket buildParseThicketFromTextWithRST(String para) {
+		ParseThicket pt = ptBuilderRST.buildParseThicket(para);
+
+		List<List<ParseTreeNode>> phrs = phraseBuilder.buildPT2ptPhrases(pt);
+		if (pt != null)
+			pt.setPhrases(phrs);
+		return pt;
+	}
+
 	public List<List<ParseTreeChunk>> assessRelevance(List<List<ParseTreeChunk>> para0, String para2) {
 		// first build PTs for each text
-	
+
 		ParseThicket pt2 = ptBuilder.buildParseThicket(para2);
 		// then build phrases and rst arcs
 		List<List<ParseTreeNode>> phrs2 = phraseBuilder.buildPT2ptPhrases(pt2);
 		// group phrases by type
 		List<List<ParseTreeChunk>> sent2GrpLst = formGroupedPhrasesFromChunksForPara(phrs2);
 		List<List<ParseTreeChunk>> res = pgGen.generalize(para0, sent2GrpLst);
-				
+
 		return res;
 
 	}
-	
-	
-	public static void main(String[] args){
-		//MatcherExternalRST m = new MatcherExternalRST();
-		
-		
+
+	public static void main(String[] args) {
+		// MatcherExternalRST m = new MatcherExternalRST();
+
 	}
 }

@@ -38,64 +38,65 @@ public class TwitterEngineRunner {
 	TwitterFilter neExtractor = new TwitterFilter();
 	private static int iWind = 80;
 
-	public void processTweetFile(int nRun){
-		List<String[]> report = new ArrayList<String[]>(), ful_less =  new ArrayList<String[]>();
+	public void processTweetFile(int nRun) {
+		List<String[]> report = new ArrayList<String[]>(), ful_less = new ArrayList<String[]>();
 		List<String> meaningLESS = new ArrayList<String>(), meaningFUL = new ArrayList<String>();
-		report.add(new String[] { "text", "phrases of potential interest list" , });
+		report.add(new String[] { "text", "phrases of potential interest list", });
 
 		List<String[]> texts = ProfileReaderWriter.readProfiles(twSource);
-		int offset = iWind*nRun;
-		
-		//for(int i=offset; i< offset+iWind; i++){
-			
-		//	String[] text = texts.get(i);
-		for(String[] text: texts){
+		int offset = iWind * nRun;
+
+		// for(int i=offset; i< offset+iWind; i++){
+
+		// String[] text = texts.get(i);
+		for (String[] text : texts) {
 			List<String> textDeduped = new ArrayList<String>(new HashSet<String>(Arrays.asList(text)));
 			EntityExtractionResult result = null;
-			if (text==null || text.length<4)
+			if (text == null || text.length < 4)
 				continue;
 
-			for(int nInLine=3; nInLine<textDeduped.size(); nInLine++){
-				if (textDeduped.get(nInLine).length()>180)
+			for (int nInLine = 3; nInLine < textDeduped.size(); nInLine++) {
+				if (textDeduped.get(nInLine).length() > 180)
 					continue;
-				
-				String cleanedTweet = textDeduped.get(nInLine).replace("/\\bs\\@+/ig","");
+
+				String cleanedTweet = textDeduped.get(nInLine).replace("/\\bs\\@+/ig", "");
 				try {
 					result = neExtractor.extractEntities(cleanedTweet);
 				} catch (Exception e) {
 					e.printStackTrace();
 					continue;
 				}
-				report.add(new String[]{text[0],text[nInLine]});
-				report.add((String[])result.extractedNERWords.toArray(new String[0]));
-				//report.add((String[])result.extractedSentimentPhrases.toArray(new String[0]));
-				List<String> stringPhrases = new ArrayList<String>(),
-						nodePhrases = new ArrayList<String>();
+				report.add(new String[] { text[0], text[nInLine] });
+				report.add((String[]) result.extractedNERWords.toArray(new String[0]));
+				// report.add((String[])result.extractedSentimentPhrases.toArray(new
+				// String[0]));
+				List<String> stringPhrases = new ArrayList<String>(), nodePhrases = new ArrayList<String>();
 				Boolean bMeaningf = false;
 
-				//stringPhrases.add(""); nodePhrases.add(""); // to make report more readable
-				for(List<ParseTreeNode> chList: result.extractedSentimentPhrases){
-					String buf = "", nodeBuf="";
-					for(ParseTreeNode ch: chList){
-						buf+=ch.getWord()+ " ";
-						nodeBuf+=ch.toString()+ " ";
+				// stringPhrases.add(""); nodePhrases.add(""); // to make report
+				// more readable
+				for (List<ParseTreeNode> chList : result.extractedSentimentPhrases) {
+					String buf = "", nodeBuf = "";
+					for (ParseTreeNode ch : chList) {
+						buf += ch.getWord() + " ";
+						nodeBuf += ch.toString() + " ";
 					}
 					stringPhrases.add(buf.trim());
 					nodePhrases.add(nodeBuf.trim());
 				}
 				// selecting MEANINGFULL
-				if (nodePhrases.size()>1){
-					if ((nodePhrases.get(0).indexOf(">VP'")>-1 || nodePhrases.get(0).indexOf(">NNP'")>-1) &&
-							(nodePhrases.get(1).indexOf(">VP'")>-1 || nodePhrases.get(1).indexOf(">NNP'")>-1)){
+				if (nodePhrases.size() > 1) {
+					if ((nodePhrases.get(0).indexOf(">VP'") > -1 || nodePhrases.get(0).indexOf(">NNP'") > -1)
+							&& (nodePhrases.get(1).indexOf(">VP'") > -1 || nodePhrases.get(1).indexOf(">NNP'") > -1)) {
 						bMeaningf = true;
 
 					}
 				}
 
-				report.add((String[])stringPhrases.toArray(new String[0]));
-				report.add((String[])nodePhrases.toArray(new String[0]));
-				if (bMeaningf){
-					report.add(new String[]{"===", "MEANINGFUL tweet"});
+				report.add((String[]) stringPhrases.toArray(new String[0]));
+				report.add((String[]) nodePhrases.toArray(new String[0]));
+				if (bMeaningf) {
+					report.add(new String[] { "===", "MEANINGFUL tweet" });
 					if (!meaningFUL.contains(cleanedTweet))
 						meaningFUL.add(cleanedTweet);
 				} else {
@@ -105,24 +106,23 @@ public class TwitterEngineRunner {
 
 				int count = 0;
 				ful_less.clear();
-				for(String less: meaningLESS ){
+				for (String less : meaningLESS) {
 					String fl = "";
-					if (count<meaningFUL.size())
+					if (count < meaningFUL.size())
 						fl = meaningFUL.get(count);
-					ful_less.add(new String[]{less, fl});
+					ful_less.add(new String[] { less, fl });
 					count++;
 				}
 
-				report.add(new String[]{"-----------------------------------------------------"});
-					ProfileReaderWriter.writeReport(report, "phrasesExtractedFromTweets3_"+nRun+".csv");
-					ProfileReaderWriter.writeReport(ful_less, "ful_lessTweets3_"+nRun+".csv");
-				
+				report.add(new String[] { "-----------------------------------------------------" });
+				ProfileReaderWriter.writeReport(report, "phrasesExtractedFromTweets3_" + nRun + ".csv");
+				ProfileReaderWriter.writeReport(ful_less, "ful_lessTweets3_" + nRun + ".csv");
+
 			}
 		}
 	}
 
-
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		TwitterEngineRunner runner = new TwitterEngineRunner();
 		int nRun = Integer.parseInt(args[0]);
 		runner.processTweetFile(nRun);
@@ -131,27 +131,25 @@ public class TwitterEngineRunner {
 }
 
 /*
-	public void processDirectory(String path){
-		List<String[]> report = new ArrayList<String[]>();
-		report.add(new String[] { "filename", "named entity list", "phrases of potential interest list" });
-
-		List<String> allNamedEntities = new ArrayList<String>();
-
-		addFiles(new File(path));
-		for(File f: queue){
-			List<String> entities = (List<String>) extractEntities(f.getAbsolutePath()).getFirst();
-			List<String> opinions = (List<String>) extractEntities(f.getAbsolutePath()).getSecond();
-			report.add(new String[]{ f.getName(), entities.toString(),  opinions.toString()});	
-			ProfileReaderWriter.writeReport(report, "nameEntitiesExtracted.csv");
-
-			allNamedEntities.addAll(entities);
-
-			allNamedEntities = new ArrayList<String>(new HashSet<String> (allNamedEntities ));
-
-
-		}
-		ProfileReaderWriter.writeReport(report, "nameEntitiesTopicsOfInterestExtracted.csv");
-	} 
-} */
-
-
+ * public void processDirectory(String path){ List<String[]> report = new
+ * ArrayList<String[]>(); report.add(new String[] { "filename",
+ * "named entity list", "phrases of potential interest list" });
+ * 
+ * List<String> allNamedEntities = new ArrayList<String>();
+ * 
+ * addFiles(new File(path)); for(File f: queue){ List<String> entities =
+ * (List<String>) extractEntities(f.getAbsolutePath()).getFirst(); List<String>
+ * opinions = (List<String>) extractEntities(f.getAbsolutePath()).getSecond();
+ * report.add(new String[]{ f.getName(), entities.toString(),
+ * opinions.toString()}); ProfileReaderWriter.writeReport(report,
+ * "nameEntitiesExtracted.csv");
+ * 
+ * allNamedEntities.addAll(entities);
+ * 
+ * allNamedEntities = new ArrayList<String>(new HashSet<String>
+ * (allNamedEntities ));
+ * 
+ * 
+ * } ProfileReaderWriter.writeReport(report,
+ * "nameEntitiesTopicsOfInterestExtracted.csv"); } }
+ */

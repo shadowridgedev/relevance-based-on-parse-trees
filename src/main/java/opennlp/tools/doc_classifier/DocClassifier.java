@@ -52,14 +52,12 @@ public class DocClassifier {
 	public static String resourceDir = null;
 	public static final Log logger = LogFactory.getLog(DocClassifier.class);
 	private Map<String, Float> scoredClasses = new HashMap<String, Float>();
-	
 
-	public static Float MIN_TOTAL_SCORE_FOR_CATEGORY = 0.3f; //3.0f;
+	public static Float MIN_TOTAL_SCORE_FOR_CATEGORY = 0.3f; // 3.0f;
 	protected static IndexReader indexReader = null;
 	protected static IndexSearcher indexSearcher = null;
 	// resource directory plus the index folder
-	private static final String INDEX_PATH = resourceDir
-			+ ClassifierTrainingSetIndexer.INDEX_PATH;
+	private static final String INDEX_PATH = resourceDir + ClassifierTrainingSetIndexer.INDEX_PATH;
 
 	// http://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm
 	private static final int MAX_DOCS_TO_USE_FOR_CLASSIFY = 10, // 10 similar
@@ -91,8 +89,8 @@ public class DocClassifier {
 	// for classification
 
 	// these are categories from the index
-	public static final String[] categories = new String[] { "legal", "health",
-		"finance", "computing", "engineering", "business" };
+	public static final String[] categories = new String[] { "legal", "health", "finance", "computing", "engineering",
+			"business" };
 
 	static {
 		synchronized (DocClassifier.class) {
@@ -139,22 +137,19 @@ public class DocClassifier {
 		TopDocs hits = null; // TopDocs search(Query query, int n)
 		// Finds the top n hits for query.
 		try {
-			hits = indexSearcher
-					.search(query, MAX_DOCS_TO_USE_FOR_CLASSIFY + 2);
+			hits = indexSearcher.search(query, MAX_DOCS_TO_USE_FOR_CLASSIFY + 2);
 		} catch (IOException e1) {
 			logger.error("problem searching index \n" + e1);
 		}
 		logger.debug("Found " + hits.totalHits + " hits for " + queryStr);
 		int count = 0;
-		
 
 		for (ScoreDoc scoreDoc : hits.scoreDocs) {
 			Document doc = null;
 			try {
 				doc = indexSearcher.doc(scoreDoc.doc);
 			} catch (IOException e) {
-				logger.error("Problem searching training set for classif \n"
-						+ e);
+				logger.error("Problem searching training set for classif \n" + e);
 				continue;
 			}
 			String flag = doc.get("class");
@@ -165,8 +160,8 @@ public class DocClassifier {
 			else
 				scoredClasses.put(flag, scoreForClass + scoreDoc.score);
 
-			logger.debug(" <<categorized as>> " + flag + " | score="
-					+ scoreDoc.score + " \n text =" + doc.get("text") + "\n");
+			logger.debug(" <<categorized as>> " + flag + " | score=" + scoreDoc.score + " \n text =" + doc.get("text")
+					+ "\n");
 
 			if (count > MAX_DOCS_TO_USE_FOR_CLASSIFY) {
 				break;
@@ -175,14 +170,13 @@ public class DocClassifier {
 		}
 		try {
 			scoredClasses = ValueSortMap.sortMapByValue(scoredClasses, false);
-			List<String> resultsAll = new ArrayList<String>(
-					scoredClasses.keySet()), resultsAboveThresh = new ArrayList<String>();
+			List<String> resultsAll = new ArrayList<String>(scoredClasses.keySet()),
+					resultsAboveThresh = new ArrayList<String>();
 			for (String key : resultsAll) {
 				if (scoredClasses.get(key) > MIN_TOTAL_SCORE_FOR_CATEGORY)
 					resultsAboveThresh.add(key);
 				else
-					logger.debug("Too low score of " + scoredClasses.get(key)
-							+ " for category = " + key);
+					logger.debug("Too low score of " + scoredClasses.get(key) + " for category = " + key);
 			}
 
 			int len = resultsAboveThresh.size();
@@ -199,8 +193,7 @@ public class DocClassifier {
 			return results;
 
 		// if two categories, one is very high and another is relatively low
-		if (scoredClasses.get(results.get(0))
-				/ scoredClasses.get(results.get(1)) > BEST_TO_NEX_BEST_RATIO) // second
+		if (scoredClasses.get(results.get(0)) / scoredClasses.get(results.get(1)) > BEST_TO_NEX_BEST_RATIO) // second
 			// best
 			// is
 			// much
@@ -211,15 +204,11 @@ public class DocClassifier {
 
 	}
 
-	
-
-	
 	public static String formClassifQuery(String pageContentReader, int maxRes) {
 
 		// We want to control which delimiters we substitute. For example '_' &
 		// \n we retain
-		pageContentReader = pageContentReader.replaceAll("[^A-Za-z0-9 _\\n]",
-				"");
+		pageContentReader = pageContentReader.replaceAll("[^A-Za-z0-9 _\\n]", "");
 
 		Scanner in = new Scanner(pageContentReader);
 		in.useDelimiter("\\s+");
@@ -243,9 +232,9 @@ public class DocClassifier {
 		int len = resultsAll.size();
 		if (len > maxRes)
 			results = resultsAll.subList(len - maxRes, len - 1); // get maxRes
-			// elements
-			else
-				results = resultsAll;
+		// elements
+		else
+			results = resultsAll;
 
 		return results.toString().replaceAll("(\\[|\\]|,)", " ").trim();
 	}
@@ -256,9 +245,8 @@ public class DocClassifier {
 		} catch (IOException e) {
 			logger.error("Problem closing index \n" + e);
 		}
-	}	
-	
-	
+	}
+
 	/*
 	 * Main entry point for classifying sentences
 	 */
@@ -290,7 +278,7 @@ public class DocClassifier {
 		} catch (Exception e) {
 			logger.error("Problem classifying sentence\n " + e);
 		}
-		
+
 		List<String> aggrResults = new ArrayList<String>();
 		try {
 

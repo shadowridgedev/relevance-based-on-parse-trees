@@ -16,8 +16,6 @@
  */
 package opennlp.tools.parse_thicket.pattern_structure;
 
-
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,29 +26,30 @@ import opennlp.tools.parse_thicket.ParseTreeNode;
 import opennlp.tools.textsimilarity.ParseTreeChunk;
 import opennlp.tools.textsimilarity.ParseTreeMatcherDeterministic;
 
-
 public class PhrasePatternStructure {
 	int objectCount;
 	int attributeCount;
 	public List<PhraseConcept> conceptList;
-	ParseTreeMatcherDeterministic md; 
+	ParseTreeMatcherDeterministic md;
+
 	public PhrasePatternStructure(int objectCounts, int attributeCounts) {
 		objectCount = objectCounts;
 		attributeCount = attributeCounts;
 		conceptList = new ArrayList<PhraseConcept>();
 		PhraseConcept bottom = new PhraseConcept();
 		md = new ParseTreeMatcherDeterministic();
-		/*Set<Integer> b_intent = new HashSet<Integer>();
-		for (int index = 0; index < attributeCount; ++index) {
-			b_intent.add(index);
-		}
-		bottom.setIntent(b_intent);*/
+		/*
+		 * Set<Integer> b_intent = new HashSet<Integer>(); for (int index = 0;
+		 * index < attributeCount; ++index) { b_intent.add(index); }
+		 * bottom.setIntent(b_intent);
+		 */
 		bottom.setPosition(0);
 		conceptList.add(bottom);
 	}
+
 	public int GetMaximalConcept(List<List<ParseTreeChunk>> intent, int Generator) {
 		boolean parentIsMaximal = true;
-		while(parentIsMaximal) {
+		while (parentIsMaximal) {
 			parentIsMaximal = false;
 			for (int parent : conceptList.get(Generator).parents) {
 				if (conceptList.get(parent).intent.containsAll(intent)) {
@@ -62,10 +61,11 @@ public class PhrasePatternStructure {
 		}
 		return Generator;
 	}
+
 	public int AddIntent(List<List<ParseTreeChunk>> intent, int generator) {
 		System.out.println("debug");
 		System.out.println("called for " + intent);
-		//printLattice();
+		// printLattice();
 		int generator_tmp = GetMaximalConcept(intent, generator);
 		generator = generator_tmp;
 		if (conceptList.get(generator).intent.equals(intent)) {
@@ -78,12 +78,14 @@ public class PhrasePatternStructure {
 		Set<Integer> newParents = new HashSet<Integer>();
 		for (int candidate : generatorParents) {
 			if (!intent.containsAll(conceptList.get(candidate).intent)) {
-				//if (!conceptList.get(candidate).intent.containsAll(intent)) {
-				//Set<Integer> intersection = new HashSet<Integer>(conceptList.get(candidate).intent);
-				//List<List<ParseTreeChunk>> intersection = new ArrayList<List<ParseTreeChunk>>(conceptList.get(candidate).intent);
-				//intersection.retainAll(intent);
-				List<List<ParseTreeChunk>> intersection = md
-						.matchTwoSentencesGroupedChunksDeterministic(intent, conceptList.get(candidate).intent);
+				// if (!conceptList.get(candidate).intent.containsAll(intent)) {
+				// Set<Integer> intersection = new
+				// HashSet<Integer>(conceptList.get(candidate).intent);
+				// List<List<ParseTreeChunk>> intersection = new
+				// ArrayList<List<ParseTreeChunk>>(conceptList.get(candidate).intent);
+				// intersection.retainAll(intent);
+				List<List<ParseTreeChunk>> intersection = md.matchTwoSentencesGroupedChunksDeterministic(intent,
+						conceptList.get(candidate).intent);
 				System.out.println("recursive call (inclusion)");
 				candidate = AddIntent(intersection, candidate);
 			}
@@ -95,28 +97,25 @@ public class PhrasePatternStructure {
 				if (conceptList.get(parent).intent.containsAll(conceptList.get(candidate).intent)) {
 					addParents = false;
 					break;
-				}
-				else {
+				} else {
 					if (conceptList.get(candidate).intent.containsAll(conceptList.get(parent).intent)) {
 						iterator.remove();
 					}
 				}
 			}
-			/*for (int parent : newParents) {
-				System.out.println("parent = " + parent);
-				System.out.println("candidate intent:"+conceptList.get(candidate).intent);
-				System.out.println("parent intent:"+conceptList.get(parent).intent);
-
-				if (conceptList.get(parent).intent.containsAll(conceptList.get(candidate).intent)) {
-					addParents = false;
-					break;
-				}
-				else {
-					if (conceptList.get(candidate).intent.containsAll(conceptList.get(parent).intent)) {
-						newParents.remove(parent);
-					}
-				}
-			}*/
+			/*
+			 * for (int parent : newParents) { System.out.println("parent = " +
+			 * parent);
+			 * System.out.println("candidate intent:"+conceptList.get(candidate)
+			 * .intent);
+			 * System.out.println("parent intent:"+conceptList.get(parent).
+			 * intent);
+			 * 
+			 * if (conceptList.get(parent).intent.containsAll(conceptList.get(
+			 * candidate).intent)) { addParents = false; break; } else { if
+			 * (conceptList.get(candidate).intent.containsAll(conceptList.get(
+			 * parent).intent)) { newParents.remove(parent); } } }
+			 */
 			if (addParents) {
 				newParents.add(candidate);
 			}
@@ -127,7 +126,7 @@ public class PhrasePatternStructure {
 		newConcept.setPosition(conceptList.size());
 		conceptList.add(newConcept);
 		conceptList.get(generator).parents.add(newConcept.position);
-		for (int newParent: newParents) {
+		for (int newParent : newParents) {
 			if (conceptList.get(generator).parents.contains(newParent)) {
 				conceptList.get(generator).parents.remove(newParent);
 			}
@@ -155,30 +154,31 @@ public class PhrasePatternStructure {
 		conceptList.get(index).printConcept();
 	}
 
-	public List<List<ParseTreeChunk>> formGroupedPhrasesFromChunksForPara(
-			List<List<ParseTreeNode>> phrs) {
+	public List<List<ParseTreeChunk>> formGroupedPhrasesFromChunksForPara(List<List<ParseTreeNode>> phrs) {
 		List<List<ParseTreeChunk>> results = new ArrayList<List<ParseTreeChunk>>();
-		List<ParseTreeChunk> nps = new ArrayList<ParseTreeChunk>(), vps = new ArrayList<ParseTreeChunk>(), 
+		List<ParseTreeChunk> nps = new ArrayList<ParseTreeChunk>(), vps = new ArrayList<ParseTreeChunk>(),
 				pps = new ArrayList<ParseTreeChunk>();
-		for(List<ParseTreeNode> ps:phrs){
+		for (List<ParseTreeNode> ps : phrs) {
 			ParseTreeChunk ch = convertNodeListIntoChunk(ps);
 			String ptype = ps.get(0).getPhraseType();
 			System.out.println(ps);
-			if (ptype.equals("NP")){
+			if (ptype.equals("NP")) {
 				nps.add(ch);
-			} else if (ptype.equals("VP")){
+			} else if (ptype.equals("VP")) {
 				vps.add(ch);
-			} else if (ptype.equals("PP")){
+			} else if (ptype.equals("PP")) {
 				pps.add(ch);
 			}
 		}
-		results.add(nps); results.add(vps); results.add(pps);
+		results.add(nps);
+		results.add(vps);
+		results.add(pps);
 		return results;
 	}
 
 	private ParseTreeChunk convertNodeListIntoChunk(List<ParseTreeNode> ps) {
-		List<String> lemmas = new ArrayList<String>(),  poss = new ArrayList<String>();
-		for(ParseTreeNode n: ps){
+		List<String> lemmas = new ArrayList<String>(), poss = new ArrayList<String>();
+		for (ParseTreeNode n : ps) {
 			lemmas.add(n.getWord());
 			poss.add(n.getPos());
 		}
@@ -187,6 +187,4 @@ public class PhrasePatternStructure {
 		return ch;
 	}
 
-
 }
-

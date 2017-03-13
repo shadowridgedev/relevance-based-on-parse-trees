@@ -28,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import opennlp.tools.parse_thicket.ParseTreeNode;
 
-public class ParseTreeChunk implements Serializable{
+public class ParseTreeChunk implements Serializable {
 	private String mainPOS;
 
 	private List<String> lemmas;
@@ -43,12 +43,11 @@ public class ParseTreeChunk implements Serializable{
 
 	private transient ParseTreeMatcher parseTreeMatcher;
 
-	private  transient LemmaFormManager lemmaFormManager;
+	private transient LemmaFormManager lemmaFormManager;
 
-	private  transient GeneralizationListReducer generalizationListReducer;
+	private transient GeneralizationListReducer generalizationListReducer;
 
-	private  transient List<ParseTreeNode> parseTreeNodes;
-
+	private transient List<ParseTreeNode> parseTreeNodes;
 
 	public List<ParseTreeNode> getParseTreeNodes() {
 		return parseTreeNodes;
@@ -58,29 +57,30 @@ public class ParseTreeChunk implements Serializable{
 		this.parseTreeNodes = parseTreeNodes;
 	}
 
-	public ParseTreeChunk(){};
-	// "[<1>NP'Property':NN, <2>NP'has':VBZ, <3>NP'lots':NNS, <4>NP'of':IN, <5>NP'trash':NN, <6>NP'and':CC, <7>NP'debris':NN]";
+	public ParseTreeChunk() {
+	};
+	// "[<1>NP'Property':NN, <2>NP'has':VBZ, <3>NP'lots':NNS, <4>NP'of':IN,
+	// <5>NP'trash':NN, <6>NP'and':CC, <7>NP'debris':NN]";
 
-	public ParseTreeChunk(String phrStr){
-		String[] parts = phrStr.replace("]","").split(", <");
+	public ParseTreeChunk(String phrStr) {
+		String[] parts = phrStr.replace("]", "").split(", <");
 		this.POSs = new ArrayList<String>();
 		this.lemmas = new ArrayList<String>();
 		this.mainPOS = StringUtils.substringBetween(phrStr, ">", "'");
-		for(String part: parts){
+		for (String part : parts) {
 			String lemma = StringUtils.substringBetween(part, "P'", "':");
-			String pos = part.substring(part.indexOf(":")+1, part.length());
-			
-			if (pos==null || lemma ==null){
+			String pos = part.substring(part.indexOf(":") + 1, part.length());
+
+			if (pos == null || lemma == null) {
 				continue;
 			}
 			this.POSs.add(pos.trim());
 			this.lemmas.add(lemma.trim());
 		}
-		
+
 	}
-	
-	public ParseTreeChunk(List<String> lemmas, List<String> POSs, int startPos,
-			int endPos) {
+
+	public ParseTreeChunk(List<String> lemmas, List<String> POSs, int startPos, int endPos) {
 		this.lemmas = lemmas;
 		this.POSs = POSs;
 		this.startPos = startPos;
@@ -112,7 +112,6 @@ public class ParseTreeChunk implements Serializable{
 		this.lemmas = lemmas;
 		this.POSs = POSss;
 	}
-
 
 	public int getStartPos() {
 		return startPos;
@@ -150,8 +149,7 @@ public class ParseTreeChunk implements Serializable{
 		return generalizationListReducer;
 	}
 
-	public void setGeneralizationListReducer(
-			GeneralizationListReducer generalizationListReducer) {
+	public void setGeneralizationListReducer(GeneralizationListReducer generalizationListReducer) {
 		this.generalizationListReducer = generalizationListReducer;
 	}
 
@@ -159,15 +157,15 @@ public class ParseTreeChunk implements Serializable{
 		this.parseTreeMatcher = parseTreeMatcher;
 	}
 
-	public  ParseTreeChunk(List<ParseTreeNode> ps) {
+	public ParseTreeChunk(List<ParseTreeNode> ps) {
 		this.lemmas = new ArrayList<String>();
 		this.POSs = new ArrayList<String>();
-		for(ParseTreeNode n: ps){
+		for (ParseTreeNode n : ps) {
 			this.lemmas.add(n.getWord());
 			this.POSs.add(n.getPos());
 		}
 
-		if (ps.size()>0){
+		if (ps.size() > 0) {
 			this.setMainPOS(ps.get(0).getPhraseType());
 			this.parseTreeNodes = ps;
 		}
@@ -182,9 +180,8 @@ public class ParseTreeChunk implements Serializable{
 				lems.add(lem);
 				// now looking for POSs for individual word
 				for (LemmaPair chunkCur : parseResults) {
-					if (chunkCur.getLemma().equals(lem)
-							&&
-							// check that this is a proper word in proper position
+					if (chunkCur.getLemma().equals(lem) &&
+					// check that this is a proper word in proper position
 							chunkCur.getEndPos() <= chunk.getEndPos()
 							&& chunkCur.getStartPos() >= chunk.getStartPos()) {
 						poss.add(chunkCur.getPOS());
@@ -198,16 +195,15 @@ public class ParseTreeChunk implements Serializable{
 			if (lems.size() < 2) { // single word phrase, nothing to match
 				continue;
 			}
-			ParseTreeChunk ch = new ParseTreeChunk(lems, poss, chunk.getStartPos(),
-					chunk.getEndPos());
+			ParseTreeChunk ch = new ParseTreeChunk(lems, poss, chunk.getStartPos(), chunk.getEndPos());
 			ch.setMainPOS(chunk.getPOS());
 			chunksResults.add(ch);
 		}
 		return chunksResults;
 	}
 
-	public List<List<ParseTreeChunk>> matchTwoSentencesGivenPairLists(
-			List<LemmaPair> sent1Pairs, List<LemmaPair> sent2Pairs) {
+	public List<List<ParseTreeChunk>> matchTwoSentencesGivenPairLists(List<LemmaPair> sent1Pairs,
+			List<LemmaPair> sent2Pairs) {
 
 		List<ParseTreeChunk> chunk1List = buildChunks(sent1Pairs);
 		List<ParseTreeChunk> chunk2List = buildChunks(sent2Pairs);
@@ -223,9 +219,11 @@ public class ParseTreeChunk implements Serializable{
 
 	// groups noun phrases, verb phrases, propos phrases etc. for separate match
 
-	public List<List<ParseTreeChunk>> groupChunksAsParses(
-			List<ParseTreeChunk> parseResults) {
-		List<ParseTreeChunk> np = new ArrayList<ParseTreeChunk>(), vp = new ArrayList<ParseTreeChunk>(), prp = new ArrayList<ParseTreeChunk>(), sbarp = new ArrayList<ParseTreeChunk>(), pp = new ArrayList<ParseTreeChunk>(), adjp = new ArrayList<ParseTreeChunk>(), whadvp = new ArrayList<ParseTreeChunk>(), restOfPhrasesTypes = new ArrayList<ParseTreeChunk>();
+	public List<List<ParseTreeChunk>> groupChunksAsParses(List<ParseTreeChunk> parseResults) {
+		List<ParseTreeChunk> np = new ArrayList<ParseTreeChunk>(), vp = new ArrayList<ParseTreeChunk>(),
+				prp = new ArrayList<ParseTreeChunk>(), sbarp = new ArrayList<ParseTreeChunk>(),
+				pp = new ArrayList<ParseTreeChunk>(), adjp = new ArrayList<ParseTreeChunk>(),
+				whadvp = new ArrayList<ParseTreeChunk>(), restOfPhrasesTypes = new ArrayList<ParseTreeChunk>();
 		List<List<ParseTreeChunk>> results = new ArrayList<List<ParseTreeChunk>>();
 		for (ParseTreeChunk ch : parseResults) {
 			String mainPos = ch.getMainPOS().toLowerCase();
@@ -267,8 +265,8 @@ public class ParseTreeChunk implements Serializable{
 	// main function to generalize two expressions grouped by phrase types
 	// returns a list of generalizations for each phrase type with filtered
 	// sub-expressions
-	public List<List<ParseTreeChunk>> matchTwoSentencesGroupedChunks(
-			List<List<ParseTreeChunk>> sent1, List<List<ParseTreeChunk>> sent2) {
+	public List<List<ParseTreeChunk>> matchTwoSentencesGroupedChunks(List<List<ParseTreeChunk>> sent1,
+			List<List<ParseTreeChunk>> sent2) {
 		List<List<ParseTreeChunk>> results = new ArrayList<List<ParseTreeChunk>>();
 		// first irerate through component
 		for (int comp = 0; comp < 2 && // just np & vp
@@ -278,11 +276,11 @@ public class ParseTreeChunk implements Serializable{
 			for (ParseTreeChunk ch1 : sent1.get(comp)) {
 				for (ParseTreeChunk ch2 : sent2.get(comp)) { // simpler version
 					ParseTreeChunk chunkToAdd = parseTreeMatcher
-							.generalizeTwoGroupedPhrasesRandomSelectHighestScoreWithTransforms(
-									ch1, ch2);
+							.generalizeTwoGroupedPhrasesRandomSelectHighestScoreWithTransforms(ch1, ch2);
 
 					if (!lemmaFormManager.mustOccurVerifier(ch1, ch2, chunkToAdd)) {
-						continue; // if the words which have to stay do not stay, proceed to
+						continue; // if the words which have to stay do not
+									// stay, proceed to
 						// other elements
 					}
 					Boolean alreadyThere = false;
@@ -292,9 +290,8 @@ public class ParseTreeChunk implements Serializable{
 							break;
 						}
 
-						if (parseTreeMatcher
-								.generalizeTwoGroupedPhrasesRandomSelectHighestScore(chunk,
-										chunkToAdd).equalsTo(chunkToAdd)) {
+						if (parseTreeMatcher.generalizeTwoGroupedPhrasesRandomSelectHighestScore(chunk, chunkToAdd)
+								.equalsTo(chunkToAdd)) {
 							alreadyThere = true;
 							break;
 						}
@@ -307,7 +304,7 @@ public class ParseTreeChunk implements Serializable{
 					List<ParseTreeChunk> resultCompsReduced = generalizationListReducer
 							.applyFilteringBySubsumption(resultComps);
 					// if (resultCompsReduced.size() != resultComps.size())
-						// System.out.println("reduction of gen list occurred");
+					// System.out.println("reduction of gen list occurred");
 				}
 			}
 			results.add(resultComps);
@@ -316,21 +313,17 @@ public class ParseTreeChunk implements Serializable{
 		return results;
 	}
 
-/*	public Boolean equals(ParseTreeChunk ch) {
-		List<String> lems = ch.getLemmas();
-		List<String> poss = ch.POSs;
-
-		if (this.lemmas.size() <= lems.size())
-			return false; // sub-chunk should be shorter than chunk
-
-		for (int i = 0; i < lems.size() && i < this.lemmas.size(); i++) {
-			if (!(this.lemmas.get(i).equals(lems.get(i)) && this.POSs.get(i).equals(
-					poss.get(i))))
-				return false;
-		}
-		return true;
-	}
-*/
+	/*
+	 * public Boolean equals(ParseTreeChunk ch) { List<String> lems =
+	 * ch.getLemmas(); List<String> poss = ch.POSs;
+	 * 
+	 * if (this.lemmas.size() <= lems.size()) return false; // sub-chunk should
+	 * be shorter than chunk
+	 * 
+	 * for (int i = 0; i < lems.size() && i < this.lemmas.size(); i++) { if
+	 * (!(this.lemmas.get(i).equals(lems.get(i)) && this.POSs.get(i).equals(
+	 * poss.get(i)))) return false; } return true; }
+	 */
 	// 'this' is super - chunk of ch, ch is sub-chunk of 'this'
 	public Boolean isASubChunk_OLD(ParseTreeChunk ch) {
 		List<String> lems = ch.getLemmas();
@@ -340,14 +333,13 @@ public class ParseTreeChunk implements Serializable{
 			return false; // sub-chunk should be shorter than chunk
 
 		for (int i = 0; i < lems.size() && i < this.lemmas.size(); i++) {
-			if (!(this.lemmas.get(i).equals(lems.get(i)) && this.POSs.get(i).equals(
-					poss.get(i))))
+			if (!(this.lemmas.get(i).equals(lems.get(i)) && this.POSs.get(i).equals(poss.get(i))))
 				return false;
 		}
 		return true;
 	}
-	
-	// this => value   ch => *
+
+	// this => value ch => *
 	public Boolean isASubChunk(ParseTreeChunk ch) {
 		List<String> lems = ch.getLemmas();
 		List<String> poss = ch.POSs;
@@ -356,43 +348,44 @@ public class ParseTreeChunk implements Serializable{
 			return false; // sub-chunk should be shorter than chunk
 
 		Boolean notSubChunkWithGivenAlignment = false, unComparable = false;
-		
+
 		for (int i = 0; i < lems.size() && i < this.lemmas.size(); i++) {
 			// both lemma and pos are different
-			if (!this.POSs.get(i).equals(poss.get(i)) && !this.lemmas.get(i).equals(lems.get(i)) ){
+			if (!this.POSs.get(i).equals(poss.get(i)) && !this.lemmas.get(i).equals(lems.get(i))) {
 				unComparable = true;
 				break;
 			}
-			
-			// this => *  ch=> run
-			if (!this.lemmas.get(i).equals(lems.get(i)) && this.lemmas.get(i).equals("*")) 
+
+			// this => * ch=> run
+			if (!this.lemmas.get(i).equals(lems.get(i)) && this.lemmas.get(i).equals("*"))
 				notSubChunkWithGivenAlignment = true;
 		}
 		if (!notSubChunkWithGivenAlignment && !unComparable)
 			return true;
-		
-		List<String> thisPOS = new ArrayList<String> ( this.POSs);	
+
+		List<String> thisPOS = new ArrayList<String>(this.POSs);
 		Collections.reverse(thisPOS);
-		List<String> chPOS = new ArrayList<String> ( poss);	
+		List<String> chPOS = new ArrayList<String>(poss);
 		Collections.reverse(chPOS);
-		List<String> thisLemma = new ArrayList<String> ( this.lemmas);	
-		Collections.reverse(thisLemma );
-		List<String> chLemma = new ArrayList<String> ( lems);	
+		List<String> thisLemma = new ArrayList<String>(this.lemmas);
+		Collections.reverse(thisLemma);
+		List<String> chLemma = new ArrayList<String>(lems);
 		Collections.reverse(chLemma);
-		
-		notSubChunkWithGivenAlignment = false; unComparable = false;
-		for (int i = lems.size()-1 ; i>=0; i--) {
+
+		notSubChunkWithGivenAlignment = false;
+		unComparable = false;
+		for (int i = lems.size() - 1; i >= 0; i--) {
 			// both lemma and pos are different
-			if (!thisPOS.get(i).equals(chPOS.get(i)) && !thisLemma.get(i).equals(chLemma.get(i)) ){
+			if (!thisPOS.get(i).equals(chPOS.get(i)) && !thisLemma.get(i).equals(chLemma.get(i))) {
 				unComparable = true;
 				break;
 			}
-			
-			// this => *  ch=> run
-			if (!thisLemma.get(i).equals(chLemma.get(i)) && thisLemma.get(i).equals("*")) 
+
+			// this => * ch=> run
+			if (!thisLemma.get(i).equals(chLemma.get(i)) && thisLemma.get(i).equals("*"))
 				notSubChunkWithGivenAlignment = true;
 		}
-		
+
 		if (!notSubChunkWithGivenAlignment && !unComparable)
 			return true;
 		else
@@ -406,14 +399,13 @@ public class ParseTreeChunk implements Serializable{
 			return false;
 
 		for (int i = 0; i < lems.size(); i++) {
-			if (!(this.lemmas.get(i).equals(lems.get(i)) && this.POSs.get(i).equals(
-					poss.get(i))))
+			if (!(this.lemmas.get(i).equals(lems.get(i)) && this.POSs.get(i).equals(poss.get(i))))
 				return false;
 		}
 
 		return true;
 	}
-	
+
 	public boolean equals(ParseTreeChunk ch) {
 		List<String> lems = ch.getLemmas();
 		List<String> poss = ch.POSs;
@@ -424,26 +416,26 @@ public class ParseTreeChunk implements Serializable{
 		String buf = " [";
 		if (mainPOS != null)
 			buf = mainPOS + " [";
-		for (int i = 0; i < lemmas.size() && i < POSs.size() ; i++) {
+		for (int i = 0; i < lemmas.size() && i < POSs.size(); i++) {
 			buf += POSs.get(i) + "-" + lemmas.get(i) + " ";
-			if (this.parseTreeNodes!=null){
+			if (this.parseTreeNodes != null) {
 				Map<String, Object> attrs = this.parseTreeNodes.get(i).getAttributes();
-				if (attrs!=null && attrs.keySet().size()>0){
-					buf += attrs+ " ";
+				if (attrs != null && attrs.keySet().size() > 0) {
+					buf += attrs + " ";
 				}
-				String ner =this.parseTreeNodes.get(i).getNe();
-				if (ner!=null && ner.length()>1)
-					buf+="("+ner+ ") ";
+				String ner = this.parseTreeNodes.get(i).getNe();
+				if (ner != null && ner.length() > 1)
+					buf += "(" + ner + ") ";
 			}
 		}
 		return buf + "]";
 	}
-	
-	public String toWordOnlyString(){
+
+	public String toWordOnlyString() {
 		String buf = "";
 
-		for (int i = 0; i < lemmas.size()  ; i++) {
-			buf+=lemmas.get(i)+" ";
+		for (int i = 0; i < lemmas.size(); i++) {
+			buf += lemmas.get(i) + " ";
 		}
 		return buf.trim();
 	}
@@ -488,8 +480,7 @@ public class ParseTreeChunk implements Serializable{
 		return buf.toString();
 	}
 
-	public List<List<ParseTreeChunk>> obtainParseTreeChunkListByParsingList(
-			String toParse) {
+	public List<List<ParseTreeChunk>> obtainParseTreeChunkListByParsingList(String toParse) {
 		List<List<ParseTreeChunk>> results = new ArrayList<List<ParseTreeChunk>>();
 		// if (toParse.endsWith("]]]")){
 		// toParse = toParse.replace("[[","").replace("]]","");
@@ -521,14 +512,17 @@ public class ParseTreeChunk implements Serializable{
 		System.out.println(results);
 		return results;
 
-		// 2.1 | Vietnam <b>embassy</b> <b>in</b> <b>Israel</b>: information on how
+		// 2.1 | Vietnam <b>embassy</b> <b>in</b> <b>Israel</b>: information on
+		// how
 		// to get your <b>visa</b> at Vietnam
 		// <b>embassy</b> <b>in</b> <b>Israel</b>. <b>...</b> <b>Spain</b>.
 		// Scotland. Sweden. Slovakia. Switzerland. T
 		// [Top of Page] <b>...</b>
-		// [[ [NN-* IN-in NP-israel ], [NP-* IN-in NP-israel ], [NP-* IN-* TO-* NN-*
+		// [[ [NN-* IN-in NP-israel ], [NP-* IN-in NP-israel ], [NP-* IN-* TO-*
+		// NN-*
 		// ], [NN-visa IN-* NN-* IN-in ]], [
-		// [VB-get NN-visa IN-* NN-* IN-in .-* ], [VBD-* IN-* NN-* NN-* .-* ], [VB-*
+		// [VB-get NN-visa IN-* NN-* IN-in .-* ], [VBD-* IN-* NN-* NN-* .-* ],
+		// [VB-*
 		// NP-* ]]]
 
 	}
@@ -561,9 +555,9 @@ public class ParseTreeChunk implements Serializable{
 		return parseTreeMatcher;
 	}
 
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		String phrStr = "[<1>NP'Property':NN, <2>NP'has':VBZ, <3>NP'lots':NNS, <4>NP'of':IN, <5>NP'trash':NN, <6>NP'and':CC, <7>NP'debris':NN]";
-	    ParseTreeChunk ch = new ParseTreeChunk(phrStr);
-	    System.out.println(ch);
+		ParseTreeChunk ch = new ParseTreeChunk(phrStr);
+		System.out.println(ch);
 	}
 }

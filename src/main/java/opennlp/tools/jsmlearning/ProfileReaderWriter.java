@@ -30,7 +30,7 @@ public class ProfileReaderWriter {
 	public static List<String[]> readProfiles(String filename) {
 		CSVReader reader = null;
 		List<String[]> profiles = null;
-		try	{
+		try {
 			reader = new CSVReader(new FileReader(filename), ',');
 			profiles = reader.readAll();
 		} catch (FileNotFoundException e) {
@@ -40,11 +40,11 @@ public class ProfileReaderWriter {
 		}
 		return profiles;
 	}
-	
+
 	public static List<String[]> readProfiles(String filename, char delimiter) {
 		CSVReader reader = null;
 		List<String[]> profiles = null;
-		try	{
+		try {
 			reader = new CSVReader(new FileReader(filename), delimiter);
 			profiles = reader.readAll();
 		} catch (FileNotFoundException e) {
@@ -55,21 +55,21 @@ public class ProfileReaderWriter {
 		return profiles;
 	}
 
-	public static void writeReportArr( String[][] allLines, String reportName){
+	public static void writeReportArr(String[][] allLines, String reportName) {
 		List<String[]> rep = new ArrayList<String[]>();
-		for(String[] line: allLines){
+		for (String[] line : allLines) {
 			rep.add(line);
 		}
-		writeReport( rep, reportName);
+		writeReport(rep, reportName);
 	}
 
-	public static void writeReport( List<String[]> allLines, String reportName){
+	public static void writeReport(List<String[]> allLines, String reportName) {
 		CSVWriter writer = null;
-		try {	
-			writer = new CSVWriter(new PrintWriter(reportName));			
+		try {
+			writer = new CSVWriter(new PrintWriter(reportName));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		}		
+		}
 		writer.writeAll(allLines);
 
 		try {
@@ -80,13 +80,13 @@ public class ProfileReaderWriter {
 		}
 	}
 
-	public static void writeReport( List<String[]> allLines, String reportName, char delimiter){
+	public static void writeReport(List<String[]> allLines, String reportName, char delimiter) {
 		CSVWriter writer = null;
-		try {	
-			writer = new CSVWriter(new PrintWriter(reportName), delimiter, delimiter, delimiter);			
+		try {
+			writer = new CSVWriter(new PrintWriter(reportName), delimiter, delimiter, delimiter);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		}	
+		}
 
 		writer.writeAll(allLines);
 
@@ -97,22 +97,22 @@ public class ProfileReaderWriter {
 			e.printStackTrace();
 		}
 	}
-	
-	public static void appendReport( List<String[]> allLines, String reportName, char delimiter){
+
+	public static void appendReport(List<String[]> allLines, String reportName, char delimiter) {
 		List<String[]> previous;
 		try {
 			previous = readProfiles(reportName);
 			allLines.addAll(previous);
 		} catch (Exception e1) {
-			System.out.println("Creating file "+reportName);
+			System.out.println("Creating file " + reportName);
 		}
-		
+
 		CSVWriter writer = null;
-		try {	
-			writer = new CSVWriter(new PrintWriter(reportName), delimiter, delimiter, delimiter);			
+		try {
+			writer = new CSVWriter(new PrintWriter(reportName), delimiter, delimiter, delimiter);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		}	
+		}
 
 		writer.writeAll(allLines);
 
@@ -123,21 +123,22 @@ public class ProfileReaderWriter {
 			e.printStackTrace();
 		}
 	}
-	public static void appendReport( List<String[]> allLines, String reportName){
+
+	public static void appendReport(List<String[]> allLines, String reportName) {
 		List<String[]> previous;
 		try {
 			previous = readProfiles(reportName);
 			allLines.addAll(previous);
 		} catch (Exception e1) {
-			System.out.println("Creating file "+reportName);
+			System.out.println("Creating file " + reportName);
 		}
-		
+
 		CSVWriter writer = null;
-		try {	
-			writer = new CSVWriter(new PrintWriter(reportName));			
+		try {
+			writer = new CSVWriter(new PrintWriter(reportName));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		}	
+		}
 
 		writer.writeAll(allLines);
 
@@ -154,12 +155,11 @@ public class ProfileReaderWriter {
 
 	}
 
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		List<String[]> allLines = new ArrayList<String[]>();
-		allLines.add(new String[] {"aa " , "  bb", "ccc" });
-		ProfileReaderWriter.writeReport( allLines, "reportName.txt", ' ');
+		allLines.add(new String[] { "aa ", "  bb", "ccc" });
+		ProfileReaderWriter.writeReport(allLines, "reportName.txt", ' ');
 
 	}
-
 
 }

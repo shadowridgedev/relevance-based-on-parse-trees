@@ -37,36 +37,32 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-
 public class BingQueryRunnerMultipageSearchResults extends BingQueryRunner {
-	
+
 	private static String BING_KEY = "e8ADxIjn9YyHx36EihdjH/tMqJJItUrrbPTUpKahiU0=";
 	private static final Logger LOG = Logger
-		      .getLogger("opennlp.tools.similarity.apps.BingQueryRunnerMultipageSearchResults");
+			.getLogger("opennlp.tools.similarity.apps.BingQueryRunnerMultipageSearchResults");
 	private AzureSearchWebQuery aq = new AzureSearchWebQuery();
 
 	public List<HitBase> runSearch(String query, int nRes, boolean bHighRank) {
 		aq.setAppid(BING_KEY);
-		aq.setQuery(query);		  		
+		aq.setQuery(query);
 		aq.doQuery();
 		if (!bHighRank)
 			aq.setPage(5);
 		aq.setPerPage(nRes);
-		
-		List<HitBase> results = new ArrayList<HitBase> ();
+
+		List<HitBase> results = new ArrayList<HitBase>();
 		AzureSearchResultSet<AzureSearchWebResult> ars = aq.getQueryResult();
-		
-		for (AzureSearchWebResult anr : ars){
-		    HitBase h = new HitBase();
-		    h.setAbstractText(anr.getDescription());
-		    h.setTitle(anr.getTitle());
-		    h.setUrl(anr.getUrl());
-		    results.add(h);
+
+		for (AzureSearchWebResult anr : ars) {
+			HitBase h = new HitBase();
+			h.setAbstractText(anr.getDescription());
+			h.setTitle(anr.getTitle());
+			h.setUrl(anr.getUrl());
+			results.add(h);
 		}
 		return results;
 	}
-	
-	
-
 
 }

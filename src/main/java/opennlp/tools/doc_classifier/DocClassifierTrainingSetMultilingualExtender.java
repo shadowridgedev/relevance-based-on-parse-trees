@@ -45,31 +45,31 @@ import org.json.JSONObject;
  */
 public class DocClassifierTrainingSetMultilingualExtender {
 	private static final String LANG_TEMPL = "l_a_n_g";
-	private String wikiUrlsTemplate = "https://"+LANG_TEMPL+".wikipedia.org/wiki/";
-	
+	private String wikiUrlsTemplate = "https://" + LANG_TEMPL + ".wikipedia.org/wiki/";
+
 	public static String projectHome = new File(".").getAbsolutePath().replace("contentinspection/.", "");
 	public static String resourceDir = new File(".").getAbsolutePath().replace("/.", "") + "/src/main/resources";
 	DocClassifier classifier = null;
 	private String sourceDir = null, destinationDir = null;
-	//interwiki-fr"><a href="http://fr.wikipedia.org/wiki/Niveau_d%27%C3%A9nergie" title="Niveau d&#39;énergie – French" lang="fr" 
-	private static String[][] multilingualTokens = new String[][]{ 
-		{"interwiki-fr\"><a href=\"", "lang=\"fr\""},
-		{"interwiki-es\"><a href=\"", "lang=\"es\""},
-		{"interwiki-de\"><a href=\"", "lang=\"de\""},
-	};
-	
-	private static String[] langs = new String[]{ "fr", "es", "de"};
+	// interwiki-fr"><a
+	// href="http://fr.wikipedia.org/wiki/Niveau_d%27%C3%A9nergie" title="Niveau
+	// d&#39;énergie – French" lang="fr"
+	private static String[][] multilingualTokens = new String[][] { { "interwiki-fr\"><a href=\"", "lang=\"fr\"" },
+			{ "interwiki-es\"><a href=\"", "lang=\"es\"" }, { "interwiki-de\"><a href=\"", "lang=\"de\"" }, };
+
+	private static String[] langs = new String[] { "fr", "es", "de" };
 
 	protected ArrayList<File> queue = new ArrayList<File>();
 
 	protected Tika tika = new Tika();
+
 	public DocClassifierTrainingSetMultilingualExtender(String resource) {
 
 		classifier = new DocClassifier("", new JSONObject());
 
 	}
+
 	private int FRAGMENT_LENGTH = 500;
-	
 
 	protected void addFiles(File file) {
 
@@ -91,10 +91,10 @@ public class DocClassifierTrainingSetMultilingualExtender {
 
 		}
 	}
-	
-	public List<String> extractEntriesFromSpecial_Export(String filename){
+
+	public List<String> extractEntriesFromSpecial_Export(String filename) {
 		List<String> filteredEntries = new ArrayList<String>();
-		String content=null;
+		String content = null;
 		try {
 			content = FileUtils.readFileToString(new File(filename));
 		} catch (IOException e) {
@@ -102,67 +102,68 @@ public class DocClassifierTrainingSetMultilingualExtender {
 			e.printStackTrace();
 		}
 		String[] entries = StringUtils.substringsBetween(content, "[[", "]]");
-		for(String e: entries){
-			if (e.startsWith("Kategorie") || e.startsWith("Category") || e.startsWith("d:") || e.startsWith("User") 
-					||e.startsWith("Portal")  )
+		for (String e : entries) {
+			if (e.startsWith("Kategorie") || e.startsWith("Category") || e.startsWith("d:") || e.startsWith("User")
+					|| e.startsWith("Portal"))
 				continue;
-			if (e.indexOf(':')>-1)
+			if (e.indexOf(':') > -1)
 				continue;
-			
-			if (e.indexOf(":")>-1)
+
+			if (e.indexOf(":") > -1)
 				continue;
 			int endofEntry = e.indexOf('|');
-			if (endofEntry>-1) e = e.substring(0, endofEntry);
+			if (endofEntry > -1)
+				e = e.substring(0, endofEntry);
 			filteredEntries.add(e);
 		}
-		
-		filteredEntries = new ArrayList<String> (new HashSet<String>(filteredEntries));
+
+		filteredEntries = new ArrayList<String>(new HashSet<String>(filteredEntries));
 		return filteredEntries;
 	}
 
 	public void processDirectory(String fileName) throws IOException {
 		List<String[]> report = new ArrayList<String[]>();
-		report.add(new String[] { "filename", "category",
-				"confirmed?" ,
-		});
-		
+		report.add(new String[] { "filename", "category", "confirmed?", });
+
 		addFiles(new File(fileName));
-	//	FileUtils.deleteDirectory(new File(destinationDir));
-	//	FileUtils.forceMkdir(new File(destinationDir));
-		
+		// FileUtils.deleteDirectory(new File(destinationDir));
+		// FileUtils.forceMkdir(new File(destinationDir));
 
 		for (File f : queue) {
 			String content = null;
 			try {// should be wiki page
-				//if (f.getName().toString().toLowerCase().indexOf(" wiki")<0 && 
-						
-			//	if (		f.getAbsolutePath().indexOf("wiki-new")<0)
-			//		continue;
+					// if (f.getName().toString().toLowerCase().indexOf("
+					// wiki")<0 &&
+
+				// if ( f.getAbsolutePath().indexOf("wiki-new")<0)
+				// continue;
 				// should not be a page already derived by a link
-				if (f.getName().toString().toLowerCase().indexOf(".html_")>-1)
+				if (f.getName().toString().toLowerCase().indexOf(".html_") > -1)
 					continue;
-				
-				System.out.println("processing "+f.getName());
+
+				System.out.println("processing " + f.getName());
 				content = FileUtils.readFileToString(f, "utf-8");
-				int langIndex =0;
-				for(String[] begEnd: multilingualTokens){
+				int langIndex = 0;
+				for (String[] begEnd : multilingualTokens) {
 					String urlDirty = StringUtils.substringBetween(content, begEnd[0], begEnd[1]);
 					String url = StringUtils.substringBefore(urlDirty, "\"");
 
-					if (url!=null){
+					if (url != null) {
 						if (!url.startsWith("http:"))
-						    url = "https:"+url;
-						
-						String[] parts  = url.split("/");
-						String multilingualName = parts[parts.length-1];
-						String destFileName = f.getAbsolutePath().replace(sourceDir, destinationDir).replace(" - Wikipedia, the free encyclopedia.html", "-wiki")+"."+langs[langIndex]+"."
-								+"_"+multilingualName+".html";
-						if (!new File(destFileName).exists()){
+							url = "https:" + url;
+
+						String[] parts = url.split("/");
+						String multilingualName = parts[parts.length - 1];
+						String destFileName = f.getAbsolutePath().replace(sourceDir, destinationDir)
+								.replace(" - Wikipedia, the free encyclopedia.html", "-wiki") + "." + langs[langIndex]
+								+ "." + "_" + multilingualName + ".html";
+						if (!new File(destFileName).exists()) {
 							saveDocFromTheWeb(url, destFileName);
-							System.out.println(f.getName()+ " => "+destFileName);
+							System.out.println(f.getName() + " => " + destFileName);
 						}
 					} else {
-						System.out.println("Unable to extract multilingual urls for'" +langs[langIndex] +"' from file "+ f.getCanonicalPath());
+						System.out.println("Unable to extract multilingual urls for'" + langs[langIndex]
+								+ "' from file " + f.getCanonicalPath());
 					}
 					langIndex++;
 				}
@@ -171,19 +172,18 @@ public class DocClassifierTrainingSetMultilingualExtender {
 			}
 		}
 
-
 		queue.clear();
 	}
 
 	private void copyURLToFile(URL url, File file) {
-		ReadableByteChannel rbc=null;
+		ReadableByteChannel rbc = null;
 		try {
 			rbc = Channels.newChannel(url.openStream());
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		FileOutputStream fos=null;
+		FileOutputStream fos = null;
 		try {
 			fos = new FileOutputStream(file.getAbsolutePath());
 		} catch (FileNotFoundException e) {
@@ -196,17 +196,17 @@ public class DocClassifierTrainingSetMultilingualExtender {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	
-	public void crawlWikiOnTopic( String filename, String lang, String destinationDir){
+
+	public void crawlWikiOnTopic(String filename, String lang, String destinationDir) {
 		List<String> entries = extractEntriesFromSpecial_Export(filename);
-		for(String e: entries){
-			String url  = wikiUrlsTemplate.replace(LANG_TEMPL, lang) + e; 
-			saveDocFromTheWeb(url, destinationDir+e.replace(' ', '_')+".html"); 
+		for (String e : entries) {
+			String url = wikiUrlsTemplate.replace(LANG_TEMPL, lang) + e;
+			saveDocFromTheWeb(url, destinationDir + e.replace(' ', '_') + ".html");
 		}
 	}
-	
+
 	public static void saveDocFromTheWeb(String docUrl, String destinationFile) {
 		try {
 			URL url = new URL(docUrl);
@@ -216,7 +216,6 @@ public class DocClassifierTrainingSetMultilingualExtender {
 			}
 
 			OutputStream os = new FileOutputStream(destinationFile);
-
 
 			byte[] b = new byte[2048];
 			int length;
@@ -238,47 +237,44 @@ public class DocClassifierTrainingSetMultilingualExtender {
 			e.printStackTrace();
 		}
 	}
-	
 
 	public static void main(String[] args) {
 		if (args.length < 2) {
-			System.err
-			.println("Verifier accepts two arguments: [0] - input 'training_corpus' folder, "
+			System.err.println("Verifier accepts two arguments: [0] - input 'training_corpus' folder, "
 					+ "[1] - output 'training_corpus' folder . "
-					+ "All paths should include category name as a part of full path string, such as '/computing/' " );
+					+ "All paths should include category name as a part of full path string, such as '/computing/' ");
 			System.exit(0);
 		}
 
 		DocClassifierTrainingSetMultilingualExtender runner = new DocClassifierTrainingSetMultilingualExtender(null);
-		
-		if (args.length==2) {
-		runner.sourceDir = args[0]; runner.destinationDir = args[1];
-		runner.sourceDir =
-				"/Users/borisgalitsky/Documents/svm_tk_july2015/milkyway/training_corpus_multilingual_verif";
-		runner.destinationDir =
-				"/Users/borisgalitsky/Documents/new_corpus/milkyway/training_corpus_new_multilingual_refined";
 
-		try {
-			runner.processDirectory( runner.sourceDir);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		} else {  
+		if (args.length == 2) {
+			runner.sourceDir = args[0];
+			runner.destinationDir = args[1];
+			runner.sourceDir = "/Users/borisgalitsky/Documents/svm_tk_july2015/milkyway/training_corpus_multilingual_verif";
+			runner.destinationDir = "/Users/borisgalitsky/Documents/new_corpus/milkyway/training_corpus_new_multilingual_refined";
+
+			try {
+				runner.processDirectory(runner.sourceDir);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
 			runner.crawlWikiOnTopic("/Users/borisgalitsky/Downloads/Wikipedia-20150730124756.xml",
-					//Wikipedia-20150730053619.xml",
-					////Wikipedia-20150730044602.xml",
-					//Wikipedia-20150729103933.xml",
-					//Wikipedia-20150729103933.xml",
+					// Wikipedia-20150730053619.xml",
+					//// Wikipedia-20150730044602.xml",
+					// Wikipedia-20150729103933.xml",
+					// Wikipedia-20150729103933.xml",
 					// "Wikipedia-20150728193126.xml",
-					//Wikipedia-20150728183128.xml",
-					"en", 
+					// Wikipedia-20150728183128.xml",
+					"en",
 					"/Users/borisgalitsky/Documents/merged_svm_tk/milkyway/training_corpus_new_multilingual/business/wiki/wiki-new/");
 		}
-
 
 	}
 }
 
 /*
-/Users/borisgalitsky/Documents/workspace/deepContentInspection/src/main/resources/docs/netflix
+ * /Users/borisgalitsky/Documents/workspace/deepContentInspection/src/main/
+ * resources/docs/netflix
  */

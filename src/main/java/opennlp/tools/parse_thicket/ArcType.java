@@ -1,18 +1,17 @@
 package opennlp.tools.parse_thicket;
 
-public class ArcType{
+public class ArcType {
 	private String type; // rst
 	private String subtype; // rst-explain
 	private Integer type_id;
 	private Integer subtype_id;
-	
+
 	public ArcType(String type, // rst
-	String subtype, // rst-explain
-	Integer type_id,
-	Integer subtype_id){
+			String subtype, // rst-explain
+			Integer type_id, Integer subtype_id) {
 		this.type = type; // rst
 		this.subtype = subtype; // rst-explain
-		this.type_id= type_id;
+		this.type_id = type_id;
 		this.subtype_id = subtype_id;
 	}
 
@@ -47,8 +46,8 @@ public class ArcType{
 	public void setSubtype_id(Integer subtype_id) {
 		this.subtype_id = subtype_id;
 	}
-	
-	public String toString(){
-		return type+":"+subtype;
+
+	public String toString() {
+		return type + ":" + subtype;
 	}
 }

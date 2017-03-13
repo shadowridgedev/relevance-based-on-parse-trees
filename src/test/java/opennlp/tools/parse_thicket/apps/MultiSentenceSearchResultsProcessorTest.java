@@ -26,30 +26,28 @@ public class MultiSentenceSearchResultsProcessorTest extends TestCase {
 	MultiSentenceSearchResultsProcessor proc = new MultiSentenceSearchResultsProcessor();
 
 	public void testSearchOrder() {
-		List<HitBase> res; HitBase first = null;
-		String query ;
+		List<HitBase> res;
+		HitBase first = null;
+		String query;
 		/*
-		query = "I am now living abroad and have health insurance from Russia. How can I avoid penalty for not having health insurance in US";
-		res = proc.runSearchViaAPI(query);
-		// we verify that top answers have high similarity score
-		System.out.println(res);
-		first = res.get(0);
-		assertTrue(first.getGenerWithQueryScore() > 2.0f);
-*/
-		
-		
-		query = "Furious about reports that the IRS was used to target conservative groups, President Obama said that acting IRS Director Steve T. Miller was asked to resign. "+
-				"IRS actions were inexcusable. Americans are right to be angry about it. Obama will not tolerate this type of behavior by IRS";
+		 * query =
+		 * "I am now living abroad and have health insurance from Russia. How can I avoid penalty for not having health insurance in US"
+		 * ; res = proc.runSearchViaAPI(query); // we verify that top answers
+		 * have high similarity score System.out.println(res); first =
+		 * res.get(0); assertTrue(first.getGenerWithQueryScore() > 2.0f);
+		 */
+
+		query = "Furious about reports that the IRS was used to target conservative groups, President Obama said that acting IRS Director Steve T. Miller was asked to resign. "
+				+ "IRS actions were inexcusable. Americans are right to be angry about it. Obama will not tolerate this type of behavior by IRS";
 		res = proc.runSearchViaAPI(query);
 		// we verify that top answers have high similarity score
 		System.out.println(res);
 		first = res.get(0);
 		assertTrue(first.getGenerWithQueryScore() > 000f);
 
-
-		query = " I see no meaningful distinction between complacency or complicity in the military's latest failure to uphold their own " +
-				"standards of conduct. Nor do I see a distinction between the service member who orchestrated this offense and the chain of " +
-				"command that was either oblivious to or tolerant of criminal behavior";
+		query = " I see no meaningful distinction between complacency or complicity in the military's latest failure to uphold their own "
+				+ "standards of conduct. Nor do I see a distinction between the service member who orchestrated this offense and the chain of "
+				+ "command that was either oblivious to or tolerant of criminal behavior";
 		res = proc.runSearchViaAPI(query);
 		first = res.get(0);
 		assertTrue(first.getGenerWithQueryScore() > 1.69);
@@ -58,8 +56,9 @@ public class MultiSentenceSearchResultsProcessorTest extends TestCase {
 
 	}
 
-	/*public void testSimpleQuery(){
-		List<HitBase> res = proc.runSearchViaAPI("How can I pay tax on my income abroad");
-	}*/
+	/*
+	 * public void testSimpleQuery(){ List<HitBase> res =
+	 * proc.runSearchViaAPI("How can I pay tax on my income abroad"); }
+	 */
 
 }

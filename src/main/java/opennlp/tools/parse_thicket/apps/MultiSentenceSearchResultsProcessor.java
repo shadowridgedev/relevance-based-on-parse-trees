@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
-
 import opennlp.tools.jsmlearning.ProfileReaderWriter;
 import opennlp.tools.parse_thicket.matching.Matcher;
 import opennlp.tools.similarity.apps.BingQueryRunner;
@@ -33,9 +32,8 @@ import opennlp.tools.textsimilarity.ParseTreeChunkListScorer;
 import opennlp.tools.textsimilarity.SentencePairMatchResult;
 import opennlp.tools.textsimilarity.chunker2matcher.ParserChunker2MatcherProcessor;
 
-public class MultiSentenceSearchResultsProcessor  {
-	private static Logger LOG = Logger
-			.getLogger("opennlp.tools.similarity.apps.SearchResultsProcessor");
+public class MultiSentenceSearchResultsProcessor {
+	private static Logger LOG = Logger.getLogger("opennlp.tools.similarity.apps.SearchResultsProcessor");
 
 	private WebSearchEngineResultsScraper scraper = new WebSearchEngineResultsScraper();
 	private Matcher matcher = new Matcher();
@@ -46,38 +44,35 @@ public class MultiSentenceSearchResultsProcessor  {
 	protected static final int NUM_OF_SEARCH_RESULTS = 10;
 
 	/*
-	 * Takes a search engine API (or scraped) search results and calculates the parse tree similarity
-	 * between the question and each snippet. Ranks those snippets with higher
-	 * similarity score up
+	 * Takes a search engine API (or scraped) search results and calculates the
+	 * parse tree similarity between the question and each snippet. Ranks those
+	 * snippets with higher similarity score up
 	 */
 
-
-	protected List<HitBase> calculateMatchScoreResortHits(List<HitBase> hits,
-			String searchQuery) {
+	protected List<HitBase> calculateMatchScoreResortHits(List<HitBase> hits, String searchQuery) {
 
 		List<HitBase> newHitList = new ArrayList<HitBase>();
 		int count = 0;
 		for (HitBase hit : hits) {
-			if (count>10)
+			if (count > 10)
 				break;
 			count++;
 			String[] pageSentsAndSnippet = formTextForReRankingFromHit(hit);
-					
+
 			Double score = 0.0;
 			try {
 				List<List<ParseTreeChunk>> match = null;
-				if (pageSentsAndSnippet!=null && pageSentsAndSnippet[0].length()>50){
-					match = matcher.assessRelevanceCache(pageSentsAndSnippet[0] ,
-							searchQuery);
+				if (pageSentsAndSnippet != null && pageSentsAndSnippet[0].length() > 50) {
+					match = matcher.assessRelevanceCache(pageSentsAndSnippet[0], searchQuery);
 					score = parseTreeChunkListScorer.getParseTreeChunkListScore(match);
 					hit.setSource(match.toString());
 				}
-				if (score < 2){ // attempt to match with snippet, if not much luck with original text
-					match = matcher.assessRelevanceCache(pageSentsAndSnippet[1] ,
-							searchQuery);
+				if (score < 2) { // attempt to match with snippet, if not much
+									// luck with original text
+					match = matcher.assessRelevanceCache(pageSentsAndSnippet[1], searchQuery);
 					score = parseTreeChunkListScorer.getParseTreeChunkListScore(match);
 				}
-				LOG.info(score + " | " +pageSentsAndSnippet[1]);
+				LOG.info(score + " | " + pageSentsAndSnippet[1]);
 			} catch (Exception e) {
 				LOG.severe("Problem processing snapshot " + pageSentsAndSnippet[1]);
 				e.printStackTrace();
@@ -85,18 +80,18 @@ public class MultiSentenceSearchResultsProcessor  {
 			hit.setGenerWithQueryScore(score);
 			newHitList.add(hit);
 		}
-		
+
 		System.out.println("\n\n ============= old ORDER ================= ");
 		for (HitBase hit : newHitList) {
-			System.out.println(hit.getOriginalSentences().toString() + " => "+hit.getGenerWithQueryScore());
-			System.out.println("match = "+hit.getSource());
+			System.out.println(hit.getOriginalSentences().toString() + " => " + hit.getGenerWithQueryScore());
+			System.out.println("match = " + hit.getSource());
 		}
 		Collections.sort(newHitList, new HitBaseComparable());
 
 		System.out.println("\n\n ============= NEW ORDER ================= ");
 		for (HitBase hit : newHitList) {
-			System.out.println(hit.getOriginalSentences().toString() + " => "+hit.getGenerWithQueryScore());
-			System.out.println("match = "+hit.getSource());
+			System.out.println(hit.getOriginalSentences().toString() + " => " + hit.getGenerWithQueryScore());
+			System.out.println("match = " + hit.getSource());
 		}
 
 		return newHitList;
@@ -107,27 +102,26 @@ public class MultiSentenceSearchResultsProcessor  {
 		String textFromOriginalPage = "";
 		try {
 			List<String> sents = hitWithFullSents.getOriginalSentences();
-			for(String s: sents){
-				textFromOriginalPage+=s+" ";
+			for (String s : sents) {
+				textFromOriginalPage += s + " ";
 			}
 
-			if (textFromOriginalPage.startsWith(".")){
+			if (textFromOriginalPage.startsWith(".")) {
 				textFromOriginalPage = textFromOriginalPage.substring(2);
 			}
-			textFromOriginalPage = textFromOriginalPage.replace(" . .", ". ").replace(". . ", ". ").
-					replace("..", ". ").trim();
+			textFromOriginalPage = textFromOriginalPage.replace(" . .", ". ").replace(". . ", ". ").replace("..", ". ")
+					.trim();
 		} catch (Exception e1) {
 			e1.printStackTrace();
-			LOG.info("Problem processing snapshot "+hit.getAbstractText());
+			LOG.info("Problem processing snapshot " + hit.getAbstractText());
 		}
 		hit.setPageContent(textFromOriginalPage);
-		String snapshot = hit.getAbstractText().replace("<b>...</b>", ". ").replace("<span class='best-phrase'>", " ").replace("<span>", " ").replace("<span>", " ")
-				.replace("<b>", "").replace("</b>", "");
-		snapshot = snapshot.replace("</B>", "").replace("<B>", "")
-				.replace("<br>", "").replace("</br>", "").replace("...", ". ")
-				.replace("|", " ").replace(">", " ").replace(". .", ". ");
+		String snapshot = hit.getAbstractText().replace("<b>...</b>", ". ").replace("<span class='best-phrase'>", " ")
+				.replace("<span>", " ").replace("<span>", " ").replace("<b>", "").replace("</b>", "");
+		snapshot = snapshot.replace("</B>", "").replace("<B>", "").replace("<br>", "").replace("</br>", "")
+				.replace("...", ". ").replace("|", " ").replace(">", " ").replace(". .", ". ");
 		snapshot += " . " + hit.getTitle();
-		
+
 		return new String[] { textFromOriginalPage, snapshot };
 	}
 
@@ -138,21 +132,19 @@ public class MultiSentenceSearchResultsProcessor  {
 
 	public List<HitBase> runSearch(String query) {
 
-
 		List<HitBase> hits = scraper.runSearch(query);
 		hits = calculateMatchScoreResortHits(hits, query);
 		return hits;
 	}
 
-
 	public List<HitBase> runSearchViaAPI(String query) {
-		List<String[]> reportData = new ArrayList<String[]>(); 
-		reportData.add(new String[]{query});
+		List<String[]> reportData = new ArrayList<String[]>();
+		reportData.add(new String[] { query });
 		List<HitBase> hits = null;
 		try {
 			List<HitBase> resultList = bingSearcher.runSearch(query);
 			reportData.add(convertListHitBaseIntoStringAr(resultList));
-			
+
 			// now we apply our own relevance filter
 			hits = calculateMatchScoreResortHits(resultList, query);
 			reportData.add(convertListHitBaseIntoStringAr(resultList));
@@ -161,22 +153,23 @@ public class MultiSentenceSearchResultsProcessor  {
 			LOG.info("No search results for query '" + query);
 			return null;
 		}
-		//ProfileReaderWriter.writeReport(reportData, "resultsForQuery_"+query.replace(' ', '_')+".csv");
+		// ProfileReaderWriter.writeReport(reportData,
+		// "resultsForQuery_"+query.replace(' ', '_')+".csv");
 		return hits;
 	}
-	
-	private String[] convertListHitBaseIntoStringAr(List<HitBase> list){
-		List<String> results = new  ArrayList<String>(); 
-		for(HitBase h: list ){
-			results.add(h.getTitle()+ " | "+h.getAbstractText());
+
+	private String[] convertListHitBaseIntoStringAr(List<HitBase> list) {
+		List<String> results = new ArrayList<String>();
+		for (HitBase h : list) {
+			results.add(h.getTitle() + " | " + h.getAbstractText());
 		}
 		return results.toArray(new String[0]);
 	}
 
-	public static void main(String[] args){
-		String query = " I see no meaningful distinction between complacency or complicity in the military's latest failure to uphold their own " +
-				"standards of conduct. Nor do I see a distinction between the service member who orchestrated this offense and the chain of " +
-				"command that was either oblivious to or tolerant of criminal behavior";
+	public static void main(String[] args) {
+		String query = " I see no meaningful distinction between complacency or complicity in the military's latest failure to uphold their own "
+				+ "standards of conduct. Nor do I see a distinction between the service member who orchestrated this offense and the chain of "
+				+ "command that was either oblivious to or tolerant of criminal behavior";
 
 		new MultiSentenceSearchResultsProcessor().runSearchViaAPI(query);
 	}

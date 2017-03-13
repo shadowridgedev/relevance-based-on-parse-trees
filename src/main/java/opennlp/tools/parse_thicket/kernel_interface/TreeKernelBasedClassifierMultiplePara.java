@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 
-
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 
@@ -38,78 +37,79 @@ import opennlp.tools.parse_thicket.VerbNetProcessor;
 import opennlp.tools.parse_thicket.apps.MultiSentenceSearchResultsProcessor;
 import opennlp.tools.parse_thicket.matching.Matcher;
 
-public class TreeKernelBasedClassifierMultiplePara extends TreeKernelBasedClassifier{
+public class TreeKernelBasedClassifierMultiplePara extends TreeKernelBasedClassifier {
 	boolean bShortRun = false;
-	public void setShortRun(){
+
+	public void setShortRun() {
 		bShortRun = true;
 	}
 
+	public void trainClassifier(String posDirectory, String negDirectory) {
 
-	public void trainClassifier(
-			String posDirectory, String negDirectory) {
-
-		queuePos.clear(); queueNeg.clear();
+		queuePos.clear();
+		queueNeg.clear();
 		addFilesPos(new File(posDirectory));
 		addFilesNeg(new File(negDirectory));
 
 		List<File> filesPos = new ArrayList<File>(queuePos), filesNeg = new ArrayList<File>(queueNeg);
 
 		Collection<String> treeBankBuffer = new ArrayList<String>();
-		int countPos=0, countNeg=0;
+		int countPos = 0, countNeg = 0;
 
 		for (File f : filesPos) {
 			// get first paragraph of text
-			List<String> texts=DescriptiveParagraphFromDocExtractor.getLongParagraphsFromFile(f);		
+			List<String> texts = DescriptiveParagraphFromDocExtractor.getLongParagraphsFromFile(f);
 			List<String> lines = formTreeKernelStructuresMultiplePara(texts, "1");
-			treeBankBuffer.addAll(lines);		
-			if (bShortRun && countPos>3000)
+			treeBankBuffer.addAll(lines);
+			if (bShortRun && countPos > 3000)
 				break;
 
 			countPos++;
-		}	
+		}
 		for (File f : filesNeg) {
-			// get first paragraph of text 
-			List<String> texts=DescriptiveParagraphFromDocExtractor.getLongParagraphsFromFile(f);	
+			// get first paragraph of text
+			List<String> texts = DescriptiveParagraphFromDocExtractor.getLongParagraphsFromFile(f);
 			List<String> lines = formTreeKernelStructuresMultiplePara(texts, "-1");
-			treeBankBuffer.addAll(lines);	
-			if (bShortRun && countNeg>3000)
+			treeBankBuffer.addAll(lines);
+			if (bShortRun && countNeg > 3000)
 				break;
 
 			countNeg++;
-		}	
+		}
 
 		// write the lists of samples to a file
 		try {
-			FileUtils.writeLines(new File(path+trainingFileName), null, treeBankBuffer);
+			FileUtils.writeLines(new File(path + trainingFileName), null, treeBankBuffer);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//	ProfileReaderWriter.writeReport(treeBankBuffer, path+trainingFileName, ' ');
+		// ProfileReaderWriter.writeReport(treeBankBuffer,
+		// path+trainingFileName, ' ');
 		// build the model
 		tkRunner.runLearner(path, trainingFileName, modelFileName);
 	}
 
-	public List<String[]> classifyFilesInDirectory(String dirFilesToBeClassified){
-		Map<Integer, Integer> countObject = new HashMap<Integer, Integer>(); 
-		int itemCount=0, objectCount = 0;
+	public List<String[]> classifyFilesInDirectory(String dirFilesToBeClassified) {
+		Map<Integer, Integer> countObject = new HashMap<Integer, Integer>();
+		int itemCount = 0, objectCount = 0;
 		List<String> treeBankBuffer = new ArrayList<String>();
 		queuePos.clear();
-		addFilesPos(new File( dirFilesToBeClassified));
+		addFilesPos(new File(dirFilesToBeClassified));
 		List<File> filesUnkn = new ArrayList<File>(queuePos);
-		for (File f : filesUnkn) {	
-			List<String> texts=DescriptiveParagraphFromDocExtractor.getLongParagraphsFromFile(f);
+		for (File f : filesUnkn) {
+			List<String> texts = DescriptiveParagraphFromDocExtractor.getLongParagraphsFromFile(f);
 			List<String> lines = formTreeKernelStructuresMultiplePara(texts, "0");
-			for(String l: lines){
+			for (String l : lines) {
 				countObject.put(itemCount, objectCount);
 				itemCount++;
 			}
 			objectCount++;
-			treeBankBuffer.addAll(lines);		
-		}	
+			treeBankBuffer.addAll(lines);
+		}
 		// write the lists of samples to a file
 		try {
-			FileUtils.writeLines(new File(path+unknownToBeClassified), null, treeBankBuffer);
+			FileUtils.writeLines(new File(path + unknownToBeClassified), null, treeBankBuffer);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -117,62 +117,66 @@ public class TreeKernelBasedClassifierMultiplePara extends TreeKernelBasedClassi
 
 		tkRunner.runClassifier(path, unknownToBeClassified, modelFileName, classifierOutput);
 		// read classification results
-		List<String[]> classifResults = ProfileReaderWriter.readProfiles(path+classifierOutput, ' ');
-		// iterate through classification results and set them as scores for hits
-		List<String[]>results = new ArrayList<String[]>();
+		List<String[]> classifResults = ProfileReaderWriter.readProfiles(path + classifierOutput, ' ');
+		// iterate through classification results and set them as scores for
+		// hits
+		List<String[]> results = new ArrayList<String[]>();
 
-		itemCount=0; objectCount = 0;
-		int currentItemCount=0;
+		itemCount = 0;
+		objectCount = 0;
+		int currentItemCount = 0;
 		float accum = 0;
-		for(String[] line: classifResults){
+		for (String[] line : classifResults) {
 			Float val = Float.parseFloat(line[0]);
-			accum+=val;
+			accum += val;
 			// last line
 			Boolean bLastLine = false;
-			if (itemCount==classifResults.size()-1)
+			if (itemCount == classifResults.size() - 1)
 				bLastLine = true;
 
-			if (objectCount== countObject .get(itemCount) /*&& !bLastLine*/){
-				itemCount++; 
+			if (objectCount == countObject.get(itemCount) /* && !bLastLine */) {
+				itemCount++;
 				currentItemCount++;
 				continue;
-			}
-			else while(objectCount!= countObject .get(itemCount)-1){
-				objectCount++;
-				String[] rline = new String[]{filesUnkn.get(objectCount).getName(), "unknown", "0",
-						filesUnkn.get(objectCount).getAbsolutePath() , new Integer(itemCount).toString(), new Integer(objectCount).toString()}; 
-				results.add(rline);
-			}
+			} else
+				while (objectCount != countObject.get(itemCount) - 1) {
+					objectCount++;
+					String[] rline = new String[] { filesUnkn.get(objectCount).getName(), "unknown", "0",
+							filesUnkn.get(objectCount).getAbsolutePath(), new Integer(itemCount).toString(),
+							new Integer(objectCount).toString() };
+					results.add(rline);
+				}
 			objectCount = countObject.get(itemCount);
-			itemCount++; 
+			itemCount++;
 
-			float averaged = accum/(float)currentItemCount;
-			currentItemCount=0;
+			float averaged = accum / (float) currentItemCount;
+			currentItemCount = 0;
 			Boolean in = false;
-			if (averaged> MIN_SVM_SCORE_TOBE_IN)
+			if (averaged > MIN_SVM_SCORE_TOBE_IN)
 				in = true;
 
-			String[] rline = new String[]{filesUnkn.get(objectCount).getName(), in.toString(), new Float(averaged).toString(),
-					filesUnkn.get(objectCount).getAbsolutePath() , new Integer(itemCount).toString(), new Integer(objectCount).toString()}; 
+			String[] rline = new String[] { filesUnkn.get(objectCount).getName(), in.toString(),
+					new Float(averaged).toString(), filesUnkn.get(objectCount).getAbsolutePath(),
+					new Integer(itemCount).toString(), new Integer(objectCount).toString() };
 			results.add(rline);
-			accum=0;
+			accum = 0;
 		}
 		return results;
 
 	}
 
-
 	protected List<String> formTreeKernelStructuresMultiplePara(List<String> texts, String flag) {
 		List<String> extendedTreesDumpTotal = new ArrayList<String>();
 		try {
-			for(String text: texts){
-				// get the parses from original documents, and form the training dataset
-				System.out.println("About to build pt from "+text);
+			for (String text : texts) {
+				// get the parses from original documents, and form the training
+				// dataset
+				System.out.println("About to build pt from " + text);
 				ParseThicket pt = matcher.buildParseThicketFromTextWithRST(text);
 				System.out.print("About to build extended forest ");
 				List<String> extendedTreesDump = treeExtender.buildForestForCorefArcs(pt);
-				for(String line: extendedTreesDump)
-					extendedTreesDumpTotal.add(flag + " |BT| "+line + " |ET| ");
+				for (String line : extendedTreesDump)
+					extendedTreesDumpTotal.add(flag + " |BT| " + line + " |ET| ");
 				System.out.println("DONE");
 			}
 
@@ -182,43 +186,104 @@ public class TreeKernelBasedClassifierMultiplePara extends TreeKernelBasedClassi
 		return extendedTreesDumpTotal;
 	}
 
-	public static void main(String[] args){
-		VerbNetProcessor p = VerbNetProcessor.
-				getInstance("/Users/bgalitsky/Documents/relevance-based-on-parse-trees/src/test/resources"); 
+	public static void main(String[] args) {
+		VerbNetProcessor p = VerbNetProcessor
+				.getInstance("/Users/bgalitsky/Documents/relevance-based-on-parse-trees/src/test/resources");
 
 		TreeKernelBasedClassifierMultiplePara proc = new TreeKernelBasedClassifierMultiplePara();
 		proc.setKernelPath("/Users/bgalitsky/Documents/relevance-based-on-parse-trees/src/test/resources/tree_kernel/");
-		proc.trainClassifier(
-				"/Users/bgalitsky/Documents/ENRON/detectors/design_docs/docs/design_doc_posNeg/pos",
+		proc.trainClassifier("/Users/bgalitsky/Documents/ENRON/detectors/design_docs/docs/design_doc_posNeg/pos",
 				"/Users/bgalitsky/Documents/ENRON/detectors/design_docs/docs/design_doc_posNeg/neg");
-		//		"/Users/bgalitsky/Documents/relevance-based-on-parse-trees/src/test/resources/style_recognizer/txt/ted",
-		//		"/Users/bgalitsky/Documents/relevance-based-on-parse-trees/src/test/resources/style_recognizer/txt/Tedi");
+		// "/Users/bgalitsky/Documents/relevance-based-on-parse-trees/src/test/resources/style_recognizer/txt/ted",
+		// "/Users/bgalitsky/Documents/relevance-based-on-parse-trees/src/test/resources/style_recognizer/txt/Tedi");
 
-		//		List<String[]>res = proc.classifyFilesInDirectory(args[2]);
-		//		ProfileReaderWriter.writeReport(res, "svmDesignDocReport05plus.csv");
+		// List<String[]>res = proc.classifyFilesInDirectory(args[2]);
+		// ProfileReaderWriter.writeReport(res, "svmDesignDocReport05plus.csv");
 	}
 
 }
 
 /*
  * Number of examples: 12767, linear space size: 10
-
-estimating ...
-Setting default regularization parameter C=1.0000
-Optimizing.......................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
- Checking optimality of inactive variables...done.
- Number of inactive variables = 3632
-done. (5288 iterations)
-Optimization finished (628 misclassified, maxdiff=0.00099).
-Runtime in cpu-seconds: 879.17
-Number of SV: 7723 (including 2703 at upper bound)
-L1 loss: loss=1731.86774
-Norm of weight vector: |w|=69.71561
-Norm of longest example vector: |x|=1.00000
-Estimated VCdim of classifier: VCdim<=4861.26666
-Computing XiAlpha-estimates...done
-Runtime for XiAlpha-estimates in cpu-seconds: 0.13
-XiAlpha-estimate of the error: error<=30.35% (rho=1.00,depth=0)
-XiAlpha-estimate of the recall: recall=>76.31% (rho=1.00,depth=0)
-XiAlpha-estimate of the precision: precision=>66.10% (rho=1.00,depth=0)
-*/
+ * 
+ * estimating ... Setting default regularization parameter C=1.0000
+ * Optimizing...................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * .............................................................................
+ * ............................................................. Checking
+ * optimality of inactive variables...done. Number of inactive variables = 3632
+ * done. (5288 iterations) Optimization finished (628 misclassified,
+ * maxdiff=0.00099). Runtime in cpu-seconds: 879.17 Number of SV: 7723
+ * (including 2703 at upper bound) L1 loss: loss=1731.86774 Norm of weight
+ * vector: |w|=69.71561 Norm of longest example vector: |x|=1.00000 Estimated
+ * VCdim of classifier: VCdim<=4861.26666 Computing XiAlpha-estimates...done
+ * Runtime for XiAlpha-estimates in cpu-seconds: 0.13 XiAlpha-estimate of the
+ * error: error<=30.35% (rho=1.00,depth=0) XiAlpha-estimate of the recall:
+ * recall=>76.31% (rho=1.00,depth=0) XiAlpha-estimate of the precision:
+ * precision=>66.10% (rho=1.00,depth=0)
+ */

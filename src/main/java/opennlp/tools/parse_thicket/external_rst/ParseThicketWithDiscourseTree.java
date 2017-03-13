@@ -29,9 +29,11 @@ public class ParseThicketWithDiscourseTree extends ParseThicket {
 	public DiscourseTree getDt() {
 		return dt;
 	}
-	// sets the highest level DT (under further iterations does not set anything)
+
+	// sets the highest level DT (under further iterations does not set
+	// anything)
 	public void setDt(DiscourseTree dt) {
-		if (this.dt==null)
+		if (this.dt == null)
 			this.dt = dt;
 	}
 
@@ -39,7 +41,7 @@ public class ParseThicketWithDiscourseTree extends ParseThicket {
 		super(ptTrees, barcs);
 	}
 
-	public void setDtDump(){
+	public void setDtDump() {
 		StringBuilder sb = new StringBuilder(100000);
 		StringBuilder res = toStringBuilderDTWithPOSSeq(sb, this.dt);
 		dtDumpWithPOS = res.toString();
@@ -56,17 +58,18 @@ public class ParseThicketWithDiscourseTree extends ParseThicket {
 		res = toStringBuilderDTWithVerbNet(sb, this.dt);
 		dtDumpWithVerbNet = res.toString();
 	}
-	// basic representation of discourse tree 
+
+	// basic representation of discourse tree
 	private StringBuilder toStringBuilderDT(StringBuilder sb, DiscourseTree dt) {
 		if (dt.isTerminal()) {
 			if (dt.relationLabel() != null) {
 				sb.append(dt.relationLabel());
-				//sb.append("("+dt.rawText()+")");
+				// sb.append("("+dt.rawText()+")");
 				scala.collection.mutable.StringBuilder sbs = new scala.collection.mutable.StringBuilder(100);
 
 				dt.print(sbs, 0, false, true);
-				String text  =  sbs.replaceAllLiterally("Nucleus TEXT:", "(");
-				text = text.substring(0, text.length()-1)+")";
+				String text = sbs.replaceAllLiterally("Nucleus TEXT:", "(");
+				text = text.substring(0, text.length() - 1) + ")";
 				sb.append(text);
 			}
 			return sb;
@@ -88,14 +91,15 @@ public class ParseThicketWithDiscourseTree extends ParseThicket {
 
 	private StringBuilder toStringBuilderDTWithPOSSeq(StringBuilder sb, DiscourseTree dt) {
 		if (dt.isTerminal()) {
-			if (dt.relationLabel() != null && dt.relationLabel().length()>2) {
+			if (dt.relationLabel() != null && dt.relationLabel().length() > 2) {
 				sb.append(dt.relationLabel());
 				// different StrBuilder for trees from scala
 				scala.collection.mutable.StringBuilder sbs = new scala.collection.mutable.StringBuilder(100);
 				dt.print(sbs, 0, false, true);
-				String text  =  sbs.replaceAllLiterally("Nucleus TEXT:", "");
-				//text = text.substring(0, text.length()-1)+"";
-				String textDump = substituteTextWithPOStext(text, this.getNodesThicket().get(dt.firstToken().copy$default$1()));
+				String text = sbs.replaceAllLiterally("Nucleus TEXT:", "");
+				// text = text.substring(0, text.length()-1)+"";
+				String textDump = substituteTextWithPOStext(text,
+						this.getNodesThicket().get(dt.firstToken().copy$default$1()));
 				sb.append(textDump);
 			}
 			return sb;
@@ -118,22 +122,22 @@ public class ParseThicketWithDiscourseTree extends ParseThicket {
 	private String substituteTextWithPOStext(String text, List<ParseTreeNode> list) {
 		boolean bMatch = false;
 		String[] tokens = text.split(" ");
-		for(int offset = 0; offset<list.size(); offset++ ){	    	
-			List<ParseTreeNode> subList = list.subList(offset, tokens.length+offset);
+		for (int offset = 0; offset < list.size(); offset++) {
+			List<ParseTreeNode> subList = list.subList(offset, tokens.length + offset);
 			int count = 0;
 			bMatch = true; // if at least one mismatch
-			for(ParseTreeNode n: subList){
-				if (!n.getWord().equals(tokens[count])){
+			for (ParseTreeNode n : subList) {
+				if (!n.getWord().equals(tokens[count])) {
 					bMatch = false;
 					break;
-				} else 
+				} else
 					count++;
-				if (count>3)
+				if (count > 3)
 					break;
 			}
-			if (bMatch){
-				return //"(" + 
-						ParseTreeNode.toTreeRepresentationString(subList); // + ")";
+			if (bMatch) {
+				return // "(" +
+				ParseTreeNode.toTreeRepresentationString(subList); // + ")";
 			}
 		}
 		return null;
@@ -141,14 +145,14 @@ public class ParseThicketWithDiscourseTree extends ParseThicket {
 
 	private StringBuilder toStringBuilderDTWithEmbeddedTrees(StringBuilder sb, DiscourseTree dt) {
 		if (dt.isTerminal()) {
-			if (dt.relationLabel() != null && dt.relationLabel().length()>2) {
+			if (dt.relationLabel() != null && dt.relationLabel().length() > 2) {
 				sb.append(dt.relationLabel());
-				//sb.append("("+dt.rawText()+")");
+				// sb.append("("+dt.rawText()+")");
 				scala.collection.mutable.StringBuilder sbs = new scala.collection.mutable.StringBuilder(100);
 
 				dt.print(sbs, 0, false, true);
-				String text  =  sbs.replaceAllLiterally("Nucleus TEXT:", "");
-				//text = text.substring(0, text.length()-1)+"";
+				String text = sbs.replaceAllLiterally("Nucleus TEXT:", "");
+				// text = text.substring(0, text.length()-1)+"";
 				substituteTextWithParseTree(sb, text, this.getSentenceTrees().get(dt.firstToken().copy$default$1()));
 			}
 			return sb;
@@ -167,20 +171,20 @@ public class ParseThicketWithDiscourseTree extends ParseThicket {
 			return sb.append(')');
 		}
 	}
+
 	private void substituteTextWithParseTree(StringBuilder sb, String text, Tree sentenceTree) {
 		String[] tokens = text.split(" ");
 		List<Tree> foundTrees = null;
-		if (tokens.length>1){
-			foundTrees = 
-					extender.getASubtreeWithRootAsNodeForWord1(sentenceTree, sentenceTree, new String[]{tokens[0], tokens[1]});
-		}
-		else{
-			foundTrees = 
-					extender.getASubtreeWithRootAsNodeForWord1(sentenceTree, sentenceTree, new String[]{tokens[0]});
+		if (tokens.length > 1) {
+			foundTrees = extender.getASubtreeWithRootAsNodeForWord1(sentenceTree, sentenceTree,
+					new String[] { tokens[0], tokens[1] });
+		} else {
+			foundTrees = extender.getASubtreeWithRootAsNodeForWord1(sentenceTree, sentenceTree,
+					new String[] { tokens[0] });
 
 		}
 
-		if (foundTrees == null || foundTrees.size()<1)
+		if (foundTrees == null || foundTrees.size() < 1)
 			return;
 
 		extender.toStringBuilder(sb, foundTrees.get(0));
@@ -189,20 +193,23 @@ public class ParseThicketWithDiscourseTree extends ParseThicket {
 
 	private StringBuilder toStringBuilderDTWithVerbNet(StringBuilder sb, DiscourseTree dt) {
 		if (dt.isTerminal()) {
-			if (dt.relationLabel() != null && dt.relationLabel().length()>2) {
+			if (dt.relationLabel() != null && dt.relationLabel().length() > 2) {
 				sb.append(dt.relationLabel());
-				//sb.append("("+dt.rawText()+")");
+				// sb.append("("+dt.rawText()+")");
 				scala.collection.mutable.StringBuilder sbs = new scala.collection.mutable.StringBuilder(100);
 
 				dt.print(sbs, 0, false, true);
-				String text  =  sbs.replaceAllLiterally("Nucleus TEXT:", "");
+				String text = sbs.replaceAllLiterally("Nucleus TEXT:", "");
 				String textDump = null;
-				if (text.split(" ").length<100) // if not TOO long, more informative substitution, including VerbNets
-					textDump = substituteTextWithPOStextVerbNet(text, this.getNodesThicket().get(dt.firstToken().copy$default$1()));
+				if (text.split(" ").length < 100) // if not TOO long, more
+													// informative substitution,
+													// including VerbNets
+					textDump = substituteTextWithPOStextVerbNet(text,
+							this.getNodesThicket().get(dt.firstToken().copy$default$1()));
 				else // otherwise just lemma-POS chains
-					textDump = substituteTextWithPOStext(text, this.getNodesThicket().get(dt.firstToken().copy$default$1()));
-				
-					
+					textDump = substituteTextWithPOStext(text,
+							this.getNodesThicket().get(dt.firstToken().copy$default$1()));
+
 				sb.append(textDump);
 			}
 			return sb;
@@ -227,39 +234,44 @@ public class ParseThicketWithDiscourseTree extends ParseThicket {
 	private String substituteTextWithPOStextVerbNet(String text, List<ParseTreeNode> list) {
 		boolean bMatch = false;
 		String[] tokens = text.split(" ");
-		for(int offset = 0; offset<list.size(); offset++ ){	    	
-			List<ParseTreeNode> subList = list.subList(offset, tokens.length+offset);
+		for (int offset = 0; offset < list.size(); offset++) {
+			List<ParseTreeNode> subList = list.subList(offset, tokens.length + offset);
 			int count = 0;
 			bMatch = true; // if at least one mismatch
-			for(ParseTreeNode n: subList){
-				if (!n.getWord().equals(tokens[count])){
+			for (ParseTreeNode n : subList) {
+				if (!n.getWord().equals(tokens[count])) {
 					bMatch = false;
 					break;
-				} else 
+				} else
 					count++;
-				if (count>3) // three tokens is enough for alignment
+				if (count > 3) // three tokens is enough for alignment
 					break;
 			}
-			// alignment found; now 
-			if (bMatch){
+			// alignment found; now
+			if (bMatch) {
 				StringBuilder buf = new StringBuilder();
-				for(ParseTreeNode ch: subList){
+				for (ParseTreeNode ch : subList) {
 					try {
-	                    if (ch.getPos().startsWith(".") || ch.getPos().startsWith(",") || ch.getPos().startsWith(";") || ch.getPos().startsWith("!"))
-	                    	continue;
-	                    if (ch.getPos().startsWith("VB") && ch.getNormalizedWord()!=null){ // do more info for verbs
-	                    	StringBuilder verbRepr = verbBuilder.
-	                    			buildTreeRepresentationForTreeKernelLearning(ch.getNormalizedWord());
-	                    	if (verbRepr!=null)
-	                    		buf.append(" ("+verbRepr+") ");
-	                    	else
-	                    		buf.append( "("+ch.getWord()+ " " + ch.getPos() + ")" );
-	                    } else { // other than verb
-	                    	buf.append( "("+ch.getWord()+ " " + ch.getPos() + ")" );
-	                    }
-                    } catch (Exception e) {
-	                    e.printStackTrace();
-                    }
+						if (ch.getPos().startsWith(".") || ch.getPos().startsWith(",") || ch.getPos().startsWith(";")
+								|| ch.getPos().startsWith("!"))
+							continue;
+						if (ch.getPos().startsWith("VB") && ch.getNormalizedWord() != null) { // do
+																								// more
+																								// info
+																								// for
+																								// verbs
+							StringBuilder verbRepr = verbBuilder
+									.buildTreeRepresentationForTreeKernelLearning(ch.getNormalizedWord());
+							if (verbRepr != null)
+								buf.append(" (" + verbRepr + ") ");
+							else
+								buf.append("(" + ch.getWord() + " " + ch.getPos() + ")");
+						} else { // other than verb
+							buf.append("(" + ch.getWord() + " " + ch.getPos() + ")");
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 				return buf.toString().trim();
 			}
@@ -270,6 +282,7 @@ public class ParseThicketWithDiscourseTree extends ParseThicket {
 	public String getDtDump() {
 		return this.dtDump;
 	}
+
 	public String getDtDumpWithPOS() {
 		return this.dtDumpWithPOS;
 	}
@@ -277,7 +290,7 @@ public class ParseThicketWithDiscourseTree extends ParseThicket {
 	public String getDtDumpWithEmbeddedTrees() {
 		return this.dtDumpWithEmbeddedTrees;
 	}
-	
+
 	public String getDtDumpWithVerbNet() {
 		return this.dtDumpWithVerbNet;
 	}

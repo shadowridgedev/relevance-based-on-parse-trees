@@ -30,68 +30,61 @@ import opennlp.tools.textsimilarity.TextProcessor;
 import org.apache.commons.lang.StringUtils;
 
 public class WebPageContentSentenceExtractor extends WebPageExtractor {
-	
-	
-	
 
-	public List<String> extractSentencesWithPotentialReviewPhrases(String url)
-	{
+	public List<String> extractSentencesWithPotentialReviewPhrases(String url) {
 		int maxSentsFromPage = 30;
 		String downloadedPage = pageFetcher.fetchPage(url, 20000);
-		if (downloadedPage == null || downloadedPage.length() < 100)
-		{
+		if (downloadedPage == null || downloadedPage.length() < 100) {
 			return null;
 		}
-		downloadedPage= downloadedPage.replace("     ", "&");
+		downloadedPage = downloadedPage.replace("     ", "&");
 		downloadedPage = downloadedPage.replaceAll("(?:&)+", "#");
 		String[] sents = downloadedPage.split("#");
 		List<TextChunk> sentsList = new ArrayList<TextChunk>();
-		for(String s: sents){
-			s = s.trim().replace("  ", ". ").replace("..", ".").replace(". . .", " ")
-					.replace(": ", ". ").replace("- ", ". ").
-					replace (". .",".").trim();
+		for (String s : sents) {
+			s = s.trim().replace("  ", ". ").replace("..", ".").replace(". . .", " ").replace(": ", ". ")
+					.replace("- ", ". ").replace(". .", ".").trim();
 			sentsList.add(new TextChunk(s, s.length()));
 		}
-		
+
 		Collections.sort(sentsList, new TextChunkComparable());
-		
+
 		String[] longestSents = new String[maxSentsFromPage];
-		int j=0;														// -1 removed
-		for(int i=sentsList.size()-1 -maxSentsFromPage; i< sentsList.size()-1; i++){
+		int j = 0; // -1 removed
+		for (int i = sentsList.size() - 1 - maxSentsFromPage; i < sentsList.size() - 1; i++) {
 			longestSents[j] = sentsList.get(i).text;
 			j++;
 		}
 
 		sents = cleanListOfSents(longestSents);
-	/*	
-		for(int i = 0; i< sents.length; i++){
-			sents[i] = sents[i].trim().replace("  ", ". ").replace("..", ".").replace(". . .", " ")
-					.replace(": ", ". ").replace("- ", ". ").
-					replace (". .",".").trim();
-		}
-		sents = cleanListOfSents(sents);
-	*/	sents = verifyEnforceStartsUpperCase(sents);
+		/*
+		 * for(int i = 0; i< sents.length; i++){ sents[i] =
+		 * sents[i].trim().replace("  ", ". ").replace("..",
+		 * ".").replace(". . .", " ") .replace(": ", ". ").replace("- ", ". ").
+		 * replace (". .",".").trim(); } sents = cleanListOfSents(sents);
+		 */ sents = verifyEnforceStartsUpperCase(sents);
 
 		return Arrays.asList(sents);
 	}
 
 	private String[] verifyEnforceStartsUpperCase(String[] sents) {
-		for(int i=0; i<sents.length; i++){
+		for (int i = 0; i < sents.length; i++) {
 			String s = sents[i];
 			s = StringUtils.trim(s);
 			String sFirstChar = s.substring(0, 1);
-			if (!sFirstChar.toUpperCase().equals(sFirstChar)){
-				s = sFirstChar.toUpperCase()+s.substring(1);
+			if (!sFirstChar.toUpperCase().equals(sFirstChar)) {
+				s = sFirstChar.toUpperCase() + s.substring(1);
 			}
 			sents[i] = s;
 		}
-			return sents;
+		return sents;
 	}
 
 	private List<String> cleanProductFeatures(List<String> productFeaturesList) {
 		List<String> results = new ArrayList<String>();
-		for(String feature: productFeaturesList){
-			if (feature.startsWith("Unlimited Free") || feature.startsWith("View Larger") || feature.startsWith("View Larger") || feature.indexOf("shipping")>0)
+		for (String feature : productFeaturesList) {
+			if (feature.startsWith("Unlimited Free") || feature.startsWith("View Larger")
+					|| feature.startsWith("View Larger") || feature.indexOf("shipping") > 0)
 				continue;
 			results.add(feature);
 		}
@@ -99,26 +92,25 @@ public class WebPageContentSentenceExtractor extends WebPageExtractor {
 	}
 
 	// extracts paragraphs from web page
-	protected String[] cleanListOfSents(String[] longestSents)
-	{
-		float minFragmentLength = 40, minFragmentLengthSpace=4;
+	protected String[] cleanListOfSents(String[] longestSents) {
+		float minFragmentLength = 40, minFragmentLengthSpace = 4;
 
 		List<String> sentsClean = new ArrayList<String>();
-		for (String sentenceOrMultSent : longestSents)
-		{
-			if (GeneratedSentenceProcessor.acceptableMinedSentence(sentenceOrMultSent)==null){
-				System.out.println("Rejected sentence by GeneratedSentenceProcessor.acceptableMinedSentence = "+sentenceOrMultSent);
+		for (String sentenceOrMultSent : longestSents) {
+			if (GeneratedSentenceProcessor.acceptableMinedSentence(sentenceOrMultSent) == null) {
+				System.out.println("Rejected sentence by GeneratedSentenceProcessor.acceptableMinedSentence = "
+						+ sentenceOrMultSent);
 				continue;
 			}
-			// aaa. hhh hhh.  kkk . kkk ll hhh. lll kkk n.
-			int numOfDots = sentenceOrMultSent.replace('.','&').split("&").length;
-			float avgSentenceLengthInTextPortion = (float)sentenceOrMultSent.length() /(float) numOfDots;
-			if ( avgSentenceLengthInTextPortion<minFragmentLength)
+			// aaa. hhh hhh. kkk . kkk ll hhh. lll kkk n.
+			int numOfDots = sentenceOrMultSent.replace('.', '&').split("&").length;
+			float avgSentenceLengthInTextPortion = (float) sentenceOrMultSent.length() / (float) numOfDots;
+			if (avgSentenceLengthInTextPortion < minFragmentLength)
 				continue;
 			// o oo o ooo o o o ooo oo ooo o o oo
-			numOfDots = sentenceOrMultSent.replace(' ','&').split("&").length;
-			avgSentenceLengthInTextPortion = (float)sentenceOrMultSent.length() /(float) numOfDots;
-			if ( avgSentenceLengthInTextPortion<minFragmentLengthSpace)
+			numOfDots = sentenceOrMultSent.replace(' ', '&').split("&").length;
+			avgSentenceLengthInTextPortion = (float) sentenceOrMultSent.length() / (float) numOfDots;
+			if (avgSentenceLengthInTextPortion < minFragmentLengthSpace)
 				continue;
 
 			sentsClean.add(sentenceOrMultSent);
@@ -127,13 +119,11 @@ public class WebPageContentSentenceExtractor extends WebPageExtractor {
 		return (String[]) sentsClean.toArray(new String[0]);
 	}
 
-	
-
 	private String startWithCapitalSent(String sent) {
-		String firstChar = sent.substring(0,1);
+		String firstChar = sent.substring(0, 1);
 		String remainder = sent.substring(1);
-		
-		return firstChar.toUpperCase()+remainder;
+
+		return firstChar.toUpperCase() + remainder;
 	}
 
 	public HitBase formTextFromOriginalPageGivenSnippet(HitBase hit) {
@@ -142,6 +132,4 @@ public class WebPageContentSentenceExtractor extends WebPageExtractor {
 		return hit;
 	}
 
-	
-	
 }

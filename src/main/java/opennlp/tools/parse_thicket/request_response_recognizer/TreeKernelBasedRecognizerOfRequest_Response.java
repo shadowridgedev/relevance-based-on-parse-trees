@@ -16,7 +16,6 @@
  */
 package opennlp.tools.parse_thicket.request_response_recognizer;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,28 +30,29 @@ import opennlp.tools.parse_thicket.kernel_interface.TreeKernelBasedClassifierMul
  * based on Surdeanu at al RST parser. It does sentence parsing and NLP pipeline of 
  * Surdeanu's wrapper of Stanford NLP
  */
-public class TreeKernelBasedRecognizerOfRequest_Response extends TreeKernelBasedClassifierMultiplePara{
+public class TreeKernelBasedRecognizerOfRequest_Response extends TreeKernelBasedClassifierMultiplePara {
 
 	private MatcherExternalRST matcherRST = new MatcherExternalRST();
 
 	protected List<String> formTreeKernelStructuresMultiplePara(List<String> texts, String flag) {
-		//TODO
-		this.setShortRun();	
+		// TODO
+		this.setShortRun();
 		List<String> extendedTreesDumpTotal = new ArrayList<String>();
 		try {
 
-			for(String text: texts){
-				// get the parses from original documents, and form the training dataset
+			for (String text : texts) {
+				// get the parses from original documents, and form the training
+				// dataset
 				try {
-					System.out.print("About to build pt with external rst from "+text + "\n...");
+					System.out.print("About to build pt with external rst from " + text + "\n...");
 					ParseThicket pt = matcherRST.buildParseThicketFromTextWithRST(text);
 					if (pt == null)
 						continue;
 					System.out.print("About to build extended forest with external rst...");
-					List<String> extendedTreesDump =  // use direct option (true
-							buildReptresentationForDiscourseTreeAndExtensions((ParseThicketWithDiscourseTree)pt, true);
-					for(String line: extendedTreesDump)
-						extendedTreesDumpTotal.add(flag + " |BT| "+line + " |ET| ");
+					List<String> extendedTreesDump = // use direct option (true
+							buildReptresentationForDiscourseTreeAndExtensions((ParseThicketWithDiscourseTree) pt, true);
+					for (String line : extendedTreesDump)
+						extendedTreesDumpTotal.add(flag + " |BT| " + line + " |ET| ");
 					System.out.println("DONE");
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -64,31 +64,30 @@ public class TreeKernelBasedRecognizerOfRequest_Response extends TreeKernelBased
 		return extendedTreesDumpTotal;
 	}
 
-	private List<String> buildReptresentationForDiscourseTreeAndExtensions(ParseThicketWithDiscourseTree pt, boolean bDirectDT){
+	private List<String> buildReptresentationForDiscourseTreeAndExtensions(ParseThicketWithDiscourseTree pt,
+			boolean bDirectDT) {
 		List<String> extendedTreesDump = new ArrayList<String>();
 		if (!bDirectDT)
-			// option 1: use RST relation for extended trees 
+			// option 1: use RST relation for extended trees
 			extendedTreesDump = treeExtender.buildForestForRSTArcs(pt);
 		else {
 			// option 2: use DT directly
 			extendedTreesDump.add(pt.getDtDump());
-		    extendedTreesDump.add(pt.getDtDumpWithPOS());
-		    extendedTreesDump.add(pt.getDtDumpWithEmbeddedTrees());
-		    extendedTreesDump.add(pt.getDtDumpWithVerbNet());
-		}		
+			extendedTreesDump.add(pt.getDtDumpWithPOS());
+			extendedTreesDump.add(pt.getDtDumpWithEmbeddedTrees());
+			extendedTreesDump.add(pt.getDtDumpWithVerbNet());
+		}
 		return extendedTreesDump;
 	}
-	
-	public static void main(String[] args){
-		VerbNetProcessor p = VerbNetProcessor.
-				getInstance("/Users/bgalitsky/Documents/relevance-based-on-parse-trees/src/test/resources"); 
+
+	public static void main(String[] args) {
+		VerbNetProcessor p = VerbNetProcessor
+				.getInstance("/Users/bgalitsky/Documents/relevance-based-on-parse-trees/src/test/resources");
 
 		TreeKernelBasedRecognizerOfRequest_Response proc = new TreeKernelBasedRecognizerOfRequest_Response();
 		proc.setKernelPath("/Users/bgalitsky/Documents/relevance-based-on-parse-trees/src/test/resources/tree_kernel/");
-		proc.trainClassifier(
-				YahooAnswersTrainingSetCreator.origFilesDir,
-				YahooAnswersTrainingSetCreator.origFilesDir.replace("/text", "/neg_text")
-				);
+		proc.trainClassifier(YahooAnswersTrainingSetCreator.origFilesDir,
+				YahooAnswersTrainingSetCreator.origFilesDir.replace("/text", "/neg_text"));
 	}
 
 }

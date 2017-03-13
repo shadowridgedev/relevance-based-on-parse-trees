@@ -45,7 +45,7 @@ public class NamedEntityExtractor {
 	protected static PT2ThicketPhraseBuilder phraseBuilder;
 	protected static SentimentVocab sVocab = SentimentVocab.getInstance();
 	String resourceDirSentimentList = null;
-	Set<String> sentimentVcb = new HashSet<String> ();
+	Set<String> sentimentVcb = new HashSet<String>();
 
 	static {
 		synchronized (NamedEntityExtractor.class) {
@@ -54,69 +54,70 @@ public class NamedEntityExtractor {
 		}
 	}
 
-	public NamedEntityExtractor(){
+	public NamedEntityExtractor() {
 		try {
-			resourceDirSentimentList = new File( "." ).getCanonicalPath()+"/src/test/resources/opinions/sentiment_listReduced.csv";
+			resourceDirSentimentList = new File(".").getCanonicalPath()
+					+ "/src/test/resources/opinions/sentiment_listReduced.csv";
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		List<String[]> sentimentList=null;
+		List<String[]> sentimentList = null;
 		sentimentList = ProfileReaderWriter.readProfiles(resourceDirSentimentList);
-		for(String[] line: sentimentList){
+		for (String[] line : sentimentList) {
 			sentimentVcb.add(line[0]);
 		}
 	}
 
-	protected boolean isSentimentWord(String word){
+	protected boolean isSentimentWord(String word) {
 		if (sentimentVcb.contains(word))
 			return true;
 		else
-			return false;		
+			return false;
 	}
 
-	public EntityExtractionResult extractEntities(String para){
+	public EntityExtractionResult extractEntities(String para) {
 		List<List<ParseTreeNode>> extractedNERs = new ArrayList<List<ParseTreeNode>>();
 		List<String> extractedNERsWords = new ArrayList<String>();
-		List<List<ParseTreeNode>> extractedSentimentPhrases = 
-				new ArrayList<List<ParseTreeNode>>();
+		List<List<ParseTreeNode>> extractedSentimentPhrases = new ArrayList<List<ParseTreeNode>>();
 		EntityExtractionResult result = new EntityExtractionResult();
 
 		ParseThicket pt = null;
 
-		System.out.println("Processing paragraph of length "+para.length() + " | "+ para);
+		System.out.println("Processing paragraph of length " + para.length() + " | " + para);
 		pt = matcher.buildParseThicketFromTextWithRST(para);
 		List<List<ParseTreeNode>> nodeList = pt.getSentenceNodes();
 
-
-		for(List<ParseTreeNode> sentence: nodeList){
-			//System.out.println("   Processing sentence: "+ sentence);
-			boolean bInsideNER = false; 
+		for (List<ParseTreeNode> sentence : nodeList) {
+			// System.out.println(" Processing sentence: "+ sentence);
+			boolean bInsideNER = false;
 			String currentPhrase = "";
-			List<ParseTreeNode> currentPhraseNode = new ArrayList<ParseTreeNode>(); 
-			for(ParseTreeNode word: sentence){
-				if (isNERforPhraseExtraction(word)){
-					//System.out.println("++Found word ="+word + " | NER="+ word.getNe());
-					if (bInsideNER){
-						currentPhrase += " "+word.getWord();
+			List<ParseTreeNode> currentPhraseNode = new ArrayList<ParseTreeNode>();
+			for (ParseTreeNode word : sentence) {
+				if (isNERforPhraseExtraction(word)) {
+					// System.out.println("++Found word ="+word + " | NER="+
+					// word.getNe());
+					if (bInsideNER) {
+						currentPhrase += " " + word.getWord();
 						currentPhraseNode.add(word);
 					} else {
-						bInsideNER=true;
+						bInsideNER = true;
 						currentPhrase = word.getWord();
 						currentPhraseNode.add(word);
 					}
 				} else {
-					if (bInsideNER){
-						if (currentPhrase.indexOf(' ')>-1) // at least two tokens
+					if (bInsideNER) {
+						if (currentPhrase.indexOf(' ') > -1) // at least two
+																// tokens
 							extractedNERsWords.add(currentPhrase);
-							extractedNERs.add(currentPhraseNode);
+						extractedNERs.add(currentPhraseNode);
 						currentPhrase = "";
-						bInsideNER=false;
+						bInsideNER = false;
 					} else {
 						// do nothing, continue scan
 					}
 				}
 			}
-			if (currentPhrase.length()>1 && currentPhrase.indexOf(' ')>-1){
+			if (currentPhrase.length() > 1 && currentPhrase.indexOf(' ') > -1) {
 				extractedNERs.add(currentPhraseNode);
 				extractedNERsWords.add(currentPhrase);
 			}
@@ -124,17 +125,18 @@ public class NamedEntityExtractor {
 			Set<String> foundSentimentWords = new HashSet<String>();
 			// now we extract phrases
 			List<List<ParseTreeNode>> phrases = pt.getPhrases();
-			for(List<ParseTreeNode> phrase: phrases){
+			for (List<ParseTreeNode> phrase : phrases) {
 				// find a noun phrase under sentiment
 				try {
-					for(int i = phrase.size()-1; i>-1; i--){
+					for (int i = phrase.size() - 1; i > -1; i--) {
 						ParseTreeNode word = phrase.get(i);
-						if ((isSentimentWord(word.getWord()) ||
-								sVocab.isSentimentWord(word.getWord()) && !foundSentimentWords.contains(word.getWord()) )){
+						if ((isSentimentWord(word.getWord()) || sVocab.isSentimentWord(word.getWord())
+								&& !foundSentimentWords.contains(word.getWord()))) {
 							foundSentimentWords.add(word.getWord());
-							System.out.println("Sentim = " + word.getWord() + " | Found opinionated phrase "+phrase.toString());
-							if (phrase.size()>1 && phrase.size()<7)
-								extractedSentimentPhrases.add(phrase);			
+							System.out.println(
+									"Sentim = " + word.getWord() + " | Found opinionated phrase " + phrase.toString());
+							if (phrase.size() > 1 && phrase.size() < 7)
+								extractedSentimentPhrases.add(phrase);
 							break;
 						}
 					}
@@ -143,10 +145,10 @@ public class NamedEntityExtractor {
 				}
 			}
 
-		} 
-		
+		}
+
 		extractedSentimentPhrases = reduceExtractedPhrases(extractedSentimentPhrases);
-		
+
 		result.setExtractedNER(extractedNERs);
 		result.setExtractedNERWords(extractedNERsWords);
 		result.setExtractedSentimentPhrases(extractedSentimentPhrases);
@@ -154,32 +156,31 @@ public class NamedEntityExtractor {
 	}
 
 	private List<List<ParseTreeNode>> reduceExtractedPhrases(List<List<ParseTreeNode>> extractedSentimentPhrases) {
-	    List<Integer> idsToDelete = new ArrayList<Integer>();
-		for(int i = 0; i<extractedSentimentPhrases.size(); i++){
-			for(int j = i+1; j<extractedSentimentPhrases.size(); j++){
+		List<Integer> idsToDelete = new ArrayList<Integer>();
+		for (int i = 0; i < extractedSentimentPhrases.size(); i++) {
+			for (int j = i + 1; j < extractedSentimentPhrases.size(); j++) {
 				String phrStr1 = ParseTreeNode.toWordString(extractedSentimentPhrases.get(i));
 				String phrStr2 = ParseTreeNode.toWordString(extractedSentimentPhrases.get(j));
-				if (phrStr1 .indexOf(phrStr2 )>-1)
+				if (phrStr1.indexOf(phrStr2) > -1)
 					idsToDelete.add(j);
 			}
 		}
 		List<List<ParseTreeNode>> resultPhrases = new ArrayList<List<ParseTreeNode>>();
-		for(int i = 0; i<extractedSentimentPhrases.size(); i++){
+		for (int i = 0; i < extractedSentimentPhrases.size(); i++) {
 			if (!idsToDelete.contains(i))
-				resultPhrases .add(extractedSentimentPhrases.get(i));
+				resultPhrases.add(extractedSentimentPhrases.get(i));
 		}
-	    return resultPhrases ;
-    }
+		return resultPhrases;
+	}
 
-	private boolean isNERforPhraseExtraction(ParseTreeNode word){
-		if ((word.getNe().equals("ORGANIZATION") ||word.getNe().equals("LOCATION") || word.getNe().equals("PERSON") ) &&
-				(word.getPos().startsWith("NN") || word.getPos().startsWith("PR") || word.getPos().startsWith("IN")|| 
-						word.getPos().startsWith("JJ") || word.getPos().startsWith("DT")  ))
+	private boolean isNERforPhraseExtraction(ParseTreeNode word) {
+		if ((word.getNe().equals("ORGANIZATION") || word.getNe().equals("LOCATION") || word.getNe().equals("PERSON"))
+				&& (word.getPos().startsWith("NN") || word.getPos().startsWith("PR") || word.getPos().startsWith("IN")
+						|| word.getPos().startsWith("JJ") || word.getPos().startsWith("DT")))
 			return true;
 
 		return false;
 
 	}
-
 
 }

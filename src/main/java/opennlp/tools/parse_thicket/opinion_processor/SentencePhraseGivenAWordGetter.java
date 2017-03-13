@@ -43,7 +43,6 @@ public class SentencePhraseGivenAWordGetter {
 	protected ArrayList<File> queue = new ArrayList<File>();
 	protected static PT2ThicketPhraseBuilder phraseBuilder;
 
-
 	static {
 		synchronized (SentencePhraseGivenAWordGetter.class) {
 			matcher = new Matcher();
@@ -51,24 +50,24 @@ public class SentencePhraseGivenAWordGetter {
 		}
 	}
 
-	public SentencePhraseGivenAWordGetter(){
+	public SentencePhraseGivenAWordGetter() {
 	}
 
-	public EntityExtractionResult extractEntities(String para, String keyword){
+	public EntityExtractionResult extractEntities(String para, String keyword) {
 		List<List<ParseTreeNode>> extractedPhrases = new ArrayList<List<ParseTreeNode>>();
 
 		EntityExtractionResult result = new EntityExtractionResult();
 
-		ParseThicket pt =  matcher.buildParseThicketFromTextWithRST(para);
+		ParseThicket pt = matcher.buildParseThicketFromTextWithRST(para);
 
 		List<List<ParseTreeNode>> phrases = pt.getPhrases();
-		for(List<ParseTreeNode> phrase: phrases){
+		for (List<ParseTreeNode> phrase : phrases) {
 			// find a noun phrase under sentiment
 			try {
-				for(int i = 0; i<phrase.size(); i++){
+				for (int i = 0; i < phrase.size(); i++) {
 					ParseTreeNode word = phrase.get(i);
-					if (word.getWord().toLowerCase().equals(keyword.toLowerCase())){
-						extractedPhrases.add(phrase);		
+					if (word.getWord().toLowerCase().equals(keyword.toLowerCase())) {
+						extractedPhrases.add(phrase);
 						break;
 					}
 				}
@@ -81,27 +80,33 @@ public class SentencePhraseGivenAWordGetter {
 		return result;
 	}
 
-
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		SentencePhraseGivenAWordGetter self = new SentencePhraseGivenAWordGetter();
-		EntityExtractionResult result = self.extractEntities("However i put a foam panel inside the main case if i do not have my headphones or an iPad to brace the mac book", 
+		EntityExtractionResult result = self.extractEntities(
+				"However i put a foam panel inside the main case if i do not have my headphones or an iPad to brace the mac book",
 				"panel");
 		System.out.println(result.getExtractedSentimentPhrases());
 	}
 }
 
-
 /*
- 3 phrases are given as a result
+ * 3 phrases are given as a result
  * 
-[[<2>SBAR'i':FW, <3>SBAR'put':VBD, <4>SBAR'a':DT, <5>SBAR'foam':NN, <6>SBAR'panel':NN, <7>SBAR'inside':IN, <8>SBAR'the':DT, <9>SBAR'main':JJ, <10>SBAR'case':NN, <11>SBAR'if':IN, <12>SBAR'i':FW, 
-<13>SBAR'do':VBP, <14>SBAR'not':RB, <15>SBAR'have':VB, <16>SBAR'my':PRP$, <17>SBAR'headphones':NNS, <18>SBAR'or':CC, <19>SBAR'an':DT, <20>SBAR'iPad':NN, <21>SBAR'to':TO, 
-<22>SBAR'brace':VB, <23>SBAR'the':DT, <24>SBAR'mac':NN, <25>SBAR'book':NN], 
-
-[<3>VP'put':VBD, <4>VP'a':DT, <5>VP'foam':NN, <6>VP'panel':NN, <7>VP'inside':IN, <8>VP'the':DT, <9>VP'main':JJ, <10>VP'case':NN, <11>VP'if':IN, <12>VP'i':FW, <13>VP'do':VBP, 
-<14>VP'not':RB, <15>VP'have':VB, <16>VP'my':PRP$, <17>VP'headphones':NNS, <18>VP'or':CC, <19>VP'an':DT, <20>VP'iPad':NN, <21>VP'to':TO, <22>VP'brace':VB, <23>VP'the':DT, 
-<24>VP'mac':NN, <25>VP'book':NN], 
-
-[<4>NP'a':DT, <5>NP'foam':NN, <6>NP'panel':NN]]
-
-*/
+ * [[<2>SBAR'i':FW, <3>SBAR'put':VBD, <4>SBAR'a':DT, <5>SBAR'foam':NN,
+ * <6>SBAR'panel':NN, <7>SBAR'inside':IN, <8>SBAR'the':DT, <9>SBAR'main':JJ,
+ * <10>SBAR'case':NN, <11>SBAR'if':IN, <12>SBAR'i':FW, <13>SBAR'do':VBP,
+ * <14>SBAR'not':RB, <15>SBAR'have':VB, <16>SBAR'my':PRP$,
+ * <17>SBAR'headphones':NNS, <18>SBAR'or':CC, <19>SBAR'an':DT,
+ * <20>SBAR'iPad':NN, <21>SBAR'to':TO, <22>SBAR'brace':VB, <23>SBAR'the':DT,
+ * <24>SBAR'mac':NN, <25>SBAR'book':NN],
+ * 
+ * [<3>VP'put':VBD, <4>VP'a':DT, <5>VP'foam':NN, <6>VP'panel':NN,
+ * <7>VP'inside':IN, <8>VP'the':DT, <9>VP'main':JJ, <10>VP'case':NN,
+ * <11>VP'if':IN, <12>VP'i':FW, <13>VP'do':VBP, <14>VP'not':RB, <15>VP'have':VB,
+ * <16>VP'my':PRP$, <17>VP'headphones':NNS, <18>VP'or':CC, <19>VP'an':DT,
+ * <20>VP'iPad':NN, <21>VP'to':TO, <22>VP'brace':VB, <23>VP'the':DT,
+ * <24>VP'mac':NN, <25>VP'book':NN],
+ * 
+ * [<4>NP'a':DT, <5>NP'foam':NN, <6>NP'panel':NN]]
+ * 
+ */

@@ -28,40 +28,38 @@ import junit.framework.TestCase;
 
 public class CommunicativeActionsArcBuilderTest extends TestCase {
 	Matcher matcher = new Matcher();
-	
-	public void testCommunicativeActionsArcBuilderTestQ(){
-		String text = "As a US citizen living abroad, I am concerned about the health reform regulation of 2014. "+
-				"I do not want to wait till I am sick to buy health insurance. "+
-				"Yet I am afraid I will end up being requested to pay the tax. "+
-				"Although I live abroad, I am worried about having to pay a fine for being reported as not having health insurance coverage. ";
-		ParseThicket pt = matcher.buildParseThicketFromTextWithRST(text);
-		List<WordWordInterSentenceRelationArc> results = new ArrayList<WordWordInterSentenceRelationArc>();
-		for(WordWordInterSentenceRelationArc arc: pt.getArcs()){
-			if(arc.getArcType().getType().startsWith("ca")){
-				results.add(arc);
-				System.out.println(arc);
-			}
-		}
-		assertTrue(results.size()>11);
-		
-	}
-	public void testCommunicativeActionsArcBuilderTestA(){
-		String text =	"People are worried about paying a fine for not carrying health insurance coverage, having been informed by IRS about new regulations. "+
-				"Yet hardly anyone is expected to pay the tax, when the health reform law takes full effect in 2014. "+
-				"The individual mandate confirms that people don’t wait until they are sick to buy health insurance. "+
-				"People are exempt from health insurance fine if they report they make too little money, or US citizens living abroad.";
-		ParseThicket pt = matcher.buildParseThicketFromTextWithRST(text);
-		List<WordWordInterSentenceRelationArc> results = new ArrayList<WordWordInterSentenceRelationArc>();
-		for(WordWordInterSentenceRelationArc arc: pt.getArcs()){
-			if(arc.getArcType().getType().startsWith("ca")){
-				results.add(arc);
-				System.out.println(arc);
-			}
-		}
-		assertTrue(results.size()>5);
-	}
-	
 
-	
+	public void testCommunicativeActionsArcBuilderTestQ() {
+		String text = "As a US citizen living abroad, I am concerned about the health reform regulation of 2014. "
+				+ "I do not want to wait till I am sick to buy health insurance. "
+				+ "Yet I am afraid I will end up being requested to pay the tax. "
+				+ "Although I live abroad, I am worried about having to pay a fine for being reported as not having health insurance coverage. ";
+		ParseThicket pt = matcher.buildParseThicketFromTextWithRST(text);
+		List<WordWordInterSentenceRelationArc> results = new ArrayList<WordWordInterSentenceRelationArc>();
+		for (WordWordInterSentenceRelationArc arc : pt.getArcs()) {
+			if (arc.getArcType().getType().startsWith("ca")) {
+				results.add(arc);
+				System.out.println(arc);
+			}
+		}
+		assertTrue(results.size() > 11);
+
+	}
+
+	public void testCommunicativeActionsArcBuilderTestA() {
+		String text = "People are worried about paying a fine for not carrying health insurance coverage, having been informed by IRS about new regulations. "
+				+ "Yet hardly anyone is expected to pay the tax, when the health reform law takes full effect in 2014. "
+				+ "The individual mandate confirms that people donï¿½t wait until they are sick to buy health insurance. "
+				+ "People are exempt from health insurance fine if they report they make too little money, or US citizens living abroad.";
+		ParseThicket pt = matcher.buildParseThicketFromTextWithRST(text);
+		List<WordWordInterSentenceRelationArc> results = new ArrayList<WordWordInterSentenceRelationArc>();
+		for (WordWordInterSentenceRelationArc arc : pt.getArcs()) {
+			if (arc.getArcType().getType().startsWith("ca")) {
+				results.add(arc);
+				System.out.println(arc);
+			}
+		}
+		assertTrue(results.size() > 5);
+	}
 
 }
